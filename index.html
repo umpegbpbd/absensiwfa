@@ -258,6 +258,9 @@
     let cameraStream = null;
     let pendingDeleteRecord = null;
     let adminLoggedIn = false;
+    let githubToken = '';
+    let gistId = '';
+    let allGistRecords = [];
 
     const ADMIN_USERNAME = 'admin';
     const ADMIN_PASSWORD = '12345';
@@ -281,6 +284,10 @@
         document.getElementById('el-company-name').textContent = c('company_name');
         document.getElementById('el-btn-masuk').textContent = c('btn_masuk_text');
         document.getElementById('el-btn-pulang').textContent = c('btn_pulang_text');
+        
+        // Update GitHub settings dari config
+        githubToken = config.github_token || '';
+        gistId = config.gist_id || '';
       },
       mapToCapabilities: (config) => ({
         recolorables: [
@@ -319,7 +326,9 @@
         ['app_title', config.app_title || defaultConfig.app_title],
         ['company_name', config.company_name || defaultConfig.company_name],
         ['btn_masuk_text', config.btn_masuk_text || defaultConfig.btn_masuk_text],
-        ['btn_pulang_text', config.btn_pulang_text || defaultConfig.btn_pulang_text]
+        ['btn_pulang_text', config.btn_pulang_text || defaultConfig.btn_pulang_text],
+        ['github_token', config.github_token || ''],
+        ['gist_id', config.gist_id || '']
       ])
     });
 
@@ -571,6 +580,65 @@
       btn.disabled = false;
       btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> Konfirmasi';
       lucide.createIcons();
+
+      // Sync ke GitHub Gist jika token & ID ada
+      if (githubToken && gistId) {
+        syncToGist();
+      }
+    }
+
+    async function syncToGist() {
+      if (!githubToken || !gistId) {
+        console.log('GitHub token atau Gist ID belum dikonfigurasi');
+        return;
+      }
+      try {
+        const gistData = {
+          files: {
+            'absensi-data.json': {
+              content: JSON.stringify({
+                last_sync: new Date().toISOString(),
+                total_records: allRecords.length,
+                perusahaan: 'BPBD KAB. TRENGGALEK',
+                data: allRecords
+              }, null, 2)
+            }
+          },
+          description: `Absensi WFA - ${new Date().toLocaleString('id-ID')}`
+        };
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `token ${githubToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(gistData)
+        });
+        if (response.ok) {
+          console.log('✅ Data berhasil disync ke GitHub Gist');
+        } else {
+          console.error('❌ Gagal sync ke Gist:', response.statusText);
+        }
+      } catch (e) {
+        console.error('Error saat sync ke Gist:', e);
+      }
+    }
+
+    async function loadFromGist() {
+      if (!githubToken || !gistId) return;
+      try {
+        const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+          headers: { 'Authorization': `token ${githubToken}` }
+        });
+        if (response.ok) {
+          const gist = await response.json();
+          const fileContent = gist.files['absensi-data.json'].content;
+          allGistRecords = JSON.parse(fileContent).data || [];
+          console.log(`✅ Loaded ${allGistRecords.length} records dari Gist`);
+        }
+      } catch (e) {
+        console.error('Error loading dari Gist:', e);
+      }
     }
 
     function renderRecords() {
@@ -668,6 +736,7 @@
         closeAdminLogin();
         document.getElementById('admin-modal').classList.remove('hidden');
         showToast('Login berhasil! Selamat datang Admin.', 'success');
+        loadFromGist();
       } else {
         errorDiv.textContent = 'Username atau password salah!';
         errorDiv.classList.remove('hidden');
@@ -827,12 +896,13 @@
     }
 
     function downloadActivityReport() {
-      if (allRecords.length === 0) {
+      const records = adminLoggedIn ? allGistRecords : allRecords;
+      if (records.length === 0) {
         showToast('Tidak ada data untuk diunduh', 'warning');
         return;
       }
       let csv = 'Nama,Tanggal,Jam,Status,Tipe,Latitude,Longitude,Alamat,Waktu Tercatat\n';
-      const sorted = [...allRecords].sort((a, b) => {
+      const sorted = [...records].sort((a, b) => {
         const dateA = new Date(b.created_at || b.tanggal);
         const dateB = new Date(a.created_at || a.tanggal);
         return dateA - dateB;
@@ -888,5 +958,5 @@
 
     lucide.createIcons();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dca2879a38eea87',t:'MTc3MzU2MzQ0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dca37c426c2d8ca',t:'MTc3MzU2NDA3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
