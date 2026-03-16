@@ -1,17 +1,16 @@
 let stream=null
 let photoData=null
 let gpsData=null
+let addressData=null
 
 let records = JSON.parse(localStorage.getItem("records")) || []
 
 // CLOCK
 
 function getWIB(){
-
 const now=new Date()
 const utc=now.getTime()+now.getTimezoneOffset()*60000
 return new Date(utc+7*3600000)
-
 }
 
 function updateClock(){
@@ -30,6 +29,7 @@ d.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"nu
 }
 
 setInterval(updateClock,1000)
+
 
 // LOAD EMPLOYEES
 
@@ -51,6 +51,7 @@ updateClock()
 
 }
 
+
 // NAVIGATION
 
 function showPage(p){
@@ -61,6 +62,7 @@ document.getElementById("page-"+p).classList.add("active")
 
 }
 
+
 // START ABSENSI
 
 function startAbsensi(type){
@@ -68,11 +70,17 @@ function startAbsensi(type){
 const name=document.getElementById("employeeSelect").value
 
 if(!name){
-
 alert("Pilih pegawai")
-
 return
+}
 
+const today=getWIB().toISOString().split("T")[0]
+
+const sudahAbsen=records.find(r=>r.nama===name && r.tanggal===today)
+
+if(sudahAbsen){
+alert("Anda sudah absen hari ini")
+return
 }
 
 showPage("absensi")
@@ -82,6 +90,7 @@ startCamera()
 getGPS()
 
 }
+
 
 // CAMERA
 
@@ -96,13 +105,9 @@ video.srcObject=stream
 }
 
 function stopCamera(){
-
 if(stream){
-
 stream.getTracks().forEach(t=>t.stop())
-
 }
-
 }
 
 function capturePhoto(){
@@ -117,7 +122,7 @@ const ctx=canvas.getContext("2d")
 
 ctx.drawImage(video,0,0)
 
-photoData=canvas.toDataURL("image/jpeg",0.4)
+photoData=canvas.toDataURL("image/jpeg",0.5)
 
 document.getElementById("capturedPhoto").src=photoData
 document.getElementById("capturedPhoto").classList.remove("hidden")
@@ -146,30 +151,59 @@ startCamera()
 }
 
 function cancelAbsensi(){
-
 stopCamera()
-
 showPage("dashboard")
-
 }
+
 
 // GPS
 
 function getGPS(){
 
-navigator.geolocation.getCurrentPosition(pos=>{
+navigator.geolocation.getCurrentPosition(async pos=>{
 
 gpsData={
 lat:pos.coords.latitude,
 lon:pos.coords.longitude
 }
 
-document.getElementById("locationInfo").innerText=
-`${gpsData.lat}, ${gpsData.lon}`
+document.getElementById("locationInfo").innerText="Mengambil alamat..."
+
+await getAddress()
 
 })
 
 }
+
+
+// REVERSE GEOCODING
+
+async function getAddress(){
+
+const url=`https://nominatim.openstreetmap.org/reverse?format=json&lat=${gpsData.lat}&lon=${gpsData.lon}`
+
+const res=await fetch(url)
+
+const data=await res.json()
+
+const addr=data.address
+
+addressData={
+kabupaten: addr.county || addr.city || "",
+kecamatan: addr.suburb || addr.city_district || "",
+desa: addr.village || addr.town || addr.hamlet || "",
+rt: "-",
+rw: "-"
+}
+
+document.getElementById("locationInfo").innerText=`
+${addressData.desa}
+${addressData.kecamatan}
+${addressData.kabupaten}
+`
+
+}
+
 
 // SUBMIT
 
@@ -178,19 +212,13 @@ function submitAbsensi(){
 const name=document.getElementById("employeeSelect").value
 
 if(!photoData){
-
 alert("Ambil foto dulu")
-
 return
-
 }
 
 if(!gpsData){
-
 alert("GPS belum didapat")
-
 return
-
 }
 
 const now=getWIB()
@@ -203,7 +231,10 @@ jam:now.toTimeString().slice(0,8),
 status:"Hadir",
 foto:photoData,
 lat:gpsData.lat,
-lon:gpsData.lon
+lon:gpsData.lon,
+kabupaten:addressData.kabupaten,
+kecamatan:addressData.kecamatan,
+desa:addressData.desa
 
 }
 
@@ -216,6 +247,7 @@ alert("Absensi berhasil")
 showPage("dashboard")
 
 }
+
 
 // ADMIN
 
@@ -236,6 +268,7 @@ alert("Password salah")
 }
 
 }
+
 
 function loadAdmin(){
 
@@ -263,15 +296,16 @@ tbody.appendChild(tr)
 
 }
 
+
 // CSV
 
 function downloadCSV(){
 
-let csv="Nama,Tanggal,Jam,Status\n"
+let csv="Nama,Tanggal,Jam,Status,Kabupaten,Kecamatan,Desa\n"
 
 records.forEach(r=>{
 
-csv+=`${r.nama},${r.tanggal},${r.jam},${r.status}\n`
+csv+=`${r.nama},${r.tanggal},${r.jam},${r.status},${r.kabupaten},${r.kecamatan},${r.desa}\n`
 
 })
 
@@ -280,6 +314,7 @@ const blob=new Blob([csv])
 const a=document.createElement("a")
 
 a.href=URL.createObjectURL(blob)
+
 a.download="absensi.csv"
 
 a.click()
