@@ -1,155 +1,54 @@
-/* ======================================
-GLOBAL STYLE
-====================================== */
-
 body{
+font-family:Arial;
+background:#f0f5ff;
 margin:0;
 padding:0;
-font-family:'Plus Jakarta Sans',sans-serif;
-background:#f0f5ff;
-color:#0f172a;
 }
-
-
-/* ======================================
-CONTAINER
-====================================== */
 
 .container{
 max-width:600px;
 margin:auto;
 padding:20px;
+text-align:center;
 }
-
-
-/* ======================================
-VIDEO CAMERA
-====================================== */
 
 #camera{
 width:100%;
-height:260px;
-object-fit:cover;
-border-radius:12px;
+height:250px;
 background:#000;
-}
-
-
-/* ======================================
-PREVIEW FOTO
-====================================== */
-
-#previewFoto{
-width:100%;
-height:260px;
+border-radius:10px;
 object-fit:cover;
-border-radius:12px;
 }
-
-
-/* ======================================
-BUTTON
-====================================== */
 
 button{
-cursor:pointer;
-transition:all .2s ease;
+width:100%;
+padding:12px;
+margin-top:10px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
 }
-
-button:active{
-transform:scale(.95);
-}
-
-
-/* ======================================
-TABLE ADMIN
-====================================== */
 
 table{
-border-collapse:collapse;
 width:100%;
+margin-top:20px;
+border-collapse:collapse;
 }
 
 th{
 background:#1e3a8a;
 color:white;
-font-size:12px;
-padding:10px;
-text-align:left;
+padding:8px;
 }
 
 td{
-padding:10px;
-font-size:13px;
-border-bottom:1px solid #e5e7eb;
+padding:8px;
+border-bottom:1px solid #ddd;
 }
 
-tr:hover{
-background:#f1f5f9;
-}
-
-
-/* ======================================
-ADMIN PHOTO
-====================================== */
-
-td img{
+img{
+width:40px;
 border-radius:6px;
-object-fit:cover;
-}
-
-
-/* ======================================
-FORM
-====================================== */
-
-select,
-input{
-font-size:14px;
-}
-
-
-/* ======================================
-SCROLLBAR
-====================================== */
-
-::-webkit-scrollbar{
-width:6px;
-}
-
-::-webkit-scrollbar-thumb{
-background:#94a3b8;
-border-radius:10px;
-}
-
-
-/* ======================================
-CARD SHADOW
-====================================== */
-
-.card{
-background:white;
-border-radius:14px;
-box-shadow:0 4px 14px rgba(0,0,0,0.06);
-}
-
-
-/* ======================================
-ANIMATION
-====================================== */
-
-.fade{
-animation:fade .3s ease;
-}
-
-@keyframes fade{
-from{
-opacity:0;
-transform:translateY(10px);
-}
-
-to{
-opacity:1;
-transform:translateY(0);
-}
 }
