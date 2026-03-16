@@ -1,8 +1,8 @@
 let stream=null
 let photoData=null
 let gpsData=null
-let records=[]
 
+let records = JSON.parse(localStorage.getItem("records")) || []
 
 // CLOCK
 
@@ -31,7 +31,6 @@ d.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"nu
 
 setInterval(updateClock,1000)
 
-
 // LOAD EMPLOYEES
 
 window.onload=function(){
@@ -52,7 +51,6 @@ updateClock()
 
 }
 
-
 // NAVIGATION
 
 function showPage(p){
@@ -63,10 +61,9 @@ document.getElementById("page-"+p).classList.add("active")
 
 }
 
-
 // START ABSENSI
 
-async function startAbsensi(type){
+function startAbsensi(type){
 
 const name=document.getElementById("employeeSelect").value
 
@@ -85,7 +82,6 @@ startCamera()
 getGPS()
 
 }
-
 
 // CAMERA
 
@@ -109,7 +105,6 @@ stream.getTracks().forEach(t=>t.stop())
 
 }
 
-
 function capturePhoto(){
 
 const video=document.getElementById("cameraPreview")
@@ -129,6 +124,9 @@ document.getElementById("capturedPhoto").classList.remove("hidden")
 
 video.classList.add("hidden")
 
+document.getElementById("btnRetake").classList.remove("hidden")
+document.getElementById("btnCapture").classList.add("hidden")
+
 stopCamera()
 
 }
@@ -138,13 +136,22 @@ function retakePhoto(){
 photoData=null
 
 document.getElementById("capturedPhoto").classList.add("hidden")
-
 document.getElementById("cameraPreview").classList.remove("hidden")
+
+document.getElementById("btnRetake").classList.add("hidden")
+document.getElementById("btnCapture").classList.remove("hidden")
 
 startCamera()
 
 }
 
+function cancelAbsensi(){
+
+stopCamera()
+
+showPage("dashboard")
+
+}
 
 // GPS
 
@@ -164,12 +171,27 @@ document.getElementById("locationInfo").innerText=
 
 }
 
-
 // SUBMIT
 
-async function submitAbsensi(){
+function submitAbsensi(){
 
 const name=document.getElementById("employeeSelect").value
+
+if(!photoData){
+
+alert("Ambil foto dulu")
+
+return
+
+}
+
+if(!gpsData){
+
+alert("GPS belum didapat")
+
+return
+
+}
 
 const now=getWIB()
 
@@ -187,12 +209,13 @@ lon:gpsData.lon
 
 records.push(data)
 
+localStorage.setItem("records",JSON.stringify(records))
+
 alert("Absensi berhasil")
 
 showPage("dashboard")
 
 }
-
 
 // ADMIN
 
@@ -200,7 +223,7 @@ function adminLogin(){
 
 const pass=document.getElementById("adminPass").value
 
-if(pass===CONFIG.ADMIN_PASSWORD){
+if(pass==="admin123"){
 
 document.getElementById("adminPanel").classList.remove("hidden")
 
@@ -214,7 +237,6 @@ alert("Password salah")
 
 }
 
-
 function loadAdmin(){
 
 const tbody=document.getElementById("adminTableBody")
@@ -227,11 +249,11 @@ let tr=document.createElement("tr")
 
 tr.innerHTML=`
 
-<td>${r.nama}</td>
-<td>${r.tanggal}</td>
-<td>${r.jam}</td>
-<td>${r.status}</td>
-<td><img src="${r.foto}" class="photo-thumb"></td>
+<td class="p-2">${r.nama}</td>
+<td class="p-2">${r.tanggal}</td>
+<td class="p-2">${r.jam}</td>
+<td class="p-2">${r.status}</td>
+<td class="p-2"><img src="${r.foto}" class="photo-thumb"></td>
 
 `
 
@@ -240,7 +262,6 @@ tbody.appendChild(tr)
 })
 
 }
-
 
 // CSV
 
