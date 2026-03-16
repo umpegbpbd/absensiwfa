@@ -77,8 +77,6 @@ tailwind.config = {
      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm mb-3">
       <i data-lucide="fingerprint" class="w-8 h-8 text-white"></i>
      </div>
-     <h1 id="el-app-title" class="text-2xl font-800 text-white tracking-tight">Sistem Absensi Karyawan</h1>
-     <p id="el-company-name" class="text-primary-200 text-sm font-medium mt-1">Instansi Pemerintah</p>
     </header><!-- Clock -->
     <div class="glass-card rounded-2xl p-5 mb-5 text-center fade-in">
      <div id="clock-date" class="text-sm font-600 text-primary-700 mb-1"></div>
@@ -350,6 +348,10 @@ function populateSelects() {
   selects.forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
+    // Remove all options except the first one
+    while (sel.options.length > 1) {
+      sel.remove(1);
+    }
     EMPLOYEES.forEach(name => {
       const opt = document.createElement('option');
       opt.value = name;
@@ -367,8 +369,10 @@ function updateClock() {
   const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
   const timeStr = padZ(now.getHours()) + ':' + padZ(now.getMinutes()) + ':' + padZ(now.getSeconds());
 
-  document.getElementById('clock-date').textContent = dateStr;
-  document.getElementById('clock-time').textContent = timeStr;
+  const dateEl = document.getElementById('clock-date');
+  const timeEl = document.getElementById('clock-time');
+  if (dateEl) dateEl.textContent = dateStr;
+  if (timeEl) timeEl.textContent = timeStr;
   updateStatusInfo(now);
 }
 
@@ -817,5 +821,5 @@ setInterval(updateClock, 1000);
 initGPS();
 lucide.createIcons();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd11f6fe7eb0550',t:'MTc3MzYzNjQ3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd1245cc3efd4f1',t:'MTc3MzYzNjY3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
