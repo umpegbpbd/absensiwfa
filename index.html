@@ -81,43 +81,54 @@ html, body { height: 100%; margin: 0; }
   <div id="app" class="h-full w-full overflow-auto" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);">
    <div class="toast-container" id="toastContainer"></div><!-- Navigation Tabs -->
    <div class="sticky top-0 z-50 px-3 pt-3 pb-2" style="background: linear-gradient(180deg, rgba(15,23,42,0.95) 0%, transparent 100%);">
-    <div class="flex gap-2 max-w-lg mx-auto"><button class="tab-btn active flex-1 py-2.5 px-3 rounded-xl text-sm font-bold" data-tab="dashboard" onclick="switchTab('dashboard')"> <span class="flex items-center justify-center gap-1.5"> <i data-lucide="home" style="width:16px;height:16px"></i> Absensi </span> </button> <button class="tab-btn flex-1 py-2.5 px-3 rounded-xl text-sm font-bold text-white/60 bg-white/10" data-tab="admin" onclick="switchTab('admin')"> <span class="flex items-center justify-center gap-1.5"> <i data-lucide="shield" style="width:16px;height:16px"></i> Admin </span> </button>
+    <div class="flex gap-2 max-w-lg mx-auto">
+     <button class="tab-btn active flex-1 py-2.5 px-3 rounded-xl text-sm font-bold" data-tab="dashboard" onclick="switchTab('dashboard')"> <span class="flex items-center justify-center gap-1.5"> <i data-lucide="home" style="width:16px;height:16px"></i> Absensi </span> </button> <button class="tab-btn flex-1 py-2.5 px-3 rounded-xl text-sm font-bold text-white/60 bg-white/10" data-tab="admin" onclick="switchTab('admin')"> <span class="flex items-center justify-center gap-1.5"> <i data-lucide="shield" style="width:16px;height:16px"></i> Admin </span> </button>
     </div>
    </div><!-- DASHBOARD TAB -->
-   <div id="tab-dashboard" class="tab-content px-4 pb-8 max-w-lg mx-auto"><!-- Header -->
+   <div id="tab-dashboard" class="tab-content px-4 pb-8 max-w-lg mx-auto">
+    <!-- Header -->
     <div class="text-center py-4 fade-in">
      <div class="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 mb-3">
       <div class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></div><span class="text-green-300 text-xs font-semibold">SISTEM AKTIF</span>
      </div>
-     <h1 id="appTitle" class="text-2xl font-extrabold text-white mb-1">Sistem Absensi Karyawan</h1>
-     <p id="companyName" class="text-blue-200/70 text-sm font-medium">Instansi Anda</p>
     </div><!-- Clock Card -->
     <div class="glass-card rounded-2xl p-5 mb-4 text-center fade-in">
      <div class="text-xs font-bold text-blue-600 tracking-widest uppercase mb-1">
       Waktu Indonesia Barat
      </div>
-     <div id="clockDisplay" class="text-4xl font-extrabold text-slate-800 tracking-tight my-2">
-      00:00:00
+     <div class="text-4xl font-extrabold text-slate-800 tracking-tight my-2" id="timeDisplay">
+      --:--:--
      </div>
-     <div id="dateDisplay" class="text-xs font-semibold text-slate-500">
-      Senin, 1 Januari 2024
+     <div class="text-xs font-semibold text-slate-500" id="dateShow">
+      Memuat...
      </div>
     </div><!-- Employee Select -->
-    <div class="glass-card rounded-2xl p-4 mb-4 fade-in"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Nama Pegawai</label> <select id="employeeSelect" class="w-full p-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold text-slate-700 bg-white transition-colors"> <option value="">— Pilih Nama Anda —</option> </select>
+    <div class="glass-card rounded-2xl p-4 mb-4 fade-in"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Pilih Nama Pegawai</label>
+     <div class="space-y-2">
+      <div class="relative"><input type="text" id="employeeSearch" placeholder="Cari nama pegawai..." class="w-full p-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold text-slate-700 bg-white transition-colors">
+      </div>
+      <div id="employeeList" class="max-h-48 overflow-y-auto space-y-1.5 border border-slate-200 rounded-xl p-2 hidden"></div>
+      <div id="selectedEmployee" class="p-3 rounded-xl bg-blue-50 border-2 border-blue-300 text-sm font-semibold text-blue-700 hidden">
+       Dipilih: <span id="selectedName">-</span>
+      </div>
+     </div>
     </div><!-- GPS Status -->
     <div id="gpsCard" class="glass-card rounded-2xl p-4 mb-4 fade-in">
      <div class="flex items-center justify-between mb-2">
       <div class="flex items-center gap-2">
-       <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center"><i data-lucide="map-pin" style="width:18px;height:18px" class="text-blue-600"></i>
+       <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+        <i data-lucide="map-pin" style="width:18px;height:18px" class="text-blue-600"></i>
        </div><span class="text-sm font-bold text-slate-700">Lokasi GPS</span>
       </div><button onclick="refreshGPS()" class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">Refresh</button>
      </div>
      <div id="gpsStatus" class="text-xs font-medium text-slate-500 bg-slate-50 rounded-lg p-3">
-      <div class="flex items-center gap-2"><i data-lucide="loader" style="width:14px;height:14px" class="animate-spin"></i> Mendeteksi lokasi...
+      <div class="flex items-center gap-2">
+       <i data-lucide="loader" style="width:14px;height:14px" class="animate-spin"></i> Mendeteksi lokasi...
       </div>
      </div>
     </div><!-- Action Buttons -->
-    <div class="grid grid-cols-2 gap-3 mb-4 fade-in"><button id="btnMasuk" onclick="startAbsensi('masuk')" class="btn-primary text-white rounded-2xl p-5 text-center disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"> <i data-lucide="log-in" style="width:32px;height:32px" class="mx-auto mb-2"></i>
+    <div class="grid grid-cols-2 gap-3 mb-4 fade-in">
+     <button id="btnMasuk" onclick="startAbsensi('masuk')" class="btn-primary text-white rounded-2xl p-5 text-center disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none"> <i data-lucide="log-in" style="width:32px;height:32px" class="mx-auto mb-2"></i>
       <div class="font-extrabold text-base">
        ABSEN MASUK
       </div>
@@ -136,11 +147,14 @@ html, body { height: 100%; margin: 0; }
       Ketentuan Absensi
      </div>
      <div class="space-y-2 text-xs">
-      <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-2.5"><i data-lucide="info" style="width:14px;height:14px;min-width:14px" class="text-blue-500 mt-0.5"></i> <span class="text-slate-600 font-medium">Absen masuk: <b>07:00 - 07:30 WIB</b>. Lebih dari 07:30 tercatat <b>Terlambat</b></span>
+      <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-2.5">
+       <i data-lucide="info" style="width:14px;height:14px;min-width:14px" class="text-blue-500 mt-0.5"></i> <span class="text-slate-600 font-medium">Absen masuk: <b>07:00 - 07:30 WIB</b>. Lebih dari 07:30 tercatat <b>Terlambat</b></span>
       </div>
-      <div class="flex items-start gap-2 bg-green-50 rounded-lg p-2.5"><i data-lucide="info" style="width:14px;height:14px;min-width:14px" class="text-green-500 mt-0.5"></i> <span class="text-slate-600 font-medium">Absen pulang: <b>15:30 - 17:30 WIB</b></span>
+      <div class="flex items-start gap-2 bg-green-50 rounded-lg p-2.5">
+       <i data-lucide="info" style="width:14px;height:14px;min-width:14px" class="text-green-500 mt-0.5"></i> <span class="text-slate-600 font-medium">Absen pulang: <b>15:30 - 17:30 WIB</b></span>
       </div>
-      <div class="flex items-start gap-2 bg-amber-50 rounded-lg p-2.5"><i data-lucide="camera" style="width:14px;height:14px;min-width:14px" class="text-amber-500 mt-0.5"></i> <span class="text-slate-600 font-medium">Kamera &amp; GPS wajib aktif saat absensi</span>
+      <div class="flex items-start gap-2 bg-amber-50 rounded-lg p-2.5">
+       <i data-lucide="camera" style="width:14px;height:14px;min-width:14px" class="text-amber-500 mt-0.5"></i> <span class="text-slate-600 font-medium">Kamera &amp; GPS wajib aktif saat absensi</span>
       </div>
      </div>
     </div>
@@ -153,12 +167,15 @@ html, body { height: 100%; margin: 0; }
      <div class="flex-1 relative camera-preview mb-3">
       <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover" style="transform:scaleX(-1)"></video>
       <canvas id="cameraCanvas" class="hidden"></canvas>
-      <div id="capturedPreview" class="hidden absolute inset-0 bg-black"><img id="capturedImg" class="w-full h-full object-cover" style="transform:scaleX(-1)" alt="Foto absensi">
+      <div id="capturedPreview" class="hidden absolute inset-0 bg-black">
+       <img id="capturedImg" class="w-full h-full object-cover" style="transform:scaleX(-1)" alt="Foto absensi">
       </div>
      </div>
-     <div id="cameraActions" class="flex gap-3"><button id="btnCapture" onclick="capturePhoto()" class="btn-primary flex-1 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-2"> <i data-lucide="camera" style="width:20px;height:20px"></i> Ambil Foto </button>
+     <div id="cameraActions" class="flex gap-3">
+      <button id="btnCapture" onclick="capturePhoto()" class="btn-primary flex-1 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-2"> <i data-lucide="camera" style="width:20px;height:20px"></i> Ambil Foto </button>
      </div>
-     <div id="confirmActions" class="hidden flex gap-3"><button onclick="retakePhoto()" class="flex-1 bg-white/20 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-2"> <i data-lucide="refresh-cw" style="width:18px;height:18px"></i> Ulangi </button> <button id="btnConfirmPhoto" onclick="confirmPhoto()" class="btn-primary flex-1 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-2"> <i data-lucide="check" style="width:18px;height:18px"></i> Konfirmasi </button>
+     <div id="confirmActions" class="hidden flex gap-3">
+      <button onclick="retakePhoto()" class="flex-1 bg-white/20 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-2"> <i data-lucide="refresh-cw" style="width:18px;height:18px"></i> Ulangi </button> <button id="btnConfirmPhoto" onclick="confirmPhoto()" class="btn-primary flex-1 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-2"> <i data-lucide="check" style="width:18px;height:18px"></i> Konfirmasi </button>
      </div>
     </div>
    </div><!-- ADMIN TAB -->
@@ -169,25 +186,31 @@ html, body { height: 100%; margin: 0; }
     </div><!-- Admin Auth -->
     <div id="adminAuth" class="glass-card rounded-2xl p-6 mb-4">
      <div class="text-center mb-4">
-      <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="lock" style="width:28px;height:28px" class="text-blue-600"></i>
+      <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-3">
+       <i data-lucide="lock" style="width:28px;height:28px" class="text-blue-600"></i>
       </div>
       <h3 class="font-bold text-slate-800 text-lg">Akses Admin</h3>
       <p class="text-slate-500 text-sm mt-1">Masukkan password admin</p>
      </div>
-     <form onsubmit="loginAdmin(event)"><input type="password" id="adminPass" class="w-full p-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold mb-3" placeholder="Password admin"> <button type="submit" class="btn-primary w-full text-white rounded-xl py-3.5 font-bold text-sm">Masuk Admin</button>
+     <form onsubmit="loginAdmin(event)">
+      <input type="password" id="adminPass" class="w-full p-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold mb-3" placeholder="Password admin"> <button type="submit" class="btn-primary w-full text-white rounded-xl py-3.5 font-bold text-sm">Masuk Admin</button>
      </form>
     </div><!-- Admin Panel -->
-    <div id="adminPanel" class="hidden"><!-- Filter Controls -->
+    <div id="adminPanel" class="hidden">
+     <!-- Filter Controls -->
      <div class="glass-card rounded-2xl p-4 mb-4">
       <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
        Filter Data
       </div>
       <div class="space-y-3">
-       <div><label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label> <input type="date" id="adminDateFilter" onchange="filterAdminData()" class="w-full p-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold">
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label> <input type="date" id="adminDateFilter" onchange="filterAdminData()" class="w-full p-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold">
        </div>
-       <div><label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pegawai</label> <select id="adminNameFilter" onchange="filterAdminData()" class="w-full p-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold bg-white"> <option value="">Semua Pegawai</option> </select>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pegawai</label> <select id="adminNameFilter" onchange="filterAdminData()" class="w-full p-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold bg-white"> <option value="">Semua Pegawai</option> </select>
        </div>
-       <div><label class="block text-xs font-semibold text-slate-600 mb-1">Status</label> <select id="adminStatusFilter" onchange="filterAdminData()" class="w-full p-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold bg-white"> <option value="">Semua Status</option> <option value="Hadir">Hadir</option> <option value="Terlambat">Terlambat</option> <option value="Pulang">Pulang</option> </select>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Status</label> <select id="adminStatusFilter" onchange="filterAdminData()" class="w-full p-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-sm font-semibold bg-white"> <option value="">Semua Status</option> <option value="Hadir">Hadir</option> <option value="Terlambat">Terlambat</option> <option value="Pulang">Pulang</option> </select>
        </div>
       </div>
      </div><!-- Stats -->
@@ -218,7 +241,8 @@ html, body { height: 100%; margin: 0; }
       </div>
      </div><!-- Export Button --> <button onclick="exportCSV()" class="btn-primary w-full text-white rounded-xl py-3.5 font-bold text-sm mb-4 flex items-center justify-center gap-2"> <i data-lucide="download" style="width:18px;height:18px"></i> Export Data CSV </button> <!-- Admin Data List -->
      <div id="adminList" class="space-y-3"></div>
-     <div id="adminEmpty" class="text-center py-12"><i data-lucide="database" style="width:48px;height:48px" class="text-white/20 mx-auto mb-3"></i>
+     <div id="adminEmpty" class="text-center py-12">
+      <i data-lucide="database" style="width:48px;height:48px" class="text-white/20 mx-auto mb-3"></i>
       <p class="text-white/40 font-semibold">Belum ada data absensi</p>
      </div>
     </div>
@@ -365,37 +389,52 @@ const dataHandler = {
 
 // POPULATE SELECTS
 function populateSelects() {
-  const selects = ['employeeSelect', 'adminNameFilter'];
-  selects.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const current = el.value;
-    const firstOption = el.querySelector('option');
-    const newOptions = [firstOption.cloneNode(true)];
-    EMPLOYEES.forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      newOptions.push(opt);
-    });
-    el.innerHTML = '';
-    newOptions.forEach(opt => el.appendChild(opt));
-    if (current) el.value = current;
+  const adminFilter = document.getElementById('adminNameFilter');
+  if (!adminFilter) return;
+  
+  const current = adminFilter.value;
+  const firstOption = adminFilter.querySelector('option');
+  const newOptions = [firstOption.cloneNode(true)];
+  EMPLOYEES.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    newOptions.push(opt);
   });
+  adminFilter.innerHTML = '';
+  newOptions.forEach(opt => adminFilter.appendChild(opt));
+  if (current) adminFilter.value = current;
 }
 
-// UPDATE CLOCK
+// UPDATE CLOCK - FIXED
 function updateClock() {
-  const now = new Date();
-  const wib = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
-  const h = String(wib.getHours()).padStart(2, '0');
-  const m = String(wib.getMinutes()).padStart(2, '0');
-  const s = String(wib.getSeconds()).padStart(2, '0');
-  document.getElementById('clockDisplay').textContent = `${h}:${m}:${s}`;
-
-  const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-  document.getElementById('dateDisplay').textContent = `${days[wib.getDay()]}, ${wib.getDate()} ${months[wib.getMonth()]} ${wib.getFullYear()}`;
+  try {
+    const now = new Date();
+    const options = { 
+      timeZone: 'Asia/Jakarta',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
+    const formatter = new Intl.DateTimeFormat('id-ID', options);
+    const parts = formatter.formatToParts(now);
+    const partMap = {};
+    parts.forEach(p => { partMap[p.type] = p.value; });
+    
+    const timeStr = `${partMap.hour}:${partMap.minute}:${partMap.second}`;
+    const dateStr = `${partMap.day}/${partMap.month}/${partMap.year}`;
+    
+    const timeDisplay = document.getElementById('timeDisplay');
+    const dateDisplay = document.getElementById('dateShow');
+    if (timeDisplay) timeDisplay.textContent = timeStr;
+    if (dateDisplay) dateDisplay.textContent = dateStr;
+  } catch(e) {
+    console.error('Clock error:', e);
+  }
 }
 
 // GET WIB TIME
@@ -497,8 +536,8 @@ function switchTab(tab) {
 
 // START ABSENSI
 function startAbsensi(type) {
-  const name = document.getElementById('employeeSelect').value;
-  if (!name) { showToast('Pilih nama pegawai terlebih dahulu', 'warning'); return; }
+  const selectedName = document.getElementById('selectedName').textContent;
+  if (!selectedName || selectedName === '-') { showToast('Pilih nama pegawai terlebih dahulu', 'warning'); return; }
   if (!currentGPS) { showToast('Aktifkan GPS untuk melakukan absensi', 'error'); return; }
 
   const wib = getWIBNow();
@@ -509,7 +548,7 @@ function startAbsensi(type) {
   if (type === 'masuk') {
     if (totalMin < 420) { showToast('Belum waktunya absensi (mulai 07:00 WIB)', 'warning'); return; }
     const today = formatDate(wib);
-    const existing = allRecords.find(r => r.nama === name && r.tanggal === today && r.tipe === 'masuk');
+    const existing = allRecords.find(r => r.nama === selectedName && r.tanggal === today && r.tipe === 'masuk');
     if (existing) { showToast('Anda sudah absen masuk hari ini', 'warning'); return; }
   }
 
@@ -517,7 +556,7 @@ function startAbsensi(type) {
     if (totalMin < 930) { showToast('Belum waktunya absen pulang (mulai 15:30 WIB)', 'warning'); return; }
     if (totalMin > 1050) { showToast('Waktu absensi pulang telah berakhir (maks 17:30 WIB)', 'error'); return; }
     const today = formatDate(wib);
-    const existing = allRecords.find(r => r.nama === name && r.tanggal === today && r.tipe === 'pulang');
+    const existing = allRecords.find(r => r.nama === selectedName && r.tanggal === today && r.tipe === 'pulang');
     if (existing) { showToast('Anda sudah absen pulang hari ini', 'warning'); return; }
   }
 
@@ -568,12 +607,12 @@ function capturePhoto() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 
   const wib = getWIBNow();
-  const name = document.getElementById('employeeSelect').value;
+  const selectedName = document.getElementById('selectedName').textContent;
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 14px Plus Jakarta Sans, sans-serif';
-  ctx.fillText(name, 10, canvas.height - 38);
+  ctx.fillText(selectedName, 10, canvas.height - 38);
   ctx.fillText(`${formatDate(wib)} ${formatTime(wib)} WIB`, 10, canvas.height - 18);
 
   capturedPhotoData = canvas.toDataURL('image/jpeg', 0.7);
@@ -599,7 +638,7 @@ async function confirmPhoto() {
   lucide.createIcons();
 
   const wib = getWIBNow();
-  const name = document.getElementById('employeeSelect').value;
+  const selectedName = document.getElementById('selectedName').textContent;
   const h = wib.getHours();
   const m = wib.getMinutes();
   const totalMin = h * 60 + m;
@@ -618,7 +657,7 @@ async function confirmPhoto() {
   }
 
   const record = {
-    nama: name,
+    nama: selectedName,
     tanggal: formatDate(wib),
     jam: formatTime(wib),
     status: status,
@@ -753,13 +792,56 @@ function exportCSV() {
 
 // INIT
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize employee search/select
+  setupEmployeeSearch();
+  
+  // Initialize admin select
   populateSelects();
+  
   updateClock();
   setInterval(updateClock, 1000);
   refreshGPS();
   setInterval(refreshGPS, 300000);
   lucide.createIcons();
 });
+
+function setupEmployeeSearch() {
+  const searchInput = document.getElementById('employeeSearch');
+  const employeeList = document.getElementById('employeeList');
+  const selectedEmployee = document.getElementById('selectedEmployee');
+  const selectedName = document.getElementById('selectedName');
+
+  if (!searchInput) return;
+
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    if (query.length === 0) {
+      employeeList.classList.add('hidden');
+      return;
+    }
+
+    const filtered = EMPLOYEES.filter(name => name.toLowerCase().includes(query));
+    employeeList.innerHTML = filtered.map(name => `
+      <button type="button" onclick="selectEmployee('${name}')" class="w-full text-left p-2.5 rounded-lg hover:bg-blue-50 text-sm font-medium text-slate-700 transition-colors">
+        ${name}
+      </button>
+    `).join('');
+    employeeList.classList.remove('hidden');
+  });
+
+  searchInput.addEventListener('focus', () => {
+    if (searchInput.value.length > 0) {
+      employeeList.classList.remove('hidden');
+    }
+  });
+}
+
+function selectEmployee(name) {
+  document.getElementById('employeeSearch').value = '';
+  document.getElementById('employeeList').classList.add('hidden');
+  document.getElementById('selectedName').textContent = name;
+  document.getElementById('selectedEmployee').classList.remove('hidden');
+}
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd1ae5e624afda3',t:'MTc3MzY0MjMzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd1b5a3424bfda3',t:'MTc3MzY0MjYyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
