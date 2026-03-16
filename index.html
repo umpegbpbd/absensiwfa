@@ -137,7 +137,8 @@
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full bg-gradient-to-br from-slate-50 to-blue-50">
-  <div class="app-shell w-full flex flex-col" id="appShell"><!-- Toast Container -->
+  <div class="app-shell w-full flex flex-col" id="appShell">
+   <!-- Toast Container -->
    <div class="toast-container" id="toastContainer"></div><!-- Loading Overlay -->
    <div class="loading-overlay" id="loadingOverlay" style="display:none;">
     <div class="text-center">
@@ -147,11 +148,13 @@
    </div><!-- Confirm Modal -->
    <div class="modal-overlay" id="confirmModal" style="display:none;">
     <div class="modal-content text-center">
-     <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4"><i data-lucide="help-circle" class="w-8 h-8 text-blue-600"></i>
+     <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="help-circle" class="w-8 h-8 text-blue-600"></i>
      </div>
      <h3 class="text-lg font-bold text-gray-800 mb-2" id="confirmTitle">Konfirmasi</h3>
      <p class="text-gray-500 mb-6" id="confirmMsg">Apakah Anda yakin?</p>
-     <div class="flex gap-3"><button onclick="closeConfirm()" class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition">Batal</button> <button id="confirmBtn" class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Ya, Lanjutkan</button>
+     <div class="flex gap-3">
+      <button onclick="closeConfirm()" class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition">Batal</button> <button id="confirmBtn" class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Ya, Lanjutkan</button>
      </div>
     </div>
    </div><!-- Detail Modal -->
@@ -161,6 +164,18 @@
       <h3 class="text-lg font-bold text-gray-800">Detail Absensi</h3><button onclick="document.getElementById('detailModal').style.display='none'" class="p-2 hover:bg-gray-100 rounded-full transition"> <i data-lucide="x" class="w-5 h-5 text-gray-500"></i> </button>
      </div>
      <div id="detailContent"></div>
+    </div>
+   </div><!-- Admin Password Modal -->
+   <div class="modal-overlay" id="adminPasswordModal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal-content text-center">
+     <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="lock" class="w-8 h-8 text-blue-600"></i>
+     </div>
+     <h3 class="text-lg font-bold text-gray-800 mb-2">Akses Admin</h3>
+     <p class="text-gray-500 text-sm mb-4">Masukkan password untuk mengakses panel admin</p><input type="password" id="adminPasswordInput" placeholder="Password" class="w-full py-3 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:border-blue-500 outline-none transition mb-4" onkeypress="if(event.key==='Enter') checkAdminPassword()">
+     <div class="flex gap-3">
+      <button onclick="closeAdminPassword()" class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition">Batal</button> <button onclick="checkAdminPassword()" class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Masuk</button>
+     </div>
     </div>
    </div><!-- Header -->
    <header class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-white px-5 pt-6 pb-16 relative overflow-hidden">
@@ -186,9 +201,12 @@
      </div>
     </div>
    </header><!-- Main Content Area -->
-   <main class="flex-1 px-4 -mt-10 pb-24 relative z-10 max-w-lg mx-auto w-full"><!-- Page: Dashboard -->
-    <div id="pageDashboard"><!-- Employee Select Card -->
-     <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up anim-delay-1"><label class="block text-sm font-semibold text-gray-700 mb-2"> <i data-lucide="user" class="w-4 h-4 inline mr-1 text-blue-600"></i> Pilih Nama Pegawai </label> <select id="employeeSelect" class="w-full py-3 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-10"> <option value="">-- Pilih Pegawai --</option> </select>
+   <main class="flex-1 px-4 -mt-10 pb-24 relative z-10 max-w-lg mx-auto w-full">
+    <!-- Page: Dashboard -->
+    <div id="pageDashboard">
+     <!-- Employee Select Card -->
+     <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up anim-delay-1">
+      <label class="block text-sm font-semibold text-gray-700 mb-2"> <i data-lucide="user" class="w-4 h-4 inline mr-1 text-blue-600"></i> Pilih Nama Pegawai </label> <select id="employeeSelect" class="w-full py-3 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition pr-10"> <option value="">-- Pilih Pegawai --</option> </select>
      </div><!-- Today Status -->
      <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up anim-delay-2">
       <h3 class="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wide">Status Hari Ini</h3>
@@ -212,29 +230,34 @@
        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Kamera</h3><button onclick="toggleCamera()" id="cameraToggleBtn" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition"> <i data-lucide="camera" class="w-4 h-4"></i> <span id="cameraToggleText">Aktifkan</span> </button>
       </div>
       <div class="camera-frame aspect-[4/3] bg-gray-100 flex items-center justify-center" id="cameraContainer">
-       <div class="text-center text-gray-400 p-4" id="cameraPlaceholder"><i data-lucide="camera-off" class="w-12 h-12 mx-auto mb-2"></i>
+       <div class="text-center text-gray-400 p-4" id="cameraPlaceholder">
+        <i data-lucide="camera-off" class="w-12 h-12 mx-auto mb-2"></i>
         <p class="text-sm font-medium">Kamera belum aktif</p>
         <p class="text-xs mt-1">Aktifkan kamera untuk absensi</p>
        </div>
        <video id="cameraVideo" autoplay playsinline style="display:none;"></video>
        <canvas id="cameraCanvas" style="display:none;"></canvas><img id="capturedPhoto" style="display:none;" alt="Foto absensi">
       </div>
-      <div id="photoActions" style="display:none;" class="mt-3 flex gap-2"><button onclick="retakePhoto()" class="flex-1 py-2 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-1"> <i data-lucide="refresh-cw" class="w-4 h-4"></i> Foto Ulang </button>
+      <div id="photoActions" style="display:none;" class="mt-3 flex gap-2">
+       <button onclick="retakePhoto()" class="flex-1 py-2 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition flex items-center justify-center gap-1"> <i data-lucide="refresh-cw" class="w-4 h-4"></i> Foto Ulang </button>
       </div>
      </div><!-- Location Info -->
      <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up anim-delay-4" id="locationCard">
       <div class="flex items-center justify-between mb-3">
        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Lokasi GPS</h3><button onclick="getLocation()" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition"> <i data-lucide="map-pin" class="w-4 h-4"></i> Refresh </button>
       </div>
-      <div id="locationInfo" class="text-sm text-gray-500 text-center py-4"><i data-lucide="navigation" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+      <div id="locationInfo" class="text-sm text-gray-500 text-center py-4">
+       <i data-lucide="navigation" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
        <p class="font-medium">Mendeteksi lokasi...</p>
       </div>
      </div><!-- Action Buttons -->
-     <div class="space-y-3 mb-4"><button onclick="doAbsenMasuk()" id="btnMasuk" class="btn-masuk w-full py-4 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg"> <i data-lucide="log-in" class="w-6 h-6"></i> ABSEN MASUK </button> <button onclick="doAbsenPulang()" id="btnPulang" class="btn-pulang w-full py-4 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg"> <i data-lucide="log-out" class="w-6 h-6"></i> ABSEN PULANG </button>
+     <div class="space-y-3 mb-4">
+      <button onclick="doAbsenMasuk()" id="btnMasuk" class="btn-masuk w-full py-4 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg"> <i data-lucide="log-in" class="w-6 h-6"></i> ABSEN MASUK </button> <button onclick="doAbsenPulang()" id="btnPulang" class="btn-pulang w-full py-4 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-3 shadow-lg"> <i data-lucide="log-out" class="w-6 h-6"></i> ABSEN PULANG </button>
      </div><!-- Time Rules Info -->
      <div class="glass-card rounded-2xl p-4 shadow-lg mb-4">
       <div class="flex items-start gap-3">
-       <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
+       <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
        </div>
        <div class="text-xs text-gray-500">
         <p class="font-semibold text-gray-700 mb-1">Jadwal Absensi:</p>
@@ -249,56 +272,73 @@
       <div class="flex items-center justify-between mb-4">
        <h3 class="text-lg font-bold text-gray-800">Riwayat Absensi</h3><button onclick="loadRecords()" class="text-xs font-semibold text-blue-600 flex items-center gap-1"> <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh </button>
       </div>
-      <div class="mb-4"><select id="filterEmployee" onchange="renderRecords()" class="w-full py-2.5 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm text-gray-700 font-medium focus:border-blue-500 outline-none transition pr-10"> <option value="">Semua Pegawai</option> </select>
+      <div class="mb-4">
+       <select id="filterEmployee" onchange="renderRecords()" class="w-full py-2.5 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm text-gray-700 font-medium focus:border-blue-500 outline-none transition pr-10"> <option value="">Semua Pegawai</option> </select>
       </div>
       <div id="recordsList" class="space-y-3">
-       <div class="text-center text-gray-400 py-8"><i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i>
+       <div class="text-center text-gray-400 py-8">
+        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2"></i>
         <p class="text-sm font-medium">Memuat data...</p>
        </div>
       </div>
      </div>
     </div><!-- Page: Admin -->
     <div id="pageAdmin" style="display:none;">
-     <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Panel Admin</h3><!-- Gist Config -->
-      <div class="mb-6"><label class="block text-sm font-semibold text-gray-700 mb-2">GitHub Token</label> <input type="password" id="githubToken" placeholder="Masukkan GitHub Personal Access Token" class="w-full py-3 px-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm focus:border-blue-500 outline-none transition">
-       <p class="text-xs text-gray-400 mt-1">Token disimpan lokal di browser ini saja</p><button onclick="saveToken()" class="mt-2 w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition"> Simpan Token </button>
-      </div><!-- Test Connection -->
-      <div class="mb-6"><button onclick="testConnection()" class="w-full py-3 rounded-xl border-2 border-blue-200 text-blue-700 font-semibold text-sm hover:bg-blue-50 transition flex items-center justify-center gap-2"> <i data-lucide="wifi" class="w-4 h-4"></i> Test Koneksi Gist </button>
-       <div id="connectionStatus" class="mt-2 text-xs text-center text-gray-400"></div>
-      </div><!-- Export -->
-      <div class="mb-6">
-       <h4 class="text-sm font-semibold text-gray-700 mb-2">Ekspor Data</h4><button onclick="exportCSV()" class="w-full py-3 rounded-xl border-2 border-emerald-200 text-emerald-700 font-semibold text-sm hover:bg-emerald-50 transition flex items-center justify-center gap-2"> <i data-lucide="download" class="w-4 h-4"></i> Download CSV </button>
-      </div><!-- Clear Data -->
-      <div>
-       <h4 class="text-sm font-semibold text-gray-700 mb-2">Danger Zone</h4><button onclick="confirmClearData()" class="w-full py-3 rounded-xl border-2 border-red-200 text-red-700 font-semibold text-sm hover:bg-red-50 transition flex items-center justify-center gap-2"> <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Semua Data </button>
+     <!-- Admin Password Required Message -->
+     <div id="adminLockedView" class="glass-card rounded-2xl p-8 shadow-lg mb-4 anim-fade-up text-center">
+      <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+       <i data-lucide="lock" class="w-8 h-8 text-blue-600"></i>
       </div>
-     </div><!-- Stats -->
-     <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up">
-      <h3 class="text-sm font-bold text-gray-800 mb-3">Statistik</h3>
-      <div id="statsContent" class="grid grid-cols-2 gap-3">
-       <div class="bg-blue-50 rounded-xl p-3 text-center border border-blue-100">
-        <p class="text-2xl font-extrabold text-blue-700" id="statTotal">0</p>
-        <p class="text-xs text-blue-500 font-semibold">Total Record</p>
+      <h3 class="text-lg font-bold text-gray-800 mb-2">Panel Admin Terkunci</h3>
+      <p class="text-gray-500 text-sm mb-4">Silakan masukkan password untuk mengakses pengaturan admin</p><button onclick="promptAdminPassword()" class="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"> <i data-lucide="unlock" class="w-4 h-4"></i> Buka Admin </button>
+     </div><!-- Admin Unlocked View -->
+     <div id="adminUnlockedView" style="display:none;">
+      <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up">
+       <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-800">Panel Admin</h3><button onclick="lockAdminPanel()" class="text-xs font-semibold text-red-600 hover:text-red-800 flex items-center gap-1 transition"> <i data-lucide="lock" class="w-4 h-4"></i> Kunci </button>
+       </div><!-- Gist Config -->
+       <div class="mb-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-2">GitHub Token (Otomatis)</label> <input type="text" id="githubToken" placeholder="Token diatur otomatis" class="w-full py-3 px-4 bg-gray-100 border-2 border-gray-200 rounded-xl text-sm focus:border-blue-500 outline-none transition" readonly>
+        <p class="text-xs text-gray-400 mt-1">✅ Token diatur otomatis untuk semua user</p>
+       </div><!-- Test Connection -->
+       <div class="mb-6">
+        <button onclick="testConnection()" class="w-full py-3 rounded-xl border-2 border-blue-200 text-blue-700 font-semibold text-sm hover:bg-blue-50 transition flex items-center justify-center gap-2"> <i data-lucide="wifi" class="w-4 h-4"></i> Test Koneksi Gist </button>
+        <div id="connectionStatus" class="mt-2 text-xs text-center text-gray-400"></div>
+       </div><!-- Export -->
+       <div class="mb-6">
+        <h4 class="text-sm font-semibold text-gray-700 mb-2">Ekspor Data</h4><button onclick="exportCSV()" class="w-full py-3 rounded-xl border-2 border-emerald-200 text-emerald-700 font-semibold text-sm hover:bg-emerald-50 transition flex items-center justify-center gap-2"> <i data-lucide="download" class="w-4 h-4"></i> Download CSV </button>
+       </div><!-- Clear Data -->
+       <div>
+        <h4 class="text-sm font-semibold text-gray-700 mb-2">Danger Zone</h4><button onclick="confirmClearData()" class="w-full py-3 rounded-xl border-2 border-red-200 text-red-700 font-semibold text-sm hover:bg-red-50 transition flex items-center justify-center gap-2"> <i data-lucide="trash-2" class="w-4 h-4"></i> Hapus Semua Data </button>
        </div>
-       <div class="bg-emerald-50 rounded-xl p-3 text-center border border-emerald-100">
-        <p class="text-2xl font-extrabold text-emerald-700" id="statHadir">0</p>
-        <p class="text-xs text-emerald-500 font-semibold">Hadir Tepat</p>
-       </div>
-       <div class="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
-        <p class="text-2xl font-extrabold text-amber-700" id="statTerlambat">0</p>
-        <p class="text-xs text-amber-500 font-semibold">Terlambat</p>
-       </div>
-       <div class="bg-purple-50 rounded-xl p-3 text-center border border-purple-100">
-        <p class="text-2xl font-extrabold text-purple-700" id="statPulang">0</p>
-        <p class="text-xs text-purple-500 font-semibold">Pulang</p>
+      </div><!-- Stats -->
+      <div class="glass-card rounded-2xl p-5 shadow-lg mb-4 anim-fade-up">
+       <h3 class="text-sm font-bold text-gray-800 mb-3">Statistik</h3>
+       <div id="statsContent" class="grid grid-cols-2 gap-3">
+        <div class="bg-blue-50 rounded-xl p-3 text-center border border-blue-100">
+         <p class="text-2xl font-extrabold text-blue-700" id="statTotal">0</p>
+         <p class="text-xs text-blue-500 font-semibold">Total Record</p>
+        </div>
+        <div class="bg-emerald-50 rounded-xl p-3 text-center border border-emerald-100">
+         <p class="text-2xl font-extrabold text-emerald-700" id="statHadir">0</p>
+         <p class="text-xs text-emerald-500 font-semibold">Hadir Tepat</p>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-3 text-center border border-amber-100">
+         <p class="text-2xl font-extrabold text-amber-700" id="statTerlambat">0</p>
+         <p class="text-xs text-amber-500 font-semibold">Terlambat</p>
+        </div>
+        <div class="bg-purple-50 rounded-xl p-3 text-center border border-purple-100">
+         <p class="text-2xl font-extrabold text-purple-700" id="statPulang">0</p>
+         <p class="text-xs text-purple-500 font-semibold">Pulang</p>
+        </div>
        </div>
       </div>
      </div>
     </div>
    </main><!-- Bottom Navigation -->
    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 z-50 shadow-lg">
-    <div class="flex justify-around max-w-lg mx-auto"><button onclick="switchPage('dashboard')" class="nav-tab active flex flex-col items-center gap-1 text-xs font-semibold text-gray-400" id="navDashboard"> <i data-lucide="home" class="w-5 h-5"></i> Absensi </button> <button onclick="switchPage('riwayat')" class="nav-tab flex flex-col items-center gap-1 text-xs font-semibold text-gray-400" id="navRiwayat"> <i data-lucide="clock" class="w-5 h-5"></i> Riwayat </button> <button onclick="switchPage('admin')" class="nav-tab flex flex-col items-center gap-1 text-xs font-semibold text-gray-400" id="navAdmin"> <i data-lucide="settings" class="w-5 h-5"></i> Admin </button>
+    <div class="flex justify-around max-w-lg mx-auto">
+     <button onclick="switchPage('dashboard')" class="nav-tab active flex flex-col items-center gap-1 text-xs font-semibold text-gray-400" id="navDashboard"> <i data-lucide="home" class="w-5 h-5"></i> Absensi </button> <button onclick="switchPage('riwayat')" class="nav-tab flex flex-col items-center gap-1 text-xs font-semibold text-gray-400" id="navRiwayat"> <i data-lucide="clock" class="w-5 h-5"></i> Riwayat </button> <button onclick="switchPage('admin')" class="nav-tab flex flex-col items-center gap-1 text-xs font-semibold text-gray-400" id="navAdmin"> <i data-lucide="settings" class="w-5 h-5"></i> Admin </button>
     </div>
    </nav>
   </div>
@@ -306,6 +346,8 @@
     // ====================== CONFIG ======================
     const GIST_ID = 'aa2bcc58afa55da9b1b804ca2aa3814c';
     const GIST_FILENAME = 'absensi_data.json';
+    const ADMIN_PASSWORD = 'admin123';
+    const AUTO_TOKEN = 'ghp_YOUR_GITHUB_TOKEN_HERE'; // Token otomatis untuk semua user
 
     const EMPLOYEES = [
       "Drs.STEFANUS TRIADI ATMONO, M.Si.",
@@ -371,6 +413,7 @@
     let capturedImageData = null;
     let currentLocation = null;
     let locationAddress = null;
+    let isAdminAuthenticated = false;
 
     // ====================== INIT ======================
     // Populate employee dropdowns
@@ -448,6 +491,38 @@
       confirmCallback = null;
     }
 
+    // ====================== ADMIN PASSWORD ======================
+    function promptAdminPassword() {
+      document.getElementById('adminPasswordInput').value = '';
+      document.getElementById('adminPasswordModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('adminPasswordInput').focus(), 100);
+    }
+
+    function checkAdminPassword() {
+      const password = document.getElementById('adminPasswordInput').value;
+      if (password === ADMIN_PASSWORD) {
+        isAdminAuthenticated = true;
+        closeAdminPassword();
+        document.getElementById('adminLockedView').style.display = 'none';
+        document.getElementById('adminUnlockedView').style.display = 'block';
+        showToast('Akses admin berhasil', 'success');
+      } else {
+        showToast('Password salah', 'error');
+        document.getElementById('adminPasswordInput').value = '';
+      }
+    }
+
+    function closeAdminPassword() {
+      document.getElementById('adminPasswordModal').style.display = 'none';
+    }
+
+    function lockAdminPanel() {
+      isAdminAuthenticated = false;
+      document.getElementById('adminUnlockedView').style.display = 'none';
+      document.getElementById('adminLockedView').style.display = 'block';
+      showToast('Admin panel terkunci', 'info');
+    }
+
     // ====================== NAVIGATION ======================
     function switchPage(page) {
       document.getElementById('pageDashboard').style.display = page === 'dashboard' ? 'block' : 'none';
@@ -463,7 +538,7 @@
       document.getElementById(activeNav).style.color = '#1e40af';
 
       if (page === 'riwayat') loadRecords();
-      if (page === 'admin') { loadRecords(); updateStats(); }
+      if (page === 'admin') { if (isAdminAuthenticated) { loadRecords(); updateStats(); } }
 
       // Scroll to top
       document.getElementById('appShell').scrollTop = 0;
@@ -515,7 +590,6 @@
       video.style.display = 'none';
       document.getElementById('photoActions').style.display = 'flex';
       
-      // Stop camera after capture
       if (cameraStream) {
         cameraStream.getTracks().forEach(t => t.stop());
         cameraStream = null;
@@ -551,13 +625,11 @@
         const { latitude, longitude, accuracy } = pos.coords;
         currentLocation = { latitude, longitude, accuracy };
 
-        // Simple fake GPS detection: check accuracy
         let fakeWarning = '';
         if (accuracy > 100) {
           fakeWarning = '<p class="text-amber-600 text-xs mt-2 font-semibold">⚠️ Akurasi rendah (' + Math.round(accuracy) + 'm) - kemungkinan GPS palsu</p>';
         }
 
-        // Reverse geocoding using Nominatim
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&accept-language=id`);
           const data = await res.json();
@@ -608,12 +680,11 @@
       }
     }
 
-    // Auto-get location on load
     getLocation();
 
     // ====================== GIST API ======================
     function getToken() {
-      return localStorage.getItem('github_token') || '';
+      return AUTO_TOKEN; // Gunakan token otomatis untuk semua user
     }
 
     async function loadGistData() {
@@ -667,19 +738,16 @@
       const minute = wib.getMinutes();
       const timeNum = hour * 60 + minute;
 
-      // Before 07:00
       if (timeNum < 420) {
         showToast('Belum waktunya absensi. Absensi masuk mulai pukul 07:00 WIB', 'warning');
         return;
       }
 
-      // Check camera
       if (!cameraStream && !capturedImageData) {
         showToast('Aktifkan kamera dan ambil foto untuk absensi', 'warning');
         return;
       }
 
-      // Capture photo if camera is still streaming
       if (cameraStream && !capturedImageData) {
         capturePhoto();
       }
@@ -689,15 +757,13 @@
         return;
       }
 
-      // Check GPS
       if (!currentLocation) {
         showToast('Aktifkan GPS untuk melakukan absensi', 'warning');
         return;
       }
 
-      // Determine status
       let status = 'Hadir';
-      if (timeNum > 450) { // After 07:30
+      if (timeNum > 450) {
         status = 'Terlambat';
       }
 
@@ -709,7 +775,6 @@
       try {
         allRecords = await loadGistData();
 
-        // Check if already absen masuk today
         const existing = allRecords.find(r => r.nama === employee && r.tanggal === dateStr && (r.status === 'Hadir' || r.status === 'Terlambat'));
         if (existing) {
           hideLoading();
@@ -760,19 +825,16 @@
       const minute = wib.getMinutes();
       const timeNum = hour * 60 + minute;
 
-      // Before 15:30
       if (timeNum < 930) {
         showToast('Belum waktunya absensi pulang. Absensi pulang mulai pukul 15:30 WIB', 'warning');
         return;
       }
 
-      // After 17:30
       if (timeNum > 1050) {
         showToast('Waktu absensi pulang telah berakhir (maks 17:30 WIB)', 'error');
         return;
       }
 
-      // Check camera
       if (!cameraStream && !capturedImageData) {
         showToast('Aktifkan kamera dan ambil foto untuk absensi', 'warning');
         return;
@@ -888,7 +950,7 @@
       document.getElementById('recordsList').innerHTML = '<div class="flex items-center justify-center gap-2 py-8"><div class="loading-spinner w-5 h-5 border-2" style="border-color:rgba(59,130,246,0.2);border-top-color:#3b82f6;"></div><span class="text-sm text-gray-500">Memuat data...</span></div>';
       allRecords = await loadGistData();
       renderRecords();
-      updateStats();
+      if (isAdminAuthenticated) updateStats();
     }
 
     function renderRecords() {
@@ -903,7 +965,6 @@
         return;
       }
 
-      // Limit display for performance
       const display = filtered.slice(0, 50);
       
       container.innerHTML = display.map(r => {
@@ -960,10 +1021,7 @@
 
     // ====================== ADMIN ======================
     function saveToken() {
-      const token = document.getElementById('githubToken').value.trim();
-      if (!token) { showToast('Masukkan token terlebih dahulu', 'warning'); return; }
-      localStorage.setItem('github_token', token);
-      showToast('Token berhasil disimpan', 'success');
+      showToast('Token sudah diatur otomatis untuk semua user', 'info');
     }
 
     async function testConnection() {
@@ -1053,27 +1111,16 @@
       if (titleEl) titleEl.textContent = title;
       if (orgEl) orgEl.textContent = org;
 
-      // Header gradient
       const header = document.querySelector('header');
       if (header) header.style.background = `linear-gradient(135deg, ${bgColor}, ${primaryColor})`;
 
-      // Surface cards
       document.querySelectorAll('.glass-card').forEach(c => {
         c.style.backgroundColor = surfaceColor;
       });
 
-      // Text color
-      document.querySelectorAll('h3, p, label, span').forEach(el => {
-        if (!el.closest('.toast') && !el.closest('.status-badge') && !el.closest('header') && !el.closest('nav') && !el.closest('.modal-content')) {
-          // Only set if no explicit color class
-        }
-      });
-
-      // Primary button
       const btnMasuk = document.getElementById('btnMasuk');
       if (btnMasuk) btnMasuk.style.background = `linear-gradient(135deg, ${primaryColor}, ${lightenColor(primaryColor, 30)})`;
 
-      // Secondary button
       const btnPulang = document.getElementById('btnPulang');
       if (btnPulang) btnPulang.style.background = `linear-gradient(135deg, ${secondaryColor}, ${lightenColor(secondaryColor, 30)})`;
     }
@@ -1115,5 +1162,5 @@
     // ====================== INIT ICONS ======================
     lucide.createIcons();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd2e734d241e793',t:'MTc3MzY1NTE0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd2fe9b1085e8a2',t:'MTc3MzY1NjEwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
