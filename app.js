@@ -1,29 +1,43 @@
 ```javascript
-// ================= JAM REALTIME =================
+// ================= JAM REALTIME (FIXED) =================
 
 function updateClock(){
 
-let clock = document.getElementById("clockDisplay")
-let date = document.getElementById("currentDate")
+const clock = document.getElementById("clockDisplay")
+const date = document.getElementById("currentDate")
 
 if(!clock || !date) return
 
-let now = new Date()
+const now = new Date()
 
-clock.innerText = now.toLocaleTimeString("id-ID")
+// format waktu manual supaya stabil
+let h = now.getHours().toString().padStart(2,"0")
+let m = now.getMinutes().toString().padStart(2,"0")
+let s = now.getSeconds().toString().padStart(2,"0")
 
-date.innerText = now.toLocaleDateString("id-ID",{
+clock.textContent = `${h}:${m}:${s}`
+
+// format tanggal
+const tanggal = now.toLocaleDateString("id-ID",{
 weekday:"long",
 year:"numeric",
 month:"long",
 day:"numeric"
 })
 
+date.textContent = tanggal
+
 }
 
+// jalankan saat halaman siap
+document.addEventListener("DOMContentLoaded",function(){
+
+updateClock()
+
+// update tiap detik
 setInterval(updateClock,1000)
 
-document.addEventListener("DOMContentLoaded",updateClock)
+})
 
 
 // ================= PAGE NAV =================
@@ -207,7 +221,6 @@ let menit=now.getMinutes()
 let waktu=jam*60+menit
 
 
-
 // MASUK
 
 if(currentType==="masuk"){
@@ -225,7 +238,6 @@ if(waktu>450) return "Terlambat"
 }
 
 }
-
 
 
 // PULANG
