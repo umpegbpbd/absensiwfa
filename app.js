@@ -1,36 +1,98 @@
 ```javascript
-// ================= GPS ELEMENT =================
+// ================= JAM REALTIME =================
 
-let latitudeInput = document.getElementById("latitude")
-let longitudeInput = document.getElementById("longitude")
+function updateClock(){
 
-let kotaInput = document.getElementById("kota")
-let kecamatanInput = document.getElementById("kecamatan")
-let desaInput = document.getElementById("desa")
+let now = new Date()
 
-let kotaText = document.getElementById("kotaText")
-let kecamatanText = document.getElementById("kecamatanText")
-let desaText = document.getElementById("desaText")
+let time = now.toLocaleTimeString("id-ID")
 
-let statusGPS = document.getElementById("gpsStatus")
+let date = now.toLocaleDateString("id-ID",{
+weekday:"long",
+year:"numeric",
+month:"long",
+day:"numeric"
+})
+
+let clock = document.getElementById("clockDisplay")
+let currentDate = document.getElementById("currentDate")
+
+if(clock) clock.innerText = time
+if(currentDate) currentDate.innerText = date
+
+}
+
+setInterval(updateClock,1000)
+updateClock()
+
+
+
+// ================= NAVIGASI PAGE =================
+
+function showPage(page){
+
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.remove("active")
+})
+
+document.getElementById("page-"+page).classList.add("active")
+
+}
+
+
+
+// ================= VAR GLOBAL =================
+
+let currentType = ""
+let video = null
+let canvas = null
+let photo = null
+let stream = null
+let latitude = 0
+let longitude = 0
+let lokasiText = ""
+
+
+
+// ================= START ABSENSI =================
+
+function startAbsensi(type){
+
+let employee = document.getElementById("employeeSelect")
+
+if(!employee || !employee.value){
+alert("Pilih pegawai dulu")
+return
+}
+
+currentType = type
+
+showPage("absensi")
+
+startCamera()
+
+getLocation()
+
+}
+
+
 
 // ================= CAMERA =================
 
-let video = document.getElementById("video")
-let canvas = document.getElementById("canvas")
-let foto = null
-
 async function startCamera(){
+
+video = document.getElementById("cameraPreview")
+canvas = document.getElementById("cameraCanvas")
 
 try{
 
-let stream = await navigator.mediaDevices.getUserMedia({
+stream = await navigator.mediaDevices.getUserMedia({
 video:{facingMode:"user"}
 })
 
 video.srcObject = stream
 
-}catch(e){
+}catch(err){
 
 alert("Kamera tidak bisa diakses")
 
@@ -38,7 +100,9 @@ alert("Kamera tidak bisa diakses")
 
 }
 
-function ambilFoto(){
+
+
+function capturePhoto(){
 
 let ctx = canvas.getContext("2d")
 
@@ -47,162 +111,122 @@ canvas.height = video.videoHeight
 
 ctx.drawImage(video,0,0)
 
-foto = canvas.toDataURL("image/jpeg")
+photo = canvas.toDataURL("image/jpeg")
 
-alert("Foto berhasil diambil")
+document.getElementById("capturedPhoto").src = photo
+document.getElementById("capturedPhoto").classList.remove("hidden")
+
+video.classList.add("hidden")
+
+document.getElementById("btnCapture").classList.add("hidden")
+document.getElementById("btnRetake").classList.remove("hidden")
 
 }
+
+
+
+function retakePhoto(){
+
+photo = null
+
+document.getElementById("capturedPhoto").classList.add("hidden")
+
+video.classList.remove("hidden")
+
+document.getElementById("btnCapture").classList.remove("hidden")
+document.getElementById("btnRetake").classList.add("hidden")
+
+}
+
+
 
 // ================= GPS =================
 
-function ambilGPS(){
+function getLocation(){
 
-statusGPS.innerHTML = "Mengambil GPS..."
+let info = document.getElementById("locationInfo")
 
-if(!navigator.geolocation){
-alert("Browser tidak mendukung GPS")
-return
-}
+navigator.geolocation.getCurrentPosition(async pos=>{
 
-navigator.geolocation.getCurrentPosition(
+latitude = pos.coords.latitude
+longitude = pos.coords.longitude
 
-function(position){
+try{
 
-let lat = position.coords.latitude
-let lon = position.coords.longitude
+let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
 
-latitudeInput.value = lat
-longitudeInput.value = lon
+let res = await fetch(url)
 
-statusGPS.innerHTML = "GPS ditemukan"
-
-ambilAlamat(lat,lon)
-
-},
-
-function(error){
-
-statusGPS.innerHTML = "GPS gagal"
-
-console.log(error)
-
-},
-
-{
-enableHighAccuracy:true,
-timeout:15000,
-maximumAge:0
-}
-
-)
-
-}
-
-// ================= REVERSE GEOCODING =================
-
-function ambilAlamat(lat,lon){
-
-fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-
-.then(res=>res.json())
-
-.then(data=>{
+let data = await res.json()
 
 let a = data.address
 
-let kota =
-a.city ||
-a.town ||
-a.county ||
-"-"
+let desa = a.village || a.hamlet || "-"
+let kec = a.suburb || a.city_district || "-"
+let kota = a.city || a.town || a.county || "-"
 
-let kec =
-a.suburb ||
-a.city_district ||
-"-"
+lokasiText = `${desa}, ${kec}, ${kota}`
 
-let desa =
-a.village ||
-a.hamlet ||
-"-"
+info.innerText = "Lokasi : " + lokasiText
 
-kotaInput.value = kota
-kecamatanInput.value = kec
-desaInput.value = desa
+}catch(e){
 
-kotaText.innerText = kota
-kecamatanText.innerText = kec
-desaText.innerText = desa
+info.innerText = "Lokasi tidak ditemukan"
+
+}
 
 })
 
 }
 
-// ================= STATUS ABSENSI =================
 
-function cekStatusAbsensi(tipe){
+
+// ================= CEK STATUS JAM =================
+
+function getStatus(){
 
 let now = new Date()
 
-let day = now.getDay() // 5 = Jumat
+let day = now.getDay()
 
 let jam = now.getHours()
 let menit = now.getMinutes()
 
 let waktu = jam*60 + menit
 
-// ================= ABSEN MASUK =================
 
-if(tipe == "masuk"){
 
-// ===== JUMAT =====
-if(day == 5){
+// ===== MASUK =====
 
-let mulai = 6*60 + 30 // 06:30
-let batas = 7*60      // 07:00
+if(currentType=="masuk"){
 
-if(waktu >= mulai && waktu <= batas){
-return "Hadir"
-}
+// Jumat
+if(day==5){
 
-if(waktu > batas){
-return "Terlambat"
-}
+if(waktu>=390 && waktu<=420) return "Hadir"
+if(waktu>420) return "Terlambat"
 
 }
 
-// ===== HARI BIASA =====
+// Hari biasa
 else{
 
-let mulai = 7*60      // 07:00
-let batas = 7*60 + 30 // 07:30
-
-if(waktu >= mulai && waktu <= batas){
-return "Hadir"
-}
-
-if(waktu > batas){
-return "Terlambat"
-}
+if(waktu>=420 && waktu<=450) return "Hadir"
+if(waktu>450) return "Terlambat"
 
 }
 
 }
 
-// ================= ABSEN PULANG =================
 
-if(tipe == "pulang"){
 
-let mulai = 15*60 + 30 // 15:30
-let batas = 17*60 + 30 // 17:30
+// ===== PULANG =====
 
-if(waktu >= mulai && waktu <= batas){
-return "Pulang"
-}
+if(currentType=="pulang"){
 
-if(waktu > batas){
-return "Ditolak"
-}
+if(waktu>=930 && waktu<=1050) return "Pulang"
+
+if(waktu>1050) return "Tidak tercatat"
 
 }
 
@@ -210,56 +234,150 @@ return "-"
 
 }
 
-// ================= KIRIM ABSENSI =================
 
-function kirimAbsensi(tipe){
 
-if(!foto){
-alert("Ambil foto terlebih dahulu")
+// ================= SUBMIT ABSENSI =================
+
+function submitAbsensi(){
+
+if(!photo){
+alert("Ambil foto dulu")
 return
 }
 
-let status = cekStatusAbsensi(tipe)
+let employeeSelect = document.getElementById("employeeSelect")
 
-if(status == "Ditolak"){
-alert("Jam absensi sudah lewat")
-return
-}
+let nama = employeeSelect.options[employeeSelect.selectedIndex].text
 
 let now = new Date()
 
 let tanggal = now.toLocaleDateString("id-ID")
+
 let jam = now.toLocaleTimeString("id-ID")
 
+let status = getStatus()
+
+if(status=="Tidak tercatat"){
+alert("Jam pulang sudah lewat batas")
+return
+}
+
+
+
 let data = {
+nama:nama,
 tanggal:tanggal,
 jam:jam,
 status:status,
-foto:foto,
-desa:desaInput.value,
-kecamatan:kecamatanInput.value,
-kota:kotaInput.value
+lokasi:lokasiText,
+foto:photo
 }
+
+
 
 let list = JSON.parse(localStorage.getItem("absensi") || "[]")
 
 list.push(data)
 
-localStorage.setItem("absensi",JSON.stringify(list))
+localStorage.setItem("absensi", JSON.stringify(list))
+
+
 
 alert("Absensi berhasil")
 
-console.log(data)
+cancelAbsensi()
 
 }
 
-// ================= AUTO LOAD =================
 
-window.onload = function(){
 
-startCamera()
+// ================= CANCEL =================
 
-ambilGPS()
+function cancelAbsensi(){
+
+showPage("dashboard")
+
+if(stream){
+stream.getTracks().forEach(t=>t.stop())
+}
+
+photo = null
+
+}
+
+
+
+// ================= ADMIN =================
+
+function adminLogin(){
+
+let pass = document.getElementById("adminPass").value
+
+if(pass == "admin123"){
+
+document.getElementById("adminPanel").classList.remove("hidden")
+
+loadAdmin()
+
+}else{
+
+alert("Password salah")
+
+}
+
+}
+
+
+
+function loadAdmin(){
+
+let body = document.getElementById("adminTableBody")
+
+body.innerHTML = ""
+
+let list = JSON.parse(localStorage.getItem("absensi") || "[]")
+
+list.forEach(d=>{
+
+let tr = document.createElement("tr")
+
+tr.innerHTML = `
+<td class="border p-2">${d.nama}</td>
+<td class="border p-2">${d.tanggal}</td>
+<td class="border p-2">${d.jam}</td>
+<td class="border p-2">${d.status}</td>
+<td class="border p-2"><img src="${d.foto}" class="photo-thumb"></td>
+`
+
+body.appendChild(tr)
+
+})
+
+}
+
+
+
+// ================= DOWNLOAD CSV =================
+
+function downloadCSV(){
+
+let list = JSON.parse(localStorage.getItem("absensi") || "[]")
+
+let csv = "Nama,Tanggal,Jam,Status,Lokasi\n"
+
+list.forEach(d=>{
+csv += `${d.nama},${d.tanggal},${d.jam},${d.status},${d.lokasi}\n`
+})
+
+let blob = new Blob([csv])
+
+let a = document.createElement("a")
+
+a.href = URL.createObjectURL(blob)
+
+a.download = "absensi.csv"
+
+a.click()
 
 }
 ```
