@@ -317,6 +317,193 @@
     let adminLoggedIn = false;
     let githubToken = '';
     let gistId = '';
+   /* ===============================
+   DATABASE ENGINE (GitHub Gist)
+================================ */
+
+async function loadFromGist() {
+
+  if (!githubToken || !gistId) {
+    console.log("GitHub belum dikonfigurasi");
+    return [];
+  }
+
+  try {
+
+    const response = await fetch(
+      `https://api.github.com/gists/${gistId}`,
+      {
+        headers: {
+          Authorization: `token ${githubToken}`,
+          Accept: "application/vnd.github.v3+json"
+        }
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Gagal mengambil Gist", response.status);
+      return [];
+    }
+
+    const gist = await response.json();
+
+    const content = gist.files["absensi-data.json"].content;
+
+    const json = JSON.parse(content);
+
+    return json.data || [];
+
+  } catch (e) {
+
+    console.error("Error load Gist", e);
+
+    return [];
+  }
+
+}
+
+
+async function saveToGist(records) {
+
+  try {
+
+    const body = {
+      files: {
+        "absensi-data.json": {
+          content: JSON.stringify({
+            last_sync: new Date().toISOString(),
+            total_records: records.length,
+            perusahaan: "BPBD KAB. TRENGGALEK",
+            data: records
+          }, null, 2)
+        }
+      }
+    };
+
+    const response = await fetch(
+      `https://api.github.com/gists/${gistId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `token ${githubToken}`,
+          "Content-Type": "application/json",
+          Accept: "application/vnd.github.v3+json"
+        },
+        body: JSON.stringify(body)
+      }
+    );
+
+    return response.ok;
+
+  } catch (e) {
+
+    console.error("Error save Gist", e);
+
+    return false;
+  }
+
+}
+
+
+
+/* ===============================
+   DATA SDK (GLOBAL)
+================================ */
+
+window.dataSdk = {
+
+  records: [],
+
+  async init(handler) {
+
+    const data = await loadFromGist();
+
+    this.records = data || [];
+
+    handler.onDataChanged(this.records);
+
+    return { isOk: true };
+  },
+
+  async create(record) {
+
+    const records = await loadFromGist();
+
+    const exists = records.find(r =>
+      r.nama === record.nama &&
+      r.tanggal === record.tanggal &&
+      r.tipe === record.tipe
+    );
+
+    if (exists) {
+
+      alert("Anda sudah melakukan absensi ini hari ini");
+
+      return { isOk: false };
+    }
+
+    record.__backendId =
+      Date.now().toString() +
+      Math.random().toString(36).substr(2, 9);
+
+    records.push(record);
+
+    const ok = await saveToGist(records);
+
+    if (ok) {
+
+      this.records = records;
+
+      return { isOk: true };
+
+    }
+
+    return { isOk: false };
+  },
+
+  async delete(record) {
+
+    const records = await loadFromGist();
+
+    const filtered =
+      records.filter(r => r.__backendId !== record.__backendId);
+
+    const ok = await saveToGist(filtered);
+
+    if (ok) {
+
+      this.records = filtered;
+
+      return { isOk: true };
+
+    }
+
+    return { isOk: false };
+  }
+
+};
+
+
+
+/* ===============================
+   AUTO REFRESH ADMIN
+================================ */
+
+setInterval(async () => {
+
+  if (!githubToken || !gistId) return;
+
+  const data = await loadFromGist();
+
+  if (data) {
+
+    allRecords = data;
+
+    renderRecords();
+
+  }
+
+}, 5000);
     let allGistRecords = [];
     let currentTab = 'today';
 
