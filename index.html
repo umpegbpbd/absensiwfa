@@ -103,8 +103,7 @@
     <div class="modal-overlay absolute inset-0" onclick="closeAdminLogin()"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 w-[85%] max-w-sm z-10 slide-up">
      <div class="text-center mb-6">
-      <div class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-3">
-       <i data-lucide="shield" class="w-7 h-7 text-brand-600"></i>
+      <div class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-3"><i data-lucide="shield" class="w-7 h-7 text-brand-600"></i>
       </div><!-- Settings Modal GitHub Gist -->
       <div id="settings-modal" class="fixed inset-0 z-50 hidden">
        <div class="modal-overlay absolute inset-0" onclick="closeSettingsModal()"></div>
@@ -157,22 +156,18 @@
            <li>Jika sukses, klik <strong>"Simpan"</strong></li>
           </ol>
          </div>
-         <div class="bg-emerald-100/50 border border-emerald-200 rounded px-2 py-1.5 text-emerald-800 text-[10px]">
-          <strong>✅ Hasil:</strong> Setiap absensi akan otomatis tersimpan di GitHub Gist Anda!
+         <div class="bg-emerald-100/50 border border-emerald-200 rounded px-2 py-1.5 text-emerald-800 text-[10px]"><strong>✅ Hasil:</strong> Setiap absensi akan otomatis tersimpan di GitHub Gist Anda!
          </div>
         </div>
         <div class="space-y-4">
-         <div>
-          <label for="settings-github-token" class="block text-sm font-600 text-gray-700 mb-2"> <i data-lucide="key" class="w-4 h-4 inline mr-1"></i>GitHub Personal Access Token </label> <input id="settings-github-token" type="password" placeholder="ghp_xxxxxxxxxxxxx" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm font-mono" value="">
+         <div><label for="settings-github-token" class="block text-sm font-600 text-gray-700 mb-2"> <i data-lucide="key" class="w-4 h-4 inline mr-1"></i>GitHub Personal Access Token </label> <input id="settings-github-token" type="password" placeholder="ghp_xxxxxxxxxxxxx" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm font-mono" value="">
           <p class="text-xs text-gray-500 mt-1">🔐 Token disimpan lokal, tidak dikirim ke server</p>
          </div>
-         <div>
-          <label for="settings-gist-id" class="block text-sm font-600 text-gray-700 mb-2"> <i data-lucide="hash" class="w-4 h-4 inline mr-1"></i>Gist ID Anda </label> <input id="settings-gist-id" type="text" placeholder="3247ab1add8df046e300d72c20383c7d" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm font-mono" value="3247ab1add8df046e300d72c20383c7d">
+         <div><label for="settings-gist-id" class="block text-sm font-600 text-gray-700 mb-2"> <i data-lucide="hash" class="w-4 h-4 inline mr-1"></i>Gist ID Anda </label> <input id="settings-gist-id" type="text" placeholder="3247ab1add8df046e300d72c20383c7d" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm font-mono" value="3247ab1add8df046e300d72c20383c7d">
           <p class="text-xs text-gray-500 mt-1">📎 Gist ID default sudah diisi</p>
          </div>
          <div id="settings-status" class="hidden p-3 rounded-lg text-sm font-500"></div>
-         <div class="flex gap-2">
-          <button onclick="testGistConnection()" class="flex-1 py-2.5 rounded-lg bg-brand-100 text-brand-600 font-600 hover:bg-brand-200 transition text-sm flex items-center justify-center gap-1.5"> <i data-lucide="wifi" class="w-4 h-4"></i> Test Koneksi </button> <button onclick="saveGistSettings()" class="flex-1 py-2.5 rounded-lg bg-brand-600 text-white font-600 hover:bg-brand-700 transition text-sm flex items-center justify-center gap-1.5"> <i data-lucide="save" class="w-4 h-4"></i> Simpan </button>
+         <div class="flex gap-2"><button onclick="testGistConnection()" class="flex-1 py-2.5 rounded-lg bg-brand-100 text-brand-600 font-600 hover:bg-brand-200 transition text-sm flex items-center justify-center gap-1.5"> <i data-lucide="wifi" class="w-4 h-4"></i> Test Koneksi </button> <button onclick="saveGistSettings()" class="flex-1 py-2.5 rounded-lg bg-brand-600 text-white font-600 hover:bg-brand-700 transition text-sm flex items-center justify-center gap-1.5"> <i data-lucide="save" class="w-4 h-4"></i> Simpan </button>
          </div>
         </div>
        </div>
@@ -181,20 +176,25 @@
       <p class="text-xs text-gray-500 mt-1">Masukkan kredensial admin</p>
      </div>
      <div class="space-y-3 mb-4">
-      <div><label for="admin-username-input" class="block text-sm font-600 text-gray-700 mb-1.5">Username</label> <input id="admin-username-input" type="text" placeholder="admin" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm">
+      <div>
+       <label for="admin-username-input" class="block text-sm font-600 text-gray-700 mb-1.5">Username</label> <input id="admin-username-input" type="text" placeholder="admin" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm">
       </div>
-      <div><label for="admin-password-input" class="block text-sm font-600 text-gray-700 mb-1.5">Password</label> <input id="admin-password-input" type="password" placeholder="••••••" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm">
+      <div>
+       <label for="admin-password-input" class="block text-sm font-600 text-gray-700 mb-1.5">Password</label> <input id="admin-password-input" type="password" placeholder="••••••" class="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-brand-400 focus:ring-2 focus:ring-brand-100 outline-none transition text-sm">
       </div>
       <div id="login-error" class="hidden bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs font-500 text-red-600"></div>
      </div>
-     <div class="flex gap-2"><button onclick="closeAdminLogin()" class="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-600 hover:bg-gray-200 transition text-sm">Batal</button> <button onclick="validateAdminLogin()" class="flex-1 py-2.5 rounded-lg bg-brand-600 text-white font-600 hover:bg-brand-700 transition text-sm flex items-center justify-center gap-1.5"><i data-lucide="log-in" class="w-4 h-4"></i> Login </button>
+     <div class="flex gap-2">
+      <button onclick="closeAdminLogin()" class="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 font-600 hover:bg-gray-200 transition text-sm">Batal</button> <button onclick="validateAdminLogin()" class="flex-1 py-2.5 rounded-lg bg-brand-600 text-white font-600 hover:bg-brand-700 transition text-sm flex items-center justify-center gap-1.5"><i data-lucide="log-in" class="w-4 h-4"></i> Login </button>
      </div>
     </div>
    </div>
    <main class="w-full max-w-lg mx-auto px-4 py-6 pb-24">
-    <header class="text-center mb-6 slide-up relative"><button onclick="toggleAdminPanel()" class="absolute right-0 top-0 p-2 rounded-lg hover:bg-white/10 transition" title="Menu Admin"><i data-lucide="shield" class="w-5 h-5 text-white"></i></button>
+    <header class="text-center mb-6 slide-up relative">
+     <button onclick="toggleAdminPanel()" class="absolute right-0 top-0 p-2 rounded-lg hover:bg-white/10 transition" title="Menu Admin"><i data-lucide="shield" class="w-5 h-5 text-white"></i></button>
      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm mb-3">
-      <svg width="32" height="32" viewbox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 4C7.45 4 7 4.45 7 5V12C7 18.6 11.2 24.4 16 26.8C20.8 24.4 25 18.6 25 12V5C25 4.45 24.55 4 24 4H8Z" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /> <path d="M14 17L16.5 19.5L21.5 14.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <svg width="32" height="32" viewbox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+       <path d="M8 4C7.45 4 7 4.45 7 5V12C7 18.6 11.2 24.4 16 26.8C20.8 24.4 25 18.6 25 12V5C25 4.45 24.55 4 24 4H8Z" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /> <path d="M14 17L16.5 19.5L21.5 14.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
      </div>
      <h1 id="el-app-title" class="text-2xl font-800 text-white tracking-tight">Absensi WFA</h1>
@@ -202,8 +202,7 @@
     </header>
     <div class="glass-card rounded-2xl p-5 mb-5 slide-up" style="animation-delay: 0.05s;">
      <div class="flex items-center gap-3 mb-3">
-      <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center">
-       <i data-lucide="clock" class="w-5 h-5 text-brand-600"></i>
+      <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center"><i data-lucide="clock" class="w-5 h-5 text-brand-600"></i>
       </div>
       <div>
        <p id="current-date" class="text-sm text-gray-500 font-500">Memuat...</p>
@@ -217,20 +216,19 @@
       Memuat status...
      </div>
     </div>
-    <div class="glass-card rounded-2xl p-5 mb-5 slide-up" style="animation-delay: 0.1s;"><label for="select-nama" class="block text-sm font-600 text-gray-700 mb-2"><i data-lucide="user" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> Pilih Nama</label> <select id="select-nama" class="w-full px-4 py-3 rounded-xl border-2 border-brand-100 focus:border-brand-400 focus:ring-2 focus:ring-brand-200 outline-none transition text-gray-800 font-500 text-base bg-white"> <option value="">-- Pilih Nama --</option> <option>Drs.STEFANUS TRIADI ATMONO, M.Si.</option> <option>Drs. AGUNG WIDODO</option> <option>DWIANA HANDAYANI,SE</option> <option>EDY PURWANTO, SE</option> <option>Bakti Dwi Prasetyo, S.T., M.T.</option> <option>SUDARSONO</option> <option>ANIKMATUL KHOIRIYAH, S.M.</option> <option>RENY YANTI, S.Pd</option> <option>RIZAL RIZKIANTO, A.Md</option> <option>SUJANTORO</option> <option>WAWAN PURWANTO</option> <option>Abdurrohman Malik Ibrahim, S.Psi.</option> <option>Khoirul Anam A.Md</option> <option>PRABOWO</option> <option>TONI MURTONO, A.Md</option> <option>HARI MUSTAPA</option> <option>MUHAMAD CHOLIK</option> <option>Imam Basori, SE</option> <option>DEDY KURNIAWAN, S.T.</option> <option>TRI EFENDI</option> <option>SUGENG HARYADI, S.T</option> <option>MISRALI, S.E</option> <option>LUHUR NAWANG SUKMA KUSUMA, S.E.</option> <option>DEDY PEBRI YUSTISIANTO PRATAMA, S.Stat</option> <option>DWI BAROROH BARIDAH, S.Psi</option> <option>DIAN LUPI YUSTIKASARI, A.Md.</option> <option>ARDEA WIDIANTO ARI HIDAYAT, S.Psi.</option> <option>HADI PURWANTO</option> <option>ARDY DESTA EKA PUTRA</option> <option>AGUS SUGHULIN</option> <option>ADI MUJIPRASETYO</option> <option>SARI MUMANTI</option> <option>IDA APRILIYA</option> <option>ALVIN WAHYU DWISAPUTRA</option> <option>AFRISKA PRASETYA</option> <option>GIGIH HIRTAGARA</option> <option>IMAM MURODI</option> <option>GUSTA MULTI PRATAMA</option> <option>YONA PRAMISTA MAHARDIKA</option> <option>KURNIA RIAN RACHMASARI</option> <option>YOHANTAR LUTFI ARISANDHI</option> <option>YENI DWI LESTARI</option> <option>AYU FERISTARINI</option> <option>SITI ROBIAH</option> <option>DWI MARTASARININGSIH</option> <option>ANDRIK PRAYUGO</option> <option>NIKO KURNIAWAN</option> <option>PRENDICHANATA</option> <option>HINN BONKE SAMALIWU</option> </select>
+    <div class="glass-card rounded-2xl p-5 mb-5 slide-up" style="animation-delay: 0.1s;">
+     <label for="select-nama" class="block text-sm font-600 text-gray-700 mb-2"><i data-lucide="user" class="w-4 h-4 inline-block mr-1 -mt-0.5"></i> Pilih Nama</label> <select id="select-nama" class="w-full px-4 py-3 rounded-xl border-2 border-brand-100 focus:border-brand-400 focus:ring-2 focus:ring-brand-200 outline-none transition text-gray-800 font-500 text-base bg-white"> <option value="">-- Pilih Nama --</option> <option>Drs.STEFANUS TRIADI ATMONO, M.Si.</option> <option>Drs. AGUNG WIDODO</option> <option>DWIANA HANDAYANI,SE</option> <option>EDY PURWANTO, SE</option> <option>Bakti Dwi Prasetyo, S.T., M.T.</option> <option>SUDARSONO</option> <option>ANIKMATUL KHOIRIYAH, S.M.</option> <option>RENY YANTI, S.Pd</option> <option>RIZAL RIZKIANTO, A.Md</option> <option>SUJANTORO</option> <option>WAWAN PURWANTO</option> <option>Abdurrohman Malik Ibrahim, S.Psi.</option> <option>Khoirul Anam A.Md</option> <option>PRABOWO</option> <option>TONI MURTONO, A.Md</option> <option>HARI MUSTAPA</option> <option>MUHAMAD CHOLIK</option> <option>Imam Basori, SE</option> <option>DEDY KURNIAWAN, S.T.</option> <option>TRI EFENDI</option> <option>SUGENG HARYADI, S.T</option> <option>MISRALI, S.E</option> <option>LUHUR NAWANG SUKMA KUSUMA, S.E.</option> <option>DEDY PEBRI YUSTISIANTO PRATAMA, S.Stat</option> <option>DWI BAROROH BARIDAH, S.Psi</option> <option>DIAN LUPI YUSTIKASARI, A.Md.</option> <option>ARDEA WIDIANTO ARI HIDAYAT, S.Psi.</option> <option>HADI PURWANTO</option> <option>ARDY DESTA EKA PUTRA</option> <option>AGUS SUGHULIN</option> <option>ADI MUJIPRASETYO</option> <option>SARI MUMANTI</option> <option>IDA APRILIYA</option> <option>ALVIN WAHYU DWISAPUTRA</option> <option>AFRISKA PRASETYA</option> <option>GIGIH HIRTAGARA</option> <option>IMAM MURODI</option> <option>GUSTA MULTI PRATAMA</option> <option>YONA PRAMISTA MAHARDIKA</option> <option>KURNIA RIAN RACHMASARI</option> <option>YOHANTAR LUTFI ARISANDHI</option> <option>YENI DWI LESTARI</option> <option>AYU FERISTARINI</option> <option>SITI ROBIAH</option> <option>DWI MARTASARININGSIH</option> <option>ANDRIK PRAYUGO</option> <option>NIKO KURNIAWAN</option> <option>PRENDICHANATA</option> <option>HINN BONKE SAMALIWU</option> </select>
     </div>
-    <div class="grid grid-cols-2 gap-3 mb-5 slide-up" style="animation-delay: 0.15s;"><button id="btn-masuk" onclick="startAbsensi('masuk')" class="btn-absen flex flex-col items-center gap-2 p-5 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 font-700">
-      <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-       <i data-lucide="log-in" class="w-6 h-6"></i>
+    <div class="grid grid-cols-2 gap-3 mb-5 slide-up" style="animation-delay: 0.15s;">
+     <button id="btn-masuk" onclick="startAbsensi('masuk')" class="btn-absen flex flex-col items-center gap-2 p-5 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 font-700">
+      <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i data-lucide="log-in" class="w-6 h-6"></i>
       </div><span id="el-btn-masuk" class="text-sm">Absen Masuk</span> <span class="text-[10px] opacity-75">07:00 - 07:30</span> </button> <button id="btn-pulang" onclick="startAbsensi('pulang')" class="btn-absen flex flex-col items-center gap-2 p-5 rounded-2xl bg-gradient-to-br from-indigo-400 to-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 font-700">
-      <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-       <i data-lucide="log-out" class="w-6 h-6"></i>
+      <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center"><i data-lucide="log-out" class="w-6 h-6"></i>
       </div><span id="el-btn-pulang" class="text-sm">Absen Pulang</span> <span class="text-[10px] opacity-75">15:30 - 17:30</span> </button>
     </div>
     <div id="gps-info" class="glass-card rounded-2xl p-4 mb-5 slide-up" style="animation-delay: 0.2s;">
      <div class="flex items-center gap-3">
-      <div id="gps-icon-wrap" class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-       <i data-lucide="map-pin" class="w-5 h-5 text-gray-400"></i>
+      <div id="gps-icon-wrap" class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center"><i data-lucide="map-pin" class="w-5 h-5 text-gray-400"></i>
       </div>
       <div class="flex-1 min-w-0">
        <p class="text-xs font-600 text-gray-500">Lokasi GPS</p>
@@ -242,11 +240,11 @@
      <div class="flex items-center justify-between mb-3">
       <h2 class="text-white font-700 text-lg">Riwayat Absensi</h2><span id="record-count" class="text-brand-200 text-xs font-500">0 data</span>
      </div><!-- Tab Filter -->
-     <div class="flex gap-2 mb-4"><button id="tab-today" onclick="switchTab('today')" class="flex-1 py-2.5 px-3 rounded-lg font-600 text-sm transition" style="background: rgba(255,255,255,0.25); color: white; border: 2px solid white;">📅 Hari Ini</button> <button id="tab-all" onclick="switchTab('all')" class="flex-1 py-2.5 px-3 rounded-lg font-600 text-sm transition" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 2px solid transparent;">📊 Semua Data</button>
+     <div class="flex gap-2 mb-4">
+      <button id="tab-today" onclick="switchTab('today')" class="flex-1 py-2.5 px-3 rounded-lg font-600 text-sm transition" style="background: rgba(255,255,255,0.25); color: white; border: 2px solid white;">📅 Hari Ini</button> <button id="tab-all" onclick="switchTab('all')" class="flex-1 py-2.5 px-3 rounded-lg font-600 text-sm transition" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 2px solid transparent;">📊 Semua Data</button>
      </div>
      <div id="records-container" class="space-y-2"></div>
-     <div id="empty-state" class="glass-card rounded-2xl p-8 text-center">
-      <i data-lucide="clipboard-list" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
+     <div id="empty-state" class="glass-card rounded-2xl p-8 text-center"><i data-lucide="clipboard-list" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i>
       <p class="text-gray-400 text-sm font-500">Belum ada absensi</p>
      </div>
     </div>
@@ -256,7 +254,8 @@
     <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 max-h-[90%] overflow-auto slide-up z-10">
      <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
      <h3 class="text-lg font-700 text-gray-800 mb-5 text-center flex items-center justify-center gap-2"><i data-lucide="shield" class="w-5 h-5"></i> Menu Admin</h3>
-     <div class="space-y-3"><button onclick="viewActivityReport()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="activity" class="w-5 h-5"></i> Lihat Laporan Aktivitas</button> <button onclick="downloadCSV()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="download" class="w-5 h-5"></i> Download Rekap Absensi (CSV)</button> <button onclick="downloadJSON()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="file-json" class="w-5 h-5"></i> Download Data Lengkap (JSON)</button> <button onclick="viewPhotoGallery()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="image" class="w-5 h-5"></i> Lihat Galeri Foto Absensi</button> <button onclick="viewLocationMap()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="map-pin" class="w-5 h-5"></i> Lihat Peta Lokasi GPS</button> <button onclick="openSettingsModal(); closeAdminPanel();" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="settings" class="w-5 h-5"></i> ⚙️ Pengaturan GitHub Gist</button> <button onclick="closeAdminPanel()" class="w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-600 hover:bg-gray-200 transition" type="button">Tutup</button>
+     <div class="space-y-3">
+      <button onclick="viewActivityReport()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="activity" class="w-5 h-5"></i> Lihat Laporan Aktivitas</button> <button onclick="downloadCSV()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="download" class="w-5 h-5"></i> Download Rekap Absensi (CSV)</button> <button onclick="downloadJSON()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="file-json" class="w-5 h-5"></i> Download Data Lengkap (JSON)</button> <button onclick="viewPhotoGallery()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="image" class="w-5 h-5"></i> Lihat Galeri Foto Absensi</button> <button onclick="viewLocationMap()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition" type="button"><i data-lucide="map-pin" class="w-5 h-5"></i> Lihat Peta Lokasi GPS</button> <button type="button" onclick="closeAdminPanel(); openSettingsModal();" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-600 flex items-center justify-center gap-2 hover:shadow-lg transition"><i data-lucide="settings" class="w-5 h-5"></i> ⚙️ Pengaturan GitHub Gist</button> <button onclick="closeAdminPanel()" class="w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-600 hover:bg-gray-200 transition" type="button">Tutup</button>
      </div>
     </div>
    </div><!-- Photo Gallery Modal -->
@@ -285,15 +284,16 @@
       <video id="camera-video" autoplay playsinline class="w-full h-full object-cover"></video>
       <canvas id="camera-canvas" class="hidden"></canvas><img id="camera-preview" class="absolute inset-0 w-full h-full object-cover hidden">
       <div id="camera-loading" class="absolute inset-0 flex items-center justify-center bg-gray-900/80">
-       <div class="text-center text-white">
-        <i data-lucide="camera" class="w-10 h-10 mx-auto mb-2 animate-pulse"></i>
+       <div class="text-center text-white"><i data-lucide="camera" class="w-10 h-10 mx-auto mb-2 animate-pulse"></i>
         <p class="text-sm">Mengaktifkan kamera...</p>
        </div>
       </div>
      </div>
-     <div id="camera-actions" class="flex gap-3"><button onclick="capturePhoto()" id="btn-capture" class="flex-1 py-3.5 rounded-xl bg-brand-600 text-white font-600 flex items-center justify-center gap-2 hover:bg-brand-700 transition"><i data-lucide="camera" class="w-5 h-5"></i> Ambil Foto</button> <button onclick="closeCameraModal()" class="px-5 py-3.5 rounded-xl bg-gray-100 text-gray-600 font-600 hover:bg-gray-200 transition">Batal</button>
+     <div id="camera-actions" class="flex gap-3">
+      <button onclick="capturePhoto()" id="btn-capture" class="flex-1 py-3.5 rounded-xl bg-brand-600 text-white font-600 flex items-center justify-center gap-2 hover:bg-brand-700 transition"><i data-lucide="camera" class="w-5 h-5"></i> Ambil Foto</button> <button onclick="closeCameraModal()" class="px-5 py-3.5 rounded-xl bg-gray-100 text-gray-600 font-600 hover:bg-gray-200 transition">Batal</button>
      </div>
-     <div id="confirm-actions" class="hidden gap-3"><button onclick="retakePhoto()" class="flex-1 py-3.5 rounded-xl bg-gray-100 text-gray-700 font-600 flex items-center justify-center gap-2 hover:bg-gray-200 transition"><i data-lucide="refresh-cw" class="w-5 h-5"></i> Ulangi</button> <button onclick="confirmAbsensi()" id="btn-confirm" class="flex-1 py-3.5 rounded-xl bg-emerald-500 text-white font-600 flex items-center justify-center gap-2 hover:bg-emerald-600 transition"><i data-lucide="check" class="w-5 h-5"></i> Konfirmasi</button>
+     <div id="confirm-actions" class="hidden gap-3">
+      <button onclick="retakePhoto()" class="flex-1 py-3.5 rounded-xl bg-gray-100 text-gray-700 font-600 flex items-center justify-center gap-2 hover:bg-gray-200 transition"><i data-lucide="refresh-cw" class="w-5 h-5"></i> Ulangi</button> <button onclick="confirmAbsensi()" id="btn-confirm" class="flex-1 py-3.5 rounded-xl bg-emerald-500 text-white font-600 flex items-center justify-center gap-2 hover:bg-emerald-600 transition"><i data-lucide="check" class="w-5 h-5"></i> Konfirmasi</button>
      </div>
     </div>
    </div><!-- Delete Confirm Modal -->
@@ -301,13 +301,13 @@
     <div class="modal-overlay absolute inset-0" onclick="closeDeleteModal()"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 w-[85%] max-w-sm z-10 slide-up">
      <div class="text-center mb-4">
-      <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
-       <i data-lucide="trash-2" class="w-6 h-6 text-red-500"></i>
+      <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3"><i data-lucide="trash-2" class="w-6 h-6 text-red-500"></i>
       </div>
       <h3 class="font-700 text-gray-800">Hapus Data Absensi?</h3>
       <p class="text-sm text-gray-500 mt-1">Data yang dihapus tidak bisa dikembalikan</p>
      </div>
-     <div class="flex gap-3"><button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl bg-gray-100 font-600 text-gray-700 hover:bg-gray-200 transition">Batal</button> <button onclick="executeDelete()" id="btn-delete-confirm" class="flex-1 py-3 rounded-xl bg-red-500 font-600 text-white hover:bg-red-600 transition">Hapus</button>
+     <div class="flex gap-3">
+      <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl bg-gray-100 font-600 text-gray-700 hover:bg-gray-200 transition">Batal</button> <button onclick="executeDelete()" id="btn-delete-confirm" class="flex-1 py-3 rounded-xl bg-red-500 font-600 text-white hover:bg-red-600 transition">Hapus</button>
      </div>
     </div>
    </div><!-- Activity Report Modal -->
@@ -316,7 +316,8 @@
     <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 max-h-[90%] overflow-auto slide-up z-10">
      <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4"></div>
      <h3 class="text-lg font-700 text-gray-800 mb-4 flex items-center justify-between"><span><i data-lucide="activity" class="w-5 h-5 inline mr-2"></i>Laporan Aktivitas Semua Waktu</span> <button onclick="closeActivityReport()" class="p-1 hover:bg-gray-100 rounded"><i data-lucide="x" class="w-5 h-5"></i></button></h3>
-     <div class="mb-4 flex gap-2"><input type="text" id="activity-search" placeholder="Cari nama..." class="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-sm" onkeyup="filterActivityReport()"> <button onclick="downloadActivityReport()" class="px-4 py-2 rounded-lg bg-brand-600 text-white font-500 text-sm hover:bg-brand-700 transition flex items-center gap-1"><i data-lucide="download" class="w-4 h-4"></i> Export</button>
+     <div class="mb-4 flex gap-2">
+      <input type="text" id="activity-search" placeholder="Cari nama..." class="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-sm" onkeyup="filterActivityReport()"> <button onclick="downloadActivityReport()" class="px-4 py-2 rounded-lg bg-brand-600 text-white font-500 text-sm hover:bg-brand-700 transition flex items-center gap-1"><i data-lucide="download" class="w-4 h-4"></i> Export</button>
      </div>
      <div id="activity-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
     </div>
@@ -1208,5 +1209,5 @@
 
     lucide.createIcons();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd03af117ad0d23',t:'MTc3MzYyNzExOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd0423ef0aa0d23',t:'MTc3MzYyNzQxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
