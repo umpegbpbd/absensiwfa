@@ -65,16 +65,11 @@ tailwind.config = {
      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm mb-2"><i data-lucide="fingerprint" class="w-5 h-5 text-white"></i>
      </div>
      <h1 class="text-white font-700 text-lg">Absensi</h1>
-    </header><!-- Clock -->
-    <div class="glass-card rounded-lg p-3 mb-3 text-center">
-     <div id="clock-date" class="text-xs font-600 text-primary-700">
-      --
+     <div class="text-white text-xs opacity-90 mt-1" id="clock-display">
+      Loading...
      </div>
-     <div id="clock-time" class="text-2xl font-800 text-primary-900 tracking-tight">
-      00:00:00
-     </div>
-    </div><!-- Tabs -->
-    <div class="flex gap-2 mb-3"><button onclick="switchTab('absensi')" id="tab-absensi" class="flex-1 py-2 rounded-lg text-xs font-600 transition-all tab-active">Absensi</button> <button onclick="switchTab('riwayat')" id="tab-riwayat" class="flex-1 py-2 rounded-lg text-xs font-600 transition-all bg-white/30 text-white">Riwayat</button> <button onclick="switchTab('admin')" id="tab-admin" class="flex-1 py-2 rounded-lg text-xs font-600 transition-all bg-white/30 text-white">Admin</button>
+    </header><!-- Tabs -->
+    <div class="flex gap-2 mb-3"><button onclick="switchTab('absensi')" id="tab-absensi" class="flex-1 py-2 rounded-lg text-xs font-600 transition-all tab-active">Absensi</button> <button onclick="switchTab('admin')" id="tab-admin" class="flex-1 py-2 rounded-lg text-xs font-600 transition-all bg-white/30 text-white">Admin</button>
     </div><!-- ABSENSI TAB -->
     <div id="panel-absensi" class="space-y-3"><!-- Name Selector -->
      <div class="glass-card rounded-lg p-3"><label class="block text-xs font-600 text-primary-800 mb-2">Nama Pegawai</label> <select id="select-nama" class="w-full p-2 rounded-lg border border-primary-200 focus:border-primary-500 focus:outline-none text-xs bg-white text-gray-800"> <option value="">Pilih...</option> </select>
@@ -96,15 +91,6 @@ tailwind.config = {
       </div>
      </div><!-- Buttons -->
      <div class="grid grid-cols-2 gap-2"><button id="btn-masuk" onclick="startAbsensi('masuk')" class="btn-pulse bg-gradient-to-br from-primary-500 to-primary-700 text-white py-3 rounded-lg font-700 text-xs shadow-lg hover:shadow-xl transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed" style="animation:none;"> <i data-lucide="log-in" class="w-4 h-4 mx-auto mb-1"></i> Masuk </button> <button id="btn-pulang" onclick="startAbsensi('pulang')" class="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white py-3 rounded-lg font-700 text-xs shadow-lg hover:shadow-xl transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"> <i data-lucide="log-out" class="w-4 h-4 mx-auto mb-1"></i> Pulang </button>
-     </div>
-    </div><!-- RIWAYAT TAB -->
-    <div id="panel-riwayat" class="hidden space-y-2">
-     <div class="glass-card rounded-lg p-3">
-      <h3 class="font-600 text-primary-800 text-xs mb-2">Riwayat Anda</h3><select id="filter-nama-riwayat" onchange="renderRiwayat()" class="w-full p-2 rounded-lg border border-primary-200 text-xs bg-white text-gray-800 mb-2"> <option value="">Semua</option> </select>
-      <div id="riwayat-list" class="space-y-2 max-h-64 overflow-auto"></div>
-      <div id="riwayat-empty" class="text-center py-6 text-gray-400">
-       <p class="text-xs">Belum ada data</p>
-      </div>
      </div>
     </div><!-- ADMIN TAB -->
     <div id="panel-admin" class="hidden space-y-2">
@@ -252,7 +238,6 @@ window.elementSdk.init({
 const dataHandler = {
   onDataChanged(data) {
     allRecords = data;
-    renderRiwayat();
     if (adminLoggedIn) renderAdminData();
   }
 };
@@ -303,19 +288,21 @@ async function saveToGithub() {
 }
 
 function populateSelects() {
-  const selects = ['select-nama', 'filter-nama-riwayat'];
-  selects.forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    while (sel.options.length > 1) sel.remove(1);
-    EMPLOYEES.forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      sel.appendChild(opt);
-    });
+  const select = document.getElementById('select-nama');
+  if (!select) return;
+  
+  // Clear existing options except the first one
+  while (select.options.length > 1) {
+    select.remove(1);
+  }
+  
+  // Add all employees
+  EMPLOYEES.forEach(name => {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
   });
-  console.log('Dropdown populasi:', EMPLOYEES.length);
 }
 
 function updateClock() {
@@ -325,11 +312,10 @@ function updateClock() {
   
   const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
   const timeStr = padZ(now.getHours()) + ':' + padZ(now.getMinutes()) + ':' + padZ(now.getSeconds());
+  const display = `${dateStr} • ${timeStr}`;
 
-  const dateEl = document.getElementById('clock-date');
-  const timeEl = document.getElementById('clock-time');
-  if (dateEl) dateEl.textContent = dateStr;
-  if (timeEl) timeEl.textContent = timeStr;
+  const displayEl = document.getElementById('clock-display');
+  if (displayEl) displayEl.textContent = display;
   updateStatusInfo(now);
 }
 
@@ -376,7 +362,7 @@ function updateStatusInfo(now) {
 }
 
 function switchTab(tab) {
-  ['absensi','riwayat','admin'].forEach(t => {
+  ['absensi','admin'].forEach(t => {
     const panel = document.getElementById('panel-' + t);
     const tabBtn = document.getElementById('tab-' + t);
     if (t === tab) {
@@ -389,7 +375,6 @@ function switchTab(tab) {
       tabBtn.classList.add('bg-white/30', 'text-white');
     }
   });
-  if (tab === 'riwayat') renderRiwayat();
   lucide.createIcons();
 }
 
@@ -585,7 +570,6 @@ async function saveAbsensi() {
   if (saved) {
     const emoji = status === 'Hadir' ? '✅' : status === 'Terlambat' ? '⚠️' : '🏠';
     showToast(`${emoji} Absen ${pendingAbsensiType} - ${status}`, 'success');
-    renderRiwayat();
   } else {
     allRecords.pop();
     showToast('Gagal menyimpan ke GitHub', 'error');
@@ -596,39 +580,7 @@ function formatDate(d) {
   return padZ(d.getDate()) + '/' + padZ(d.getMonth()+1) + '/' + d.getFullYear();
 }
 
-function renderRiwayat() {
-  const filterNama = document.getElementById('filter-nama-riwayat').value;
-  const list = document.getElementById('riwayat-list');
-  const empty = document.getElementById('riwayat-empty');
-
-  const filtered = allRecords
-    .filter(r => !filterNama || r.nama === filterNama)
-    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-  if (filtered.length === 0) {
-    list.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
-  }
-
-  empty.classList.add('hidden');
-  list.innerHTML = '';
-  filtered.forEach(r => {
-    const statusClass = r.status === 'Hadir' ? 'status-hadir' : r.status === 'Terlambat' ? 'status-terlambat' : 'status-pulang';
-    const card = document.createElement('div');
-    card.className = 'bg-white rounded-lg p-2 shadow-sm border border-gray-100 text-xs';
-    card.innerHTML = `
-      <div class="flex justify-between items-center mb-1">
-       <span class="text-gray-500">${r.tanggal}</span>
-       <span class="${statusClass} text-white px-2 py-1 rounded-full font-600" style="font-size:10px">${r.status}</span>
-      </div>
-      <div class="font-600 text-gray-800">${r.nama}</div>
-      <div class="text-gray-500">⏰ ${r.jam}</div>
-    `;
-    list.appendChild(card);
-  });
-  lucide.createIcons();
-}
+function renderRiwayat() {}
 
 function loginAdmin() {
   const pin = document.getElementById('admin-pin').value;
@@ -720,5 +672,5 @@ setInterval(updateClock, 1000);
 initGPS();
 lucide.createIcons();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd12fa2015ed4f1',t:'MTc3MzYzNzE0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd134096663d4f1',t:'MTc3MzYzNzMyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
