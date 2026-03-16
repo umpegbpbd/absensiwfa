@@ -1,51 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Absensi Karyawan</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Absensi WFA BPBD Trenggalek</title>
 
 <style>
 
 body{
-font-family:Arial;
-background:#f5f8ff;
-text-align:center;
+font-family:Arial, Helvetica, sans-serif;
+background:linear-gradient(135deg,#1f4fc9,#4c8dff);
+height:100vh;
 margin:0;
-padding:0;
-}
-
-.header{
-background:#1a73e8;
+display:flex;
+align-items:center;
+justify-content:center;
 color:white;
-padding:20px;
-font-size:22px;
-font-weight:bold;
 }
 
 .container{
+width:380px;
+max-width:95%;
+}
+
+.card{
+background:white;
+color:#333;
+border-radius:14px;
 padding:20px;
+margin-bottom:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1{
+text-align:center;
+font-size:26px;
+margin-bottom:5px;
+}
+
+.sub{
+text-align:center;
+font-size:14px;
+opacity:0.8;
+margin-bottom:20px;
 }
 
 .clock{
-font-size:26px;
-margin:10px;
+font-size:32px;
 font-weight:bold;
+text-align:center;
 }
 
-button{
-width:90%;
+.date{
+text-align:center;
+margin-bottom:10px;
+}
+
+select{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:16px;
+}
+
+.buttons{
+display:flex;
+gap:10px;
+}
+
+.btn{
+flex:1;
 padding:18px;
-margin:10px;
-font-size:18px;
 border:none;
-border-radius:10px;
-background:#1a73e8;
+border-radius:12px;
+font-size:16px;
 color:white;
 cursor:pointer;
 }
 
-button:hover{
-background:#0f5ed7;
+.masuk{
+background:linear-gradient(135deg,#2ecc71,#27ae60);
+}
+
+.pulang{
+background:linear-gradient(135deg,#7b61ff,#5b4bdb);
 }
 
 video{
@@ -54,8 +94,16 @@ border-radius:10px;
 margin-top:10px;
 }
 
-canvas{
-display:none;
+.status{
+margin-top:10px;
+font-size:14px;
+text-align:center;
+}
+
+.gps{
+font-size:13px;
+margin-top:8px;
+text-align:center;
 }
 
 </style>
@@ -63,230 +111,259 @@ display:none;
 
 <body>
 
-<div class="header">
-Dashboard Absensi
-</div>
-
 <div class="container">
 
-<input id="nama" placeholder="Masukkan Nama" style="width:90%;padding:12px;border-radius:8px;border:1px solid #ccc">
+<h1>Absensi WFA</h1>
+<div class="sub">BPBD KAB. TRENGGALEK</div>
 
-<div class="clock" id="clock"></div>
+<div class="card">
 
-<button onclick="absenMasuk()">Absen Masuk</button>
-<button onclick="absenPulang()">Absen Pulang</button>
-
-<video id="camera" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
-
-<p id="status"></p>
+<div class="date" id="tanggal"></div>
+<div class="clock" id="jam"></div>
+<div style="text-align:center">WIB</div>
 
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+<div class="card">
+
+<select id="nama">
+
+<option value="">-- Pilih Nama --</option>
+
+<option>Drs.STEFANUS TRIADI ATMONO, M.Si.</option>
+<option>Drs. AGUNG WIDODO</option>
+<option>DWIANA HANDAYANI,SE</option>
+<option>EDY PURWANTO, SE</option>
+<option>Bakti Dwi Prasetyo, S.T., M.T.</option>
+<option>SUDARSONO</option>
+<option>ANIKMATUL KHOIRIYAH, S.M.</option>
+<option>RENY YANTI, S.Pd</option>
+<option>RIZAL RIZKIANTO, A.Md</option>
+<option>SUJANTORO</option>
+<option>WAWAN PURWANTO</option>
+<option>Abdurrohman Malik Ibrahim, S.Psi.</option>
+<option>Khoirul Anam A.Md</option>
+<option>PRABOWO</option>
+<option>TONI MURTONO, A.Md</option>
+<option>HARI MUSTAPA</option>
+<option>MUHAMAD CHOLIK</option>
+<option>Imam Basori, SE</option>
+<option>DEDY KURNIAWAN, S.T.</option>
+<option>TRI EFENDI</option>
+<option>SUGENG HARYADI, S.T</option>
+<option>MISRALI, S.E</option>
+<option>LUHUR NAWANG SUKMA KUSUMA, S.E.</option>
+<option>DEDY PEBRI YUSTISIANTO PRATAMA, S.Stat</option>
+<option>DWI BAROROH BARIDAH, S.Psi</option>
+<option>DIAN LUPI YUSTIKASARI, A.Md.</option>
+<option>ARDEA WIDIANTO ARI HIDAYAT, S.Psi.</option>
+<option>HADI PURWANTO</option>
+<option>ARDY DESTA EKA PUTRA</option>
+<option>AGUS SUGHULIN</option>
+<option>ADI MUJIPRASETYO</option>
+<option>SARI MUMANTI</option>
+<option>IDA APRILIYA</option>
+<option>ALVIN WAHYU DWISAPUTRA</option>
+<option>AFRISKA PRASETYA</option>
+<option>GIGIH HIRTAGARA</option>
+<option>IMAM MURODI</option>
+<option>GUSTA MULTI PRATAMA</option>
+<option>YONA PRAMISTA MAHARDIKA</option>
+<option>KURNIA RIAN RACHMASARI</option>
+<option>YOHANTAR LUTFI ARISANDHI</option>
+<option>YENI DWI LESTARI</option>
+<option>AYU FERISTARINI</option>
+<option>SITI ROBIAH</option>
+<option>DWI MARTASARININGSIH</option>
+<option>ANDRIK PRAYUGO</option>
+<option>NIKO KURNIAWAN</option>
+<option>PRENDICHANATA</option>
+<option>HINN BONKE SAMALIWU</option>
+
+</select>
+
+</div>
+
+<div class="buttons">
+
+<button class="btn masuk" onclick="absenMasuk()">Absen Masuk<br>07:00-07:30</button>
+
+<button class="btn pulang" onclick="absenPulang()">Absen Pulang<br>15:30-17:30</button>
+
+</div>
+
+<div class="card">
+
+<video id="camera" autoplay playsinline></video>
+
+<div class="gps" id="gps">Mendeteksi GPS...</div>
+
+<div class="status" id="status"></div>
+
+</div>
+
+</div>
 
 <script>
 
-// CONFIG FIREBASE
-const firebaseConfig = {
-apiKey: "APIKEY",
-authDomain: "PROJECT.firebaseapp.com",
-projectId: "PROJECTID",
-storageBucket: "PROJECT.appspot.com",
-messagingSenderId: "123456",
-appId: "APPID"
-};
-
-firebase.initializeApp(firebaseConfig);
-
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-
-// JAM REALTIME WIB
+let latitude=0
+let longitude=0
 
 function updateClock(){
 
-let now = new Date();
+let now=new Date()
 
-let jam = now.toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta'});
+let options={timeZone:"Asia/Jakarta"}
 
-let tanggal = now.toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta'});
+let time=now.toLocaleTimeString("id-ID",options)
+let date=now.toLocaleDateString("id-ID",options)
 
-document.getElementById("clock").innerHTML = tanggal+"<br>"+jam;
-
-}
-
-setInterval(updateClock,1000);
-
-
-// AKTIFKAN KAMERA
-
-async function startCamera(){
-
-const stream = await navigator.mediaDevices.getUserMedia({
-video:true
-});
-
-document.getElementById("camera").srcObject = stream;
+document.getElementById("jam").innerHTML=time
+document.getElementById("tanggal").innerHTML=date
 
 }
 
-startCamera();
+setInterval(updateClock,1000)
 
 
-// AMBIL FOTO
-
-function takePhoto(){
-
-let video = document.getElementById("camera");
-let canvas = document.getElementById("canvas");
-
-canvas.width = video.videoWidth;
-canvas.height = video.videoHeight;
-
-canvas.getContext("2d").drawImage(video,0,0);
-
-return canvas.toDataURL("image/png");
-
-}
+navigator.mediaDevices.getUserMedia({video:true})
+.then(stream=>{
+document.getElementById("camera").srcObject=stream
+})
 
 
-// AMBIL GPS
+navigator.geolocation.getCurrentPosition(function(pos){
 
-function getLocation(){
+latitude=pos.coords.latitude
+longitude=pos.coords.longitude
 
-return new Promise((resolve,reject)=>{
+document.getElementById("gps").innerHTML="GPS aktif"
 
-navigator.geolocation.getCurrentPosition(
-pos=>resolve(pos),
-err=>reject(err),
-{enableHighAccuracy:true}
+},
+function(){
 
-);
+document.getElementById("gps").innerHTML="Akses lokasi ditolak. Aktifkan GPS."
 
-});
+})
 
-}
+function ambilFoto(){
 
+let video=document.getElementById("camera")
 
-// SIMPAN DATA
+let canvas=document.createElement("canvas")
 
-async function saveData(status){
+canvas.width=video.videoWidth
+canvas.height=video.videoHeight
 
-let nama = document.getElementById("nama").value;
+let ctx=canvas.getContext("2d")
 
-if(nama==""){
-alert("Masukkan nama terlebih dahulu");
-return;
-}
+ctx.drawImage(video,0,0)
 
-try{
-
-let lokasi = await getLocation();
-
-let lat = lokasi.coords.latitude;
-let lng = lokasi.coords.longitude;
-
-let foto = takePhoto();
-
-let now = new Date();
-let jam = now.getHours();
-let menit = now.getMinutes();
-
-let waktu = jam+":"+menit;
-
-await db.collection("absensi").add({
-
-nama:nama,
-tanggal:new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta'}),
-jam:waktu,
-status:status,
-latitude:lat,
-longitude:lng,
-foto:foto
-
-});
-
-document.getElementById("status").innerHTML="Absensi berhasil";
-
-}catch(e){
-
-alert("Aktifkan GPS untuk melakukan absensi");
+return canvas.toDataURL("image/png")
 
 }
-
-}
-
-
-// ABSEN MASUK
 
 function absenMasuk(){
 
-let now = new Date();
+let nama=document.getElementById("nama").value
 
-let jam = now.getHours();
-let menit = now.getMinutes();
+if(nama==""){
 
-let total = jam*60+menit;
-
-let start = 7*60;
-let end = 7*60+30;
-
-if(total < start){
-
-alert("Belum waktunya absensi");
-
-return;
+alert("Pilih nama terlebih dahulu")
+return
 
 }
 
-if(total > end){
+let now=new Date()
 
-saveData("Terlambat");
+let jam=now.getHours()
+let menit=now.getMinutes()
 
-}else{
+let total=jam*60+menit
 
-saveData("Hadir");
+let start=7*60
+let end=7*60+30
+
+if(total<start){
+
+alert("Belum waktunya absensi")
+
+return
 
 }
 
+let status="Hadir"
+
+if(total>end){
+
+status="Terlambat"
+
 }
 
+let foto=ambilFoto()
 
-// ABSEN PULANG
+console.log({
+nama,
+status,
+foto,
+latitude,
+longitude
+})
+
+document.getElementById("status").innerHTML="Absensi masuk tercatat ("+status+")"
+
+alert("Absensi berhasil")
+
+}
 
 function absenPulang(){
 
-let now = new Date();
+let nama=document.getElementById("nama").value
 
-let jam = now.getHours();
-let menit = now.getMinutes();
+if(nama==""){
 
-let total = jam*60+menit;
-
-let start = 15*60+30;
-let end = 17*60+30;
-
-if(total < start){
-
-alert("Belum waktunya absensi pulang");
-
-return;
+alert("Pilih nama terlebih dahulu")
+return
 
 }
 
-if(total > end){
+let now=new Date()
 
-alert("Waktu absensi pulang telah berakhir");
+let jam=now.getHours()
+let menit=now.getMinutes()
 
-return;
+let total=jam*60+menit
+
+let start=15*60+30
+let end=17*60+30
+
+if(total<start){
+
+alert("Belum waktunya absensi pulang")
+return
 
 }
 
-saveData("Pulang");
+if(total>end){
+
+alert("Waktu absensi pulang telah berakhir")
+return
+
+}
+
+let foto=ambilFoto()
+
+console.log({
+nama,
+status:"Pulang",
+foto,
+latitude,
+longitude
+})
+
+document.getElementById("status").innerHTML="Absensi pulang tercatat"
+
+alert("Absensi pulang berhasil")
 
 }
 
