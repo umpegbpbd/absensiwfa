@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="id">
-
 <head>
 
 <meta charset="UTF-8">
@@ -25,12 +24,13 @@ background:#f0f5ff;
 #cameraPreview{
 transform:scaleX(-1);
 border-radius:12px;
+object-fit:cover;
 }
 
 .photo-thumb{
-width:40px;
-height:40px;
-border-radius:8px;
+width:50px;
+height:50px;
+border-radius:10px;
 object-fit:cover;
 }
 
@@ -126,7 +126,7 @@ Ulang
 Mengambil GPS...
 </div>
 
-<button onclick="submitAbsensi()" id="btnSubmitAbsensi" class="w-full bg-blue-700 text-white p-4 rounded-xl mt-4">
+<button onclick="submitAbsensi()" class="w-full bg-blue-700 text-white p-4 rounded-xl mt-4">
 Kirim Absensi
 </button>
 
@@ -172,7 +172,6 @@ Download CSV
 
 </div>
 
-<script src="config.js"></script>
 <script src="employees.js"></script>
 <script src="app.js"></script>
 
