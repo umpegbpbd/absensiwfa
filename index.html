@@ -18,13 +18,28 @@ font-family:'Plus Jakarta Sans',sans-serif;
 background:#f0f5ff;
 }
 
-.page{display:none}
-.page.active{display:block}
+.page{
+display:none;
+}
+
+.page.active{
+display:block;
+}
 
 #cameraPreview{
 transform:scaleX(-1);
 border-radius:12px;
 object-fit:cover;
+width:100%;
+height:256px;
+background:#000;
+}
+
+#capturedPhoto{
+width:100%;
+height:256px;
+object-fit:cover;
+border-radius:12px;
 }
 
 .photo-thumb{
@@ -32,6 +47,7 @@ width:50px;
 height:50px;
 border-radius:10px;
 object-fit:cover;
+cursor:pointer;
 }
 
 </style>
@@ -42,137 +58,171 @@ object-fit:cover;
 
 <div class="max-w-2xl mx-auto p-4">
 
-<div class="bg-blue-900 text-white rounded-xl p-4 flex justify-between">
+<!-- HEADER -->
+<div class="bg-blue-900 text-white rounded-xl p-4 flex justify-between items-center">
 
-<div class="font-bold">Absensi WFA</div>
+<div class="font-bold text-lg">⏱️ Absensi WFA</div>
 
 <div class="space-x-2">
 
-<button onclick="showPage('dashboard')" class="bg-white/20 px-3 py-1 rounded text-sm">
-Dashboard
+<button onclick="showPage('dashboard')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm transition">
+📊 Dashboard
 </button>
 
-<button onclick="showPage('admin')" class="bg-white/20 px-3 py-1 rounded text-sm">
-Admin
+<button onclick="showPage('admin')" class="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm transition">
+🔐 Admin
 </button>
 
 </div>
 
 </div>
 
-<!-- DASHBOARD -->
+<!-- ========== PAGE: DASHBOARD ========== -->
 
 <div id="page-dashboard" class="page active mt-4">
 
-<div class="bg-white rounded-xl p-6 text-center shadow">
+<!-- Clock Section -->
+<div class="bg-white rounded-xl p-6 text-center shadow-md">
 
-<div id="currentDate" class="text-sm text-gray-500"></div>
+<div id="currentDate" class="text-sm text-gray-500 font-medium">Memuat tanggal...</div>
 
-<div id="clockDisplay" class="text-5xl font-bold text-blue-700 mt-2">--:--:--</div>
+<div id="clockDisplay" class="text-6xl font-bold text-blue-700 mt-2 font-mono">00:00:00</div>
 
 </div>
 
-<div class="bg-white rounded-xl p-4 mt-4 shadow">
+<!-- Employee Selection -->
+<div class="bg-white rounded-xl p-4 mt-4 shadow-md">
 
-<label class="font-semibold text-sm">Pilih Pegawai</label>
+<label for="employeeSelect" class="font-semibold text-sm block mb-2">👤 Pilih Pegawai</label>
 
-<select id="employeeSelect" class="w-full border rounded-lg p-3 mt-2">
+<select id="employeeSelect" class="w-full border-2 border-gray-300 rounded-lg p-3 mt-2 focus:border-blue-500 focus:outline-none">
 <option value="">-- Pilih Pegawai --</option>
 </select>
 
 </div>
 
+<!-- Action Buttons -->
 <div class="grid grid-cols-2 gap-3 mt-4">
 
-<button onclick="startAbsensi('masuk')" class="bg-blue-600 text-white p-6 rounded-xl">
-Absen Masuk
+<button onclick="startAbsensi('masuk')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-6 rounded-xl transition transform hover:scale-105">
+✓ Absen Masuk
 </button>
 
-<button onclick="startAbsensi('pulang')" class="bg-green-600 text-white p-6 rounded-xl">
-Absen Pulang
+<button onclick="startAbsensi('pulang')" class="bg-green-600 hover:bg-green-700 text-white font-bold p-6 rounded-xl transition transform hover:scale-105">
+✓ Absen Pulang
 </button>
 
 </div>
 
 </div>
 
-<!-- ABSENSI -->
+<!-- ========== PAGE: ABSENSI ========== -->
 
 <div id="page-absensi" class="page mt-5">
 
-<button onclick="cancelAbsensi()" class="mb-3 border px-3 py-2 rounded">
-Kembali
+<button onclick="cancelAbsensi()" class="mb-3 border-2 border-gray-400 px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium">
+← Kembali
 </button>
 
-<video id="cameraPreview" autoplay playsinline class="w-full h-64 bg-black"></video>
+<!-- Camera Preview -->
+<video id="cameraPreview" autoplay playsinline muted></video>
 
 <canvas id="cameraCanvas" class="hidden"></canvas>
 
-<img id="capturedPhoto" class="hidden w-full h-64 object-cover">
+<img id="capturedPhoto" class="hidden">
 
-<div class="flex gap-2 mt-3">
-
-<button id="btnCapture" onclick="capturePhoto()" class="flex-1 bg-blue-600 text-white p-3 rounded">
-Ambil Foto
-</button>
-
-<button id="btnRetake" onclick="retakePhoto()" class="hidden flex-1 bg-gray-200 p-3 rounded">
-Ulang
-</button>
-
+<!-- Location Info -->
+<div id="locationInfo" class="text-sm text-gray-600 mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+📍 Mendeteksi lokasi...
 </div>
 
-<div id="locationInfo" class="text-sm text-gray-500 mt-3">
-Mengambil GPS...
-</div>
+<!-- Camera Controls -->
+<div class="flex gap-2 mt-4">
 
-<button onclick="submitAbsensi()" class="w-full bg-blue-700 text-white p-4 rounded-xl mt-4">
-Kirim Absensi
+<button id="btnCapture" onclick="capturePhoto()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-lg transition">
+📸 Ambil Foto
+</button>
+
+<button id="btnRetake" onclick="retakePhoto()" class="hidden flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold p-3 rounded-lg transition">
+🔄 Ulang Foto
 </button>
 
 </div>
 
-<!-- ADMIN -->
+<!-- Submit Button -->
+<button onclick="submitAbsensi()" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold p-4 rounded-xl mt-4 transition">
+✓ Kirim Absensi
+</button>
+
+</div>
+
+<!-- ========== PAGE: ADMIN ========== -->
 
 <div id="page-admin" class="page mt-5">
 
-<input id="adminPass" type="password" placeholder="Password Admin" class="border p-3 w-full rounded">
+<div class="bg-white rounded-xl p-6 shadow-md">
 
-<button onclick="adminLogin()" class="bg-blue-700 text-white w-full p-3 rounded mt-2">
+<h2 class="text-2xl font-bold text-blue-900 mb-4">🔐 Admin Panel</h2>
+
+<input id="adminPass" type="password" placeholder="Masukkan Password Admin" class="border-2 border-gray-300 p-3 w-full rounded-lg focus:border-blue-500 focus:outline-none">
+
+<button onclick="adminLogin()" class="bg-blue-700 hover:bg-blue-800 text-white w-full p-3 rounded-lg mt-3 font-bold transition">
 Login
 </button>
 
-<div id="adminPanel" class="hidden mt-5">
+</div>
 
-<button onclick="downloadCSV()" class="bg-green-600 text-white px-3 py-2 rounded text-sm">
-Download CSV
+<!-- Admin Panel (Hidden by default) -->
+<div id="adminPanel" class="hidden mt-5 bg-white rounded-xl p-6 shadow-md">
+
+<h3 class="text-xl font-bold text-gray-800 mb-4">📊 Data Absensi</h3>
+
+<button onclick="downloadCSV()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold mb-4 transition">
+📥 Download CSV
 </button>
 
-<table class="w-full mt-4 text-sm">
+<!-- Table -->
+<div class="overflow-x-auto">
 
-<thead class="bg-blue-900 text-white">
+<table class="w-full text-sm">
+
+<thead class="bg-blue-900 text-white sticky top-0">
 
 <tr>
-<th class="p-2">Nama</th>
-<th class="p-2">Tanggal</th>
-<th class="p-2">Jam</th>
-<th class="p-2">Status</th>
-<th class="p-2">Foto</th>
+<th class="p-3 text-left">Nama</th>
+<th class="p-3 text-left">Tanggal</th>
+<th class="p-3 text-left">Jam</th>
+<th class="p-3 text-left">Status</th>
+<th class="p-3 text-center">Foto</th>
 </tr>
 
 </thead>
 
-<tbody id="adminTableBody"></tbody>
+<tbody id="adminTableBody" class="divide-y divide-gray-200">
+
+<!-- Data will be inserted here -->
+
+</tbody>
 
 </table>
 
 </div>
 
+<button onclick="showPage('dashboard')" class="bg-gray-500 hover:bg-gray-600 text-white w-full p-3 rounded-lg mt-4 font-bold transition">
+← Kembali ke Dashboard
+</button>
+
+</div>
+
 </div>
 
 </div>
 
+<!-- ========== SCRIPTS ========== -->
+<!-- Load employees data FIRST -->
 <script src="employees.js"></script>
+
+<!-- Load main app SECOND -->
 <script src="app.js"></script>
 
 </body>
