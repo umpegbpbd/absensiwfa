@@ -1,43 +1,89 @@
 ```javascript
-// ================= JAM REALTIME (FIXED) =================
+// ================= START SYSTEM =================
 
-function updateClock(){
+window.addEventListener("load", function(){
+
+startClock()
+loadEmployees()
+
+})
+
+
+
+// ================= JAM REALTIME =================
+
+function startClock(){
 
 const clock = document.getElementById("clockDisplay")
 const date = document.getElementById("currentDate")
 
 if(!clock || !date) return
 
+function update(){
+
 const now = new Date()
 
-// format waktu manual supaya stabil
-let h = now.getHours().toString().padStart(2,"0")
-let m = now.getMinutes().toString().padStart(2,"0")
-let s = now.getSeconds().toString().padStart(2,"0")
+const h = String(now.getHours()).padStart(2,"0")
+const m = String(now.getMinutes()).padStart(2,"0")
+const s = String(now.getSeconds()).padStart(2,"0")
 
 clock.textContent = `${h}:${m}:${s}`
 
-// format tanggal
-const tanggal = now.toLocaleDateString("id-ID",{
+date.textContent = now.toLocaleDateString("id-ID",{
 weekday:"long",
 year:"numeric",
 month:"long",
 day:"numeric"
 })
 
-date.textContent = tanggal
+}
+
+update()
+setInterval(update,1000)
 
 }
 
-// jalankan saat halaman siap
-document.addEventListener("DOMContentLoaded",function(){
 
-updateClock()
 
-// update tiap detik
-setInterval(updateClock,1000)
+// ================= LOAD PEGAWAI =================
 
+function loadEmployees(){
+
+const select = document.getElementById("employeeSelect")
+
+if(!select) return
+
+// jika employees.js ada
+if(typeof employees !== "undefined"){
+
+employees.forEach(nama=>{
+let opt=document.createElement("option")
+opt.value=nama
+opt.textContent=nama
+select.appendChild(opt)
 })
+
+return
+}
+
+// fallback jika employees.js tidak ada
+const defaultEmployees=[
+"Ahmad",
+"Budi",
+"Citra",
+"Dewi",
+"Eko"
+]
+
+defaultEmployees.forEach(nama=>{
+let opt=document.createElement("option")
+opt.value=nama
+opt.textContent=nama
+select.appendChild(opt)
+})
+
+}
+
 
 
 // ================= PAGE NAV =================
@@ -48,7 +94,7 @@ document.querySelectorAll(".page").forEach(p=>{
 p.classList.remove("active")
 })
 
-let el = document.getElementById("page-"+page)
+const el=document.getElementById("page-"+page)
 
 if(el) el.classList.add("active")
 
@@ -56,7 +102,7 @@ if(el) el.classList.add("active")
 
 
 
-// ================= VAR GLOBAL =================
+// ================= GLOBAL VAR =================
 
 let currentType=""
 let video=null
@@ -69,16 +115,16 @@ let longitude=0
 let lokasiText=""
 
 
+
 // ================= START ABSENSI =================
 
 function startAbsensi(type){
 
-let select=document.getElementById("employeeSelect")
+const select=document.getElementById("employeeSelect")
 
 if(!select || !select.value){
 
 alert("Pilih pegawai dulu")
-
 return
 
 }
@@ -88,7 +134,6 @@ currentType=type
 showPage("absensi")
 
 startCamera()
-
 getLocation()
 
 }
@@ -121,9 +166,10 @@ alert("Kamera tidak bisa diakses")
 }
 
 
+
 function capturePhoto(){
 
-let ctx=canvas.getContext("2d")
+const ctx=canvas.getContext("2d")
 
 canvas.width=video.videoWidth
 canvas.height=video.videoHeight
@@ -132,7 +178,7 @@ ctx.drawImage(video,0,0)
 
 photo=canvas.toDataURL("image/jpeg")
 
-let img=document.getElementById("capturedPhoto")
+const img=document.getElementById("capturedPhoto")
 
 if(img){
 
@@ -147,6 +193,7 @@ document.getElementById("btnCapture")?.classList.add("hidden")
 document.getElementById("btnRetake")?.classList.remove("hidden")
 
 }
+
 
 
 function retakePhoto(){
@@ -168,7 +215,7 @@ document.getElementById("btnRetake")?.classList.add("hidden")
 
 function getLocation(){
 
-let info=document.getElementById("locationInfo")
+const info=document.getElementById("locationInfo")
 
 if(!navigator.geolocation) return
 
@@ -207,18 +254,18 @@ if(info) info.innerText="Lokasi tidak ditemukan"
 
 
 
-// ================= CEK STATUS JAM =================
+// ================= STATUS ABSEN =================
 
 function getStatus(){
 
-let now=new Date()
+const now=new Date()
 
-let day=now.getDay()
+const day=now.getDay()
 
-let jam=now.getHours()
-let menit=now.getMinutes()
+const jam=now.getHours()
+const menit=now.getMinutes()
 
-let waktu=jam*60+menit
+const waktu=jam*60+menit
 
 
 // MASUK
@@ -263,31 +310,29 @@ function submitAbsensi(){
 if(!photo){
 
 alert("Ambil foto dulu")
-
 return
 
 }
 
-let select=document.getElementById("employeeSelect")
+const select=document.getElementById("employeeSelect")
 
-let nama=select.options[select.selectedIndex].text
+const nama=select.options[select.selectedIndex].text
 
-let now=new Date()
+const now=new Date()
 
-let tanggal=now.toLocaleDateString("id-ID")
-let jam=now.toLocaleTimeString("id-ID")
+const tanggal=now.toLocaleDateString("id-ID")
+const jam=now.toLocaleTimeString("id-ID")
 
-let status=getStatus()
+const status=getStatus()
 
 if(status==="Tidak tercatat"){
 
 alert("Jam pulang sudah lewat batas")
-
 return
 
 }
 
-let data={
+const data={
 nama:nama,
 tanggal:tanggal,
 jam:jam,
@@ -332,7 +377,7 @@ photo=null
 
 function adminLogin(){
 
-let pass=document.getElementById("adminPass").value
+const pass=document.getElementById("adminPass").value
 
 if(pass==="admin123"){
 
@@ -349,9 +394,10 @@ alert("Password salah")
 }
 
 
+
 function loadAdmin(){
 
-let body=document.getElementById("adminTableBody")
+const body=document.getElementById("adminTableBody")
 
 body.innerHTML=""
 
