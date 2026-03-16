@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
 *{font-family:'Plus Jakarta Sans',sans-serif;box-sizing:border-box}
@@ -88,47 +87,57 @@ tailwind.config={
 }
 </script>
   <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full bg-surface text-textMain">
-  <div id="app" class="h-full w-full overflow-auto"><!-- NAV BAR -->
+  <div id="app" class="h-full w-full overflow-auto">
+   <!-- NAV BAR -->
    <nav id="navbar" class="sticky top-0 z-50 bg-primary shadow-lg shadow-blue-900/20">
     <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
      <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5 text-white"></i>
+      <div class="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center">
+       <i data-lucide="clipboard-check" class="w-5 h-5 text-white"></i>
       </div>
       <div>
        <h1 id="navTitle" class="text-white font-bold text-base leading-tight">Absensi Karyawan</h1>
        <p id="navOrg" class="text-blue-200 text-xs font-medium">Sistem Kehadiran</p>
       </div>
      </div>
-     <div class="flex items-center gap-2"><button id="btnNavDashboard" onclick="showPage('dashboard')" class="btn-press px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition"> <i data-lucide="home" class="w-4 h-4 inline -mt-0.5"></i> </button> <button id="btnNavAdmin" onclick="showPage('admin-login')" class="btn-press px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition"> <i data-lucide="shield" class="w-4 h-4 inline -mt-0.5"></i> </button>
+     <div class="flex items-center gap-2">
+      <button id="btnNavDashboard" onclick="showPage('dashboard')" class="btn-press px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition"> <i data-lucide="home" class="w-4 h-4 inline -mt-0.5"></i> </button> <button id="btnNavAdmin" onclick="showPage('admin-login')" class="btn-press px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition"> <i data-lucide="shield" class="w-4 h-4 inline -mt-0.5"></i> </button>
      </div>
     </div>
    </nav><!-- ===================== DASHBOARD PAGE ===================== -->
-   <div id="page-dashboard" class="page active max-w-2xl mx-auto px-4 py-6"><!-- Clock Card -->
+   <div id="page-dashboard" class="page active max-w-2xl mx-auto px-4 py-6">
+    <!-- Clock Card -->
     <div class="bg-card rounded-2xl shadow-sm border border-blue-100 p-6 text-center mb-5">
-     <div class="inline-flex items-center gap-2 bg-blue-50 text-primaryLight rounded-full px-4 py-1.5 text-xs font-semibold mb-4"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> <span id="currentDate">-</span>
+     <div class="inline-flex items-center gap-2 bg-blue-50 text-primaryLight rounded-full px-4 py-1.5 text-xs font-semibold mb-4">
+      <i data-lucide="calendar" class="w-3.5 h-3.5"></i> <span id="currentDate">-</span>
      </div>
      <div id="clockDisplay" class="text-5xl font-extrabold text-primary tracking-tight pulse-ring inline-block rounded-2xl px-6 py-3">
       --:--:--
      </div>
      <p class="text-textSub text-xs mt-3 font-medium">Waktu Indonesia Barat (WIB)</p>
     </div><!-- Employee Select -->
-    <div class="bg-card rounded-2xl shadow-sm border border-blue-100 p-5 mb-5"><label class="block text-sm font-semibold text-textMain mb-2"> <i data-lucide="user" class="w-4 h-4 inline -mt-0.5 mr-1 text-primaryLight"></i> Pilih Nama Pegawai </label> <select id="employeeSelect" class="w-full bg-surface border border-blue-200 rounded-xl px-4 py-3 text-sm font-medium text-textMain focus:outline-none focus:ring-2 focus:ring-primaryLight focus:border-transparent pr-10"> <option value="">-- Pilih Pegawai --</option> </select>
+    <div class="bg-card rounded-2xl shadow-sm border border-blue-100 p-5 mb-5">
+     <label class="block text-sm font-semibold text-textMain mb-2"> <i data-lucide="user" class="w-4 h-4 inline -mt-0.5 mr-1 text-primaryLight"></i> Pilih Nama Pegawai </label> <select id="employeeSelect" class="w-full bg-surface border border-blue-200 rounded-xl px-4 py-3 text-sm font-medium text-textMain focus:outline-none focus:ring-2 focus:ring-primaryLight focus:border-transparent pr-10"> <option value="">-- Pilih Pegawai --</option> </select>
     </div><!-- Action Buttons -->
-    <div class="grid grid-cols-2 gap-4 mb-5"><button onclick="startAbsensi('masuk')" class="btn-press bg-gradient-to-br from-primaryLight to-primary hover:from-blue-600 hover:to-blue-900 text-white rounded-2xl p-6 shadow-lg shadow-blue-500/20 transition-all"> <i data-lucide="log-in" class="w-8 h-8 mx-auto mb-2"></i> <span class="block font-bold text-base">Absen Masuk</span> <span class="block text-blue-200 text-xs mt-1">07:00 - 07:30</span> </button> <button onclick="startAbsensi('pulang')" class="btn-press bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-2xl p-6 shadow-lg shadow-emerald-500/20 transition-all"> <i data-lucide="log-out" class="w-8 h-8 mx-auto mb-2"></i> <span class="block font-bold text-base">Absen Pulang</span> <span class="block text-emerald-200 text-xs mt-1">15:30 - 17:30</span> </button>
+    <div class="grid grid-cols-2 gap-4 mb-5">
+     <button onclick="startAbsensi('masuk')" class="btn-press bg-gradient-to-br from-primaryLight to-primary hover:from-blue-600 hover:to-blue-900 text-white rounded-2xl p-6 shadow-lg shadow-blue-500/20 transition-all"> <i data-lucide="log-in" class="w-8 h-8 mx-auto mb-2"></i> <span class="block font-bold text-base">Absen Masuk</span> <span class="block text-blue-200 text-xs mt-1">07:00 - 07:30</span> </button> <button onclick="startAbsensi('pulang')" class="btn-press bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white rounded-2xl p-6 shadow-lg shadow-emerald-500/20 transition-all"> <i data-lucide="log-out" class="w-8 h-8 mx-auto mb-2"></i> <span class="block font-bold text-base">Absen Pulang</span> <span class="block text-emerald-200 text-xs mt-1">15:30 - 17:30</span> </button>
     </div><!-- Info Cards -->
     <div class="grid grid-cols-2 gap-3">
      <div class="bg-card rounded-xl border border-blue-100 p-4">
       <div class="flex items-center gap-2 mb-1">
-       <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="camera" class="w-4 h-4 text-primaryLight"></i>
+       <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+        <i data-lucide="camera" class="w-4 h-4 text-primaryLight"></i>
        </div><span class="text-xs font-semibold text-textMain">Kamera</span>
       </div>
       <p class="text-[11px] text-textSub leading-relaxed">Foto wajib diambil saat absensi</p>
      </div>
      <div class="bg-card rounded-xl border border-blue-100 p-4">
       <div class="flex items-center gap-2 mb-1">
-       <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="map-pin" class="w-4 h-4 text-primaryLight"></i>
+       <div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+        <i data-lucide="map-pin" class="w-4 h-4 text-primaryLight"></i>
        </div><span class="text-xs font-semibold text-textMain">GPS</span>
       </div>
       <p class="text-[11px] text-textSub leading-relaxed">Lokasi otomatis tercatat</p>
@@ -136,7 +145,8 @@ tailwind.config={
     </div>
    </div><!-- ===================== CAMERA / ABSENSI PAGE ===================== -->
    <div id="page-absensi" class="page max-w-2xl mx-auto px-4 py-6">
-    <div class="flex items-center gap-3 mb-5"><button onclick="cancelAbsensi()" class="btn-press w-10 h-10 rounded-xl bg-card border border-blue-100 flex items-center justify-center"> <i data-lucide="arrow-left" class="w-5 h-5 text-textMain"></i> </button>
+    <div class="flex items-center gap-3 mb-5">
+     <button onclick="cancelAbsensi()" class="btn-press w-10 h-10 rounded-xl bg-card border border-blue-100 flex items-center justify-center"> <i data-lucide="arrow-left" class="w-5 h-5 text-textMain"></i> </button>
      <div>
       <h2 id="absensiTitle" class="font-bold text-lg text-textMain">Absen Masuk</h2>
       <p id="absensiEmployee" class="text-xs text-textSub">-</p>
@@ -153,11 +163,13 @@ tailwind.config={
        </div>
       </div>
      </div>
-     <div class="p-4 flex gap-3"><button id="btnCapture" onclick="capturePhoto()" class="btn-press flex-1 bg-primary hover:bg-primaryDark text-white rounded-xl py-3 font-semibold text-sm transition flex items-center justify-center gap-2"> <i data-lucide="camera" class="w-4 h-4"></i> Ambil Foto </button> <button id="btnRetake" onclick="retakePhoto()" class="btn-press hidden flex-1 bg-slate-100 hover:bg-slate-200 text-textMain rounded-xl py-3 font-semibold text-sm transition flex items-center justify-center gap-2"> <i data-lucide="refresh-cw" class="w-4 h-4"></i> Ulang </button>
+     <div class="p-4 flex gap-3">
+      <button id="btnCapture" onclick="capturePhoto()" class="btn-press flex-1 bg-primary hover:bg-primaryDark text-white rounded-xl py-3 font-semibold text-sm transition flex items-center justify-center gap-2"> <i data-lucide="camera" class="w-4 h-4"></i> Ambil Foto </button> <button id="btnRetake" onclick="retakePhoto()" class="btn-press hidden flex-1 bg-slate-100 hover:bg-slate-200 text-textMain rounded-xl py-3 font-semibold text-sm transition flex items-center justify-center gap-2"> <i data-lucide="refresh-cw" class="w-4 h-4"></i> Ulang </button>
      </div>
     </div><!-- Location Info -->
     <div class="bg-card rounded-2xl border border-blue-100 p-4 mb-4">
-     <div class="flex items-center gap-2 mb-3"><i data-lucide="map-pin" class="w-4 h-4 text-primaryLight"></i> <span class="font-semibold text-sm text-textMain">Lokasi Anda</span>
+     <div class="flex items-center gap-2 mb-3">
+      <i data-lucide="map-pin" class="w-4 h-4 text-primaryLight"></i> <span class="font-semibold text-sm text-textMain">Lokasi Anda</span>
      </div>
      <div id="locationInfo" class="text-sm text-textSub">
       <div class="flex items-center gap-2">
@@ -170,12 +182,14 @@ tailwind.config={
    <div id="page-admin-login" class="page max-w-md mx-auto px-4 py-12">
     <div class="bg-card rounded-2xl border border-blue-100 p-8 shadow-sm">
      <div class="text-center mb-6">
-      <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4"><i data-lucide="shield" class="w-8 h-8 text-primary"></i>
+      <div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
+       <i data-lucide="shield" class="w-8 h-8 text-primary"></i>
       </div>
       <h2 class="font-bold text-xl text-textMain">Admin Panel</h2>
       <p class="text-sm text-textSub mt-1">Masukkan password admin</p>
      </div>
-     <form onsubmit="adminLogin(event)"><label for="adminPass" class="block text-sm font-semibold text-textMain mb-2">Password</label> <input type="password" id="adminPass" class="w-full bg-surface border border-blue-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primaryLight mb-2" placeholder="Masukkan password">
+     <form onsubmit="adminLogin(event)">
+      <label for="adminPass" class="block text-sm font-semibold text-textMain mb-2">Password</label> <input type="password" id="adminPass" class="w-full bg-surface border border-blue-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primaryLight mb-2" placeholder="Masukkan password">
       <p id="loginError" class="text-red-500 text-xs font-medium mb-4 hidden">Password salah!</p><button type="submit" class="btn-press w-full bg-primary hover:bg-primaryDark text-white rounded-xl py-3 font-semibold text-sm transition"> Masuk </button>
      </form>
     </div>
@@ -186,15 +200,19 @@ tailwind.config={
       <h2 class="font-bold text-xl text-textMain">Data Absensi</h2>
       <p class="text-sm text-textSub">Kelola data kehadiran pegawai</p>
      </div>
-     <div class="flex gap-2 flex-wrap"><button onclick="loadAdminData()" class="btn-press bg-card border border-blue-200 hover:bg-blue-50 text-textMain rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center gap-2"> <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh </button> <button onclick="downloadCSV()" class="btn-press bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center gap-2"> <i data-lucide="download" class="w-3.5 h-3.5"></i> Download CSV </button> <button onclick="showPage('dashboard')" class="btn-press bg-slate-100 hover:bg-slate-200 text-textMain rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center gap-2"> <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar </button>
+     <div class="flex gap-2 flex-wrap">
+      <button onclick="loadAdminData()" class="btn-press bg-card border border-blue-200 hover:bg-blue-50 text-textMain rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center gap-2"> <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh </button> <button onclick="downloadCSV()" class="btn-press bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center gap-2"> <i data-lucide="download" class="w-3.5 h-3.5"></i> Download CSV </button> <button onclick="showPage('dashboard')" class="btn-press bg-slate-100 hover:bg-slate-200 text-textMain rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center gap-2"> <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar </button>
      </div>
     </div><!-- Filter -->
     <div class="bg-card rounded-xl border border-blue-100 p-4 mb-4 flex flex-col sm:flex-row gap-3">
-     <div class="flex-1"><label class="block text-xs font-semibold text-textSub mb-1">Filter Tanggal</label> <input type="date" id="filterDate" onchange="renderAdminTable()" class="w-full bg-surface border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primaryLight">
+     <div class="flex-1">
+      <label class="block text-xs font-semibold text-textSub mb-1">Filter Tanggal</label> <input type="date" id="filterDate" onchange="renderAdminTable()" class="w-full bg-surface border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primaryLight">
      </div>
-     <div class="flex-1"><label class="block text-xs font-semibold text-textSub mb-1">Filter Nama</label> <select id="filterName" onchange="renderAdminTable()" class="w-full bg-surface border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primaryLight pr-8"> <option value="">Semua Pegawai</option> </select>
+     <div class="flex-1">
+      <label class="block text-xs font-semibold text-textSub mb-1">Filter Nama</label> <select id="filterName" onchange="renderAdminTable()" class="w-full bg-surface border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primaryLight pr-8"> <option value="">Semua Pegawai</option> </select>
      </div>
-     <div class="flex items-end"><button onclick="clearFilters()" class="btn-press bg-slate-100 hover:bg-slate-200 text-textMain rounded-lg px-4 py-2 text-xs font-semibold transition">Reset</button>
+     <div class="flex items-end">
+      <button onclick="clearFilters()" class="btn-press bg-slate-100 hover:bg-slate-200 text-textMain rounded-lg px-4 py-2 text-xs font-semibold transition">Reset</button>
      </div>
     </div><!-- Stats -->
     <div id="adminStats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4"></div><!-- Table -->
@@ -330,78 +348,40 @@ if (window.elementSdk) {
 }
 
 // ============================================================
-// DATA SDK
+// GITHUB CONFIG
 // ============================================================
-let dataSdkReady = false;
-const MAX_SDK_ATTEMPTS = 20;
+const GITHUB_CONFIG = {
+  owner: 'YOUR_GITHUB_USERNAME',      // Ganti dengan username GitHub kamu
+  repo: 'absensi-data',               // Ganti dengan nama repo (buat repo kosong)
+  branch: 'main',
+  token: 'YOUR_GITHUB_TOKEN'          // Ganti dengan Personal Access Token dari GitHub
+};
 
+const GITHUB_API = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents`;
+
+// ============================================================
+// DATA SDK PERSISTENCE
+// ============================================================
 const dataHandler = {
   onDataChanged(data) {
-    allRecords = data;
-    if (document.getElementById('page-admin').classList.contains('active')) {
-      renderAdminTable();
-    }
+    allRecords = data || [];
+    console.log(`Loaded ${allRecords.length} records`);
   }
 };
 
-async function initDataSdk() {
-  if (!window.dataSdk) {
-    console.log('Data SDK not available yet');
-    return false;
-  }
-
+// Initialize Data SDK immediately
+(async () => {
   try {
     const result = await window.dataSdk.init(dataHandler);
-    if (result && result.isOk) {
-      dataSdkReady = true;
+    if (result.isOk) {
       console.log('Data SDK initialized successfully');
-      return true;
     } else {
-      console.log('Data SDK init returned error:', result?.error);
-      return false;
+      console.error('Data SDK init error:', result.error);
     }
   } catch (err) {
-    console.log('Data SDK init error:', err);
-    return false;
+    console.error('Data SDK initialization error:', err);
   }
-}
-
-// Aggressive retry strategy - start after small delay to let SDK load
-async function startSdkInitialization() {
-  // Give SDK a moment to be injected
-  await new Promise(r => setTimeout(r, 500));
-
-  // Try immediately
-  let success = await initDataSdk();
-  if (success) {
-    console.log('SDK ready on first attempt');
-    return;
-  }
-
-  // If failed, retry aggressively
-  let attempts = 0;
-  const retryInterval = setInterval(async () => {
-    attempts++;
-    if (dataSdkReady) {
-      clearInterval(retryInterval);
-      console.log('SDK ready after retry');
-      return;
-    }
-    if (attempts >= MAX_SDK_ATTEMPTS) {
-      clearInterval(retryInterval);
-      console.warn('SDK initialization failed after max attempts');
-      return;
-    }
-    await initDataSdk();
-  }, 250);
-}
-
-// Start initialization when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startSdkInitialization);
-} else {
-  startSdkInitialization();
-}
+})();
 
 // ============================================================
 // EMPLOYEE DROPDOWN
@@ -659,39 +639,92 @@ function checkSubmitReady() {
 }
 
 // ============================================================
+// GITHUB FUNCTIONS
+// ============================================================
+async function loadDataFromGitHub() {
+  try {
+    const response = await fetch(`${GITHUB_API}/absensi_data.json`, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3.raw'
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      allRecords = data || [];
+      console.log(`Loaded ${allRecords.length} records from GitHub`);
+    } else if (response.status === 404) {
+      allRecords = [];
+      console.log('No existing data file on GitHub');
+    } else {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+  } catch (err) {
+    console.error('Load from GitHub error:', err);
+    showToast('⚠️ Gagal memuat data dari GitHub. Periksa konfigurasi.', 'warning');
+  }
+}
+
+async function saveDataToGitHub() {
+  try {
+    const content = JSON.stringify(allRecords, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(content)));
+    
+    // Get current file SHA if exists
+    let sha = null;
+    try {
+      const response = await fetch(`${GITHUB_API}/absensi_data.json`, {
+        headers: {
+          'Authorization': `token ${GITHUB_CONFIG.token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        sha = data.sha;
+      }
+    } catch (e) {
+      // File doesn't exist yet
+    }
+
+    // Upload to GitHub
+    const response = await fetch(`${GITHUB_API}/absensi_data.json`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        message: `Update absensi data - ${new Date().toLocaleString('id-ID')}`,
+        content: base64Content,
+        branch: GITHUB_CONFIG.branch,
+        ...(sha && { sha })
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    console.log('Data saved to GitHub successfully');
+    return true;
+  } catch (err) {
+    console.error('Save to GitHub error:', err);
+    showToast('⚠️ Gagal menyimpan ke GitHub. Periksa token dan koneksi internet.', 'error');
+    return false;
+  }
+}
+
+// ============================================================
 // SUBMIT ABSENSI
 // ============================================================
 async function submitAbsensi() {
   if (!capturedImageData || !currentLocation) return;
 
-  // Check limit
-  if (allRecords.length >= 999) {
-    showToast('Batas penyimpanan tercapai (999 data). Hapus data lama terlebih dahulu.', 'error');
-    return;
-  }
-
   const btn = document.getElementById('btnSubmitAbsensi');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Menyimpan...';
-
-  // Wait for SDK with aggressive retry
-  let sdkReady = false;
-  for (let i = 0; i < 10; i++) {
-    if (dataSdkReady && window.dataSdk) {
-      sdkReady = true;
-      break;
-    }
-    console.log(`Waiting for SDK... attempt ${i + 1}/10`);
-    await new Promise(r => setTimeout(r, 400));
-  }
-
-  if (!sdkReady) {
-    showToast('Sistem penyimpanan tidak tersedia. Silakan refresh halaman dan coba lagi.', 'error');
-    btn.disabled = false;
-    btn.innerHTML = 'Kirim Absensi';
-    console.error('SDK still not ready after waiting');
-    return;
-  }
 
   try {
     const wib = getWIB();
@@ -708,37 +741,37 @@ async function submitAbsensi() {
       status = 'Pulang';
     }
 
-    // Store photo in sessionStorage (temporary, for displaying in admin panel)
-    const photoId = `photo_${Date.now()}_${Math.random().toString(36).substr(2,9)}`;
-    sessionStorage.setItem(photoId, capturedImageData);
-
     const record = {
+      id: `${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
       nama: document.getElementById('employeeSelect').value,
       tanggal: tglStr,
       jam: jamStr,
       status: status,
-      foto: photoId,
+      foto: capturedImageData,
       latitude: currentLocation.latitude,
       longitude: currentLocation.longitude,
       kota: currentLocation.kota || '-',
       kecamatan: currentLocation.kecamatan || '-',
       desa: currentLocation.desa || '-',
-      tipe: currentAbsensiType
+      tipe: currentAbsensiType,
+      timestamp: Date.now()
     };
 
-    console.log('Attempting to create record:', record);
-    const result = await window.dataSdk.create(record);
-
-    if (result.isOk) {
-      console.log('Record created successfully');
+    allRecords.push(record);
+    
+    // Save to GitHub
+    const saved = await saveDataToGitHub();
+    
+    if (saved) {
       showToast(`Absensi ${currentAbsensiType === 'masuk' ? 'masuk' : 'pulang'} berhasil! Status: ${status}`, 'success');
       stopCamera();
-      setTimeout(() => showPage('dashboard'), 1000);
-    } else {
-      console.error('Create failed:', result.error);
-      showToast(`Gagal menyimpan: ${result.error?.message || 'Coba lagi'}`, 'error');
       btn.disabled = false;
       btn.innerHTML = 'Kirim Absensi';
+      setTimeout(() => showPage('dashboard'), 1000);
+    } else {
+      // Remove from local if GitHub save failed
+      allRecords.pop();
+      throw new Error('Gagal menyimpan ke GitHub');
     }
   } catch (err) {
     console.error('Submit error:', err);
@@ -764,7 +797,8 @@ function adminLogin(e) {
 }
 
 function loadAdminData() {
-  renderAdminTable();
+  // Load data from GitHub when entering admin panel
+  loadDataFromGitHub().then(() => renderAdminTable());
 }
 
 function renderAdminTable() {
@@ -814,14 +848,9 @@ function renderAdminTable() {
     const badgeClass = r.status === 'Hadir' ? 'badge-hadir' : r.status === 'Terlambat' ? 'badge-terlambat' : 'badge-pulang';
     const lokasi = [r.kota, r.kecamatan, r.desa].filter(x => x && x !== '-').join(', ');
     
-    // Get photo from sessionStorage using the photo ID
+    // Display photo from base64 data
     let photoHTML = '<span class="text-xs text-textSub">-</span>';
-    if (r.foto && r.foto.startsWith('photo_')) {
-      const photoData = sessionStorage.getItem(r.foto);
-      if (photoData) {
-        photoHTML = `<img src="${photoData}" class="photo-thumb" onclick="showPhotoModal('${photoData.replace(/'/g, "\\'")}')" alt="Foto">`;
-      }
-    } else if (r.foto && r.foto.startsWith('data:')) {
+    if (r.foto && r.foto.startsWith('data:')) {
       photoHTML = `<img src="${r.foto}" class="photo-thumb" onclick="showPhotoModal('${r.foto.replace(/'/g, "\\'")}')" alt="Foto">`;
     }
     
@@ -834,7 +863,7 @@ function renderAdminTable() {
       <td class="px-4 py-3 text-xs text-textSub max-w-[150px] truncate" title="${lokasi}">${lokasi || '-'}</td>
       <td class="px-4 py-3">${photoHTML}</td>
       <td class="px-4 py-3">
-        <button onclick="deleteRecord('${r.__backendId}')" class="btn-press text-red-500 hover:text-red-700 transition" title="Hapus">
+        <button onclick="deleteRecord('${r.id}')" class="btn-press text-red-500 hover:text-red-700 transition" title="Hapus">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       </td>
@@ -853,19 +882,16 @@ function showPhotoModal(src) {
   lucide.createIcons();
 }
 
-async function deleteRecord(backendId) {
-  const record = allRecords.find(r => r.__backendId === backendId);
-  if (!record) return;
-
+async function deleteRecord(id) {
   // Inline confirmation
-  const row = document.querySelector(`button[onclick="deleteRecord('${backendId}')"]`).closest('tr');
+  const row = document.querySelector(`button[onclick="deleteRecord('${id}')"]`)?.closest('tr');
   if (!row) return;
   const cell = row.querySelector('td:last-child');
   const originalHTML = cell.innerHTML;
   cell.innerHTML = `
     <div class="flex gap-1">
-      <button onclick="confirmDelete('${backendId}')" class="btn-press bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg">Hapus</button>
-      <button onclick="cancelDelete(this, '${backendId}')" class="btn-press bg-slate-200 text-textMain text-[10px] font-bold px-2 py-1 rounded-lg">Batal</button>
+      <button onclick="confirmDelete('${id}')" class="btn-press bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg">Hapus</button>
+      <button onclick="cancelDelete(this, '${id}')" class="btn-press bg-slate-200 text-textMain text-[10px] font-bold px-2 py-1 rounded-lg">Batal</button>
     </div>`;
   // Store original for cancel
   cell.dataset.original = originalHTML;
@@ -877,14 +903,31 @@ window.cancelDelete = function(btn, id) {
   lucide.createIcons();
 };
 
-window.confirmDelete = async function(backendId) {
-  const record = allRecords.find(r => r.__backendId === backendId);
-  if (!record) return;
-  const result = await window.dataSdk.delete(record);
-  if (result.isOk) {
-    showToast('Data berhasil dihapus', 'success');
-  } else {
-    showToast('Gagal menghapus data', 'error');
+window.confirmDelete = async function(id) {
+  const recordIndex = allRecords.findIndex(r => r.id === id);
+  if (recordIndex < 0) return;
+  
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Menghapus...';
+
+  try {
+    allRecords.splice(recordIndex, 1);
+    
+    // Save to GitHub
+    const saved = await saveDataToGitHub();
+    
+    if (saved) {
+      showToast('Data berhasil dihapus', 'success');
+      renderAdminTable();
+    } else {
+      throw new Error('Gagal menghapus dari GitHub');
+    }
+  } catch (err) {
+    console.error('Delete error:', err);
+    showToast(`Error: ${err.message}`, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Hapus';
   }
 };
 
@@ -923,8 +966,11 @@ function downloadCSV() {
 // ============================================================
 // INIT
 // ============================================================
-populateEmployees();
-lucide.createIcons();
+// Load data from GitHub on startup
+loadDataFromGitHub().then(() => {
+  populateEmployees();
+  lucide.createIcons();
+});
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd3a91a47f05576',t:'MTc3MzY2MzA4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd3b56d462aaa09',t:'MTc3MzY2MzU5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
