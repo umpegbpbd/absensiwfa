@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Absensi WFA BPBD Trenggalek</title>
 
 <style>
 
 body{
-font-family:Arial, Helvetica, sans-serif;
-background:linear-gradient(135deg,#1f4fc9,#4c8dff);
-height:100vh;
+font-family:Arial;
 margin:0;
-display:flex;
-align-items:center;
-justify-content:center;
+background:linear-gradient(135deg,#1e4fd8,#4e8cff);
 color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
 .container{
@@ -24,37 +23,34 @@ width:380px;
 max-width:95%;
 }
 
+.title{
+text-align:center;
+margin-bottom:20px;
+}
+
+.title h1{
+margin:0;
+font-size:26px;
+}
+
 .card{
 background:white;
 color:#333;
-border-radius:14px;
-padding:20px;
+padding:18px;
+border-radius:12px;
 margin-bottom:15px;
-box-shadow:0 10px 30px rgba(0,0,0,0.2);
-}
-
-h1{
-text-align:center;
-font-size:26px;
-margin-bottom:5px;
-}
-
-.sub{
-text-align:center;
-font-size:14px;
-opacity:0.8;
-margin-bottom:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 .clock{
 font-size:32px;
-font-weight:bold;
 text-align:center;
+font-weight:bold;
 }
 
 .date{
 text-align:center;
-margin-bottom:10px;
+margin-bottom:5px;
 }
 
 select{
@@ -62,12 +58,13 @@ width:100%;
 padding:12px;
 border-radius:8px;
 border:1px solid #ddd;
-font-size:16px;
+font-size:15px;
 }
 
 .buttons{
 display:flex;
 gap:10px;
+margin-bottom:15px;
 }
 
 .btn{
@@ -75,7 +72,7 @@ flex:1;
 padding:18px;
 border:none;
 border-radius:12px;
-font-size:16px;
+font-size:15px;
 color:white;
 cursor:pointer;
 }
@@ -95,15 +92,15 @@ margin-top:10px;
 }
 
 .status{
-margin-top:10px;
-font-size:14px;
 text-align:center;
+font-size:14px;
+margin-top:8px;
 }
 
 .gps{
 font-size:13px;
-margin-top:8px;
 text-align:center;
+margin-top:8px;
 }
 
 </style>
@@ -113,8 +110,10 @@ text-align:center;
 
 <div class="container">
 
+<div class="title">
 <h1>Absensi WFA</h1>
-<div class="sub">BPBD KAB. TRENGGALEK</div>
+<div>BPBD KAB. TRENGGALEK</div>
+</div>
 
 <div class="card">
 
@@ -186,9 +185,13 @@ text-align:center;
 
 <div class="buttons">
 
-<button class="btn masuk" onclick="absenMasuk()">Absen Masuk<br>07:00-07:30</button>
+<button class="btn masuk" onclick="absenMasuk()">
+Absen Masuk<br>07:00-07:30
+</button>
 
-<button class="btn pulang" onclick="absenPulang()">Absen Pulang<br>15:30-17:30</button>
+<button class="btn pulang" onclick="absenPulang()">
+Absen Pulang<br>15:30-17:30
+</button>
 
 </div>
 
@@ -196,7 +199,9 @@ text-align:center;
 
 <video id="camera" autoplay playsinline></video>
 
-<div class="gps" id="gps">Mendeteksi GPS...</div>
+<div class="gps" id="gps">
+Mendeteksi lokasi...
+</div>
 
 <div class="status" id="status"></div>
 
@@ -208,6 +213,7 @@ text-align:center;
 
 let latitude=0
 let longitude=0
+let alamat=""
 
 function updateClock(){
 
@@ -215,15 +221,16 @@ let now=new Date()
 
 let options={timeZone:"Asia/Jakarta"}
 
-let time=now.toLocaleTimeString("id-ID",options)
-let date=now.toLocaleDateString("id-ID",options)
+let jam=now.toLocaleTimeString("id-ID",options)
+let tanggal=now.toLocaleDateString("id-ID",options)
 
-document.getElementById("jam").innerHTML=time
-document.getElementById("tanggal").innerHTML=date
+document.getElementById("jam").innerHTML=jam
+document.getElementById("tanggal").innerHTML=tanggal
 
 }
 
 setInterval(updateClock,1000)
+
 
 
 navigator.mediaDevices.getUserMedia({video:true})
@@ -232,19 +239,48 @@ document.getElementById("camera").srcObject=stream
 })
 
 
-navigator.geolocation.getCurrentPosition(function(pos){
+
+function ambilLokasi(){
+
+navigator.geolocation.getCurrentPosition(async function(pos){
 
 latitude=pos.coords.latitude
 longitude=pos.coords.longitude
 
-document.getElementById("gps").innerHTML="GPS aktif"
+let url=`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+
+let res=await fetch(url)
+let data=await res.json()
+
+let a=data.address
+
+let kab=a.county||""
+let kec=a.city_district||a.suburb||""
+let desa=a.village||a.town||""
+
+alamat=kab+", "+kec+", "+desa
+
+document.getElementById("gps").innerHTML=
+"Kabupaten : "+kab+"<br>"+
+"Kecamatan : "+kec+"<br>"+
+"Desa : "+desa
 
 },
 function(){
 
-document.getElementById("gps").innerHTML="Akses lokasi ditolak. Aktifkan GPS."
+document.getElementById("gps").innerHTML=
+"Akses lokasi ditolak. Aktifkan GPS."
 
-})
+},
+{enableHighAccuracy:true}
+
+)
+
+}
+
+ambilLokasi()
+
+
 
 function ambilFoto(){
 
@@ -263,15 +299,15 @@ return canvas.toDataURL("image/png")
 
 }
 
+
+
 function absenMasuk(){
 
 let nama=document.getElementById("nama").value
 
 if(nama==""){
-
 alert("Pilih nama terlebih dahulu")
 return
-
 }
 
 let now=new Date()
@@ -285,19 +321,14 @@ let start=7*60
 let end=7*60+30
 
 if(total<start){
-
 alert("Belum waktunya absensi")
-
 return
-
 }
 
 let status="Hadir"
 
 if(total>end){
-
 status="Terlambat"
-
 }
 
 let foto=ambilFoto()
@@ -305,26 +336,28 @@ let foto=ambilFoto()
 console.log({
 nama,
 status,
-foto,
 latitude,
-longitude
+longitude,
+alamat,
+foto
 })
 
-document.getElementById("status").innerHTML="Absensi masuk tercatat ("+status+")"
+document.getElementById("status").innerHTML=
+"Absensi masuk tercatat ("+status+")"
 
 alert("Absensi berhasil")
 
 }
+
+
 
 function absenPulang(){
 
 let nama=document.getElementById("nama").value
 
 if(nama==""){
-
 alert("Pilih nama terlebih dahulu")
 return
-
 }
 
 let now=new Date()
@@ -338,17 +371,13 @@ let start=15*60+30
 let end=17*60+30
 
 if(total<start){
-
 alert("Belum waktunya absensi pulang")
 return
-
 }
 
 if(total>end){
-
 alert("Waktu absensi pulang telah berakhir")
 return
-
 }
 
 let foto=ambilFoto()
@@ -356,12 +385,14 @@ let foto=ambilFoto()
 console.log({
 nama,
 status:"Pulang",
-foto,
 latitude,
-longitude
+longitude,
+alamat,
+foto
 })
 
-document.getElementById("status").innerHTML="Absensi pulang tercatat"
+document.getElementById("status").innerHTML=
+"Absensi pulang tercatat"
 
 alert("Absensi pulang berhasil")
 
