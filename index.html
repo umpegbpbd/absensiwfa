@@ -46,7 +46,7 @@ index 6cd52ff376847192aa0c7382da6ddec8fa46cbf3..03b1e44025b3ade57f8b0e0ae027acfe
 +
 +    // DEMI KEAMANAN JANGAN SIMPAN TOKEN ASLI DI REPO.
 +    // Isi manual saat deploy lokal (opsional) atau biarkan kosong.
-+    TOKEN: "",
++    TOKEN: "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",
 +
 +    // ATURAN ABSENSI
 +    JAM_MASUK_END: "07:30",
@@ -131,12 +131,12 @@ index 6cd52ff376847192aa0c7382da6ddec8fa46cbf3..03b1e44025b3ade57f8b0e0ae027acfe
 +    address: "Mencari lokasi...",
 +    isSubmitting: false,
 +    tokenValidated: false,
-+    runtimeToken: "",
++    runtimeToken: "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",
 +    adminRows: []
 +};
 +
 +const DEFAULT_SUBMIT_LABEL = "✓ Kirim Data";
-+const TOKEN_STORAGE_KEY = "ABSENSI_GITHUB_TOKEN";
++const TOKEN_STORAGE_KEY = "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";
 +
 +window.addEventListener("DOMContentLoaded", () => {
 +    startClock();
@@ -187,7 +187,7 @@ index 6cd52ff376847192aa0c7382da6ddec8fa46cbf3..03b1e44025b3ade57f8b0e0ae027acfe
 +}
 +
 +function loadRuntimeToken() {
-+    const fromStorage = localStorage.getItem(TOKEN_STORAGE_KEY) || "";
++    const fromStorage = localStorage.getItem(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) || "";
 +    const fromConfig = (CONFIG?.TOKEN || "").trim();
 +    state.runtimeToken = fromStorage || fromConfig;
 +}
