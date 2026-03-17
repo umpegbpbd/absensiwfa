@@ -13,10 +13,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    .page { display: none; }
+    .page.active { display: block; }
+  </style>
+
 </head>
 
 <body class="text-slate-900">
-
   <div class="max-w-3xl mx-auto p-4 min-h-screen">
 
 ```
@@ -54,14 +59,14 @@
   </section>
 
   <section class="grid grid-cols-2 gap-4">
-    <button onclick="startAbsensi('masuk')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-8 rounded-2xl transition shadow-xl">
+    <button onclick="startAbsensi('masuk')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-8 rounded-2xl shadow-xl">
       <span class="text-xl block">✓ MASUK</span>
-      <span class="text-xs font-normal opacity-80">Presensi Datang</span>
+      <span class="text-xs opacity-80">Presensi Datang</span>
     </button>
 
-    <button onclick="startAbsensi('pulang')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-8 rounded-2xl transition shadow-xl">
+    <button onclick="startAbsensi('pulang')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-8 rounded-2xl shadow-xl">
       <span class="text-xl block">✓ PULANG</span>
-      <span class="text-xs font-normal opacity-80">Presensi Selesai</span>
+      <span class="text-xs opacity-80">Presensi Selesai</span>
     </button>
   </section>
 
@@ -84,9 +89,7 @@
 
     <div class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
       <p class="font-bold text-blue-900 text-sm">📍 Lokasi Anda</p>
-      <p id="locationText" class="text-blue-700 text-sm italic">
-        Mendeteksi lokasi...
-      </p>
+      <p id="locationText" class="text-blue-700 text-sm italic">Mendeteksi lokasi...</p>
     </div>
 
     <div class="grid grid-cols-1 gap-3 mt-5">
@@ -98,6 +101,7 @@
         <button onclick="retakePhoto()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold p-4 rounded-xl">
           🔄 Ulang Foto
         </button>
+
         <button id="btnSubmit" onclick="submitAbsensi()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold p-4 rounded-xl">
           ✓ Kirim Data
         </button>
@@ -112,18 +116,12 @@
 <main id="page-admin" class="page space-y-4">
 
   <div id="adminLogin" class="bg-white rounded-2xl p-8 shadow-sm text-center border border-slate-200">
-
     <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
       🔐
     </div>
 
-    <h2 class="text-2xl font-bold text-slate-800 mb-2">
-      Admin Panel
-    </h2>
-
-    <p class="text-slate-500 text-sm mb-6">
-      Masukkan password untuk melihat rekap data.
-    </p>
+    <h2 class="text-2xl font-bold text-slate-800 mb-2">Admin Panel</h2>
+    <p class="text-slate-500 text-sm mb-6">Masukkan password untuk melihat rekap data.</p>
 
     <input id="adminPassword" type="password" placeholder="Password Admin"
       class="border-2 border-slate-200 p-4 w-full rounded-xl focus:border-blue-500 outline-none mb-4 text-center font-bold">
@@ -131,15 +129,12 @@
     <button onclick="adminLogin()" class="bg-blue-700 hover:bg-blue-800 text-white w-full p-4 rounded-xl font-bold">
       Masuk Sekarang
     </button>
-
   </div>
 
   <div id="adminPanel" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
 
     <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
-      <h3 class="text-xl font-bold text-slate-800">
-        📊 Rekap Presensi GitHub
-      </h3>
+      <h3 class="text-xl font-bold text-slate-800">📊 Rekap Presensi GitHub</h3>
 
       <div class="flex gap-2">
         <button onclick="loadAdminTable()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold">
@@ -173,8 +168,7 @@
 
 <!-- FOOTER -->
 <footer class="mt-8 text-center text-slate-400 text-xs">
-  &copy; 2026 BPBD KAB. TRENGGALEK - 
-  <span class="font-bold text-blue-400">GOBLIN</span>
+  &copy; 2026 BPBD KAB. TRENGGALEK - <span class="font-bold text-blue-400">PUSDALOPS</span>
 </footer>
 ```
 
