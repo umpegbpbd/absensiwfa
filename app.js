@@ -3,6 +3,7 @@ let stream = null;
 let photoBase64 = "";
 let absenType = ""; 
 let currentLocation = { lat: null, lng: null, address: "" }; 
+let adminDataGlobal = []; // Menyimpan data untuk diexport
 
 window.onload = () => {
   initClock();
@@ -38,45 +39,37 @@ function showPage(p) {
   document.getElementById("page-" + p).classList.add("active");
 }
 
-// === FUNGSI EVALUASI WAKTU ===
 function evaluateTime(type) {
   const now = new Date();
-  const day = now.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, ..., 5: Jumat, 6: Sabtu
+  const day = now.getDay(); 
   const hours = now.getHours();
   const minutes = now.getMinutes();
   
-  // Mengubah waktu jadi format desimal untuk mempermudah perbandingan 
-  // Contoh: 07:30 menjadi 7.5 | 15:30 menjadi 15.5
   const timeFloat = hours + (minutes / 60);
 
   if (type === 'masuk') {
-    // Blokir jika absen masuk sebelum jam 07.00
     if (timeFloat < 7.0) {
       return { allowed: false, msg: "Belum waktunya! Absen masuk baru dibuka jam 07.00 WIB." };
     }
 
-    // Aturan Selain Jumat
-    if (day !== 5) {
-      if (timeFloat <= 7.5) { // 07.00 - 07.30
+    if (day !== 5) { // Selain Jumat
+      if (timeFloat <= 7.5) { 
         return { allowed: true, status: "Tepat Waktu" };
-      } else { // Lebih dari 07.30
+      } else { 
         return { allowed: true, status: "Terlambat" };
       }
-    } else {
-      // Aturan Khusus Jumat (Bebas terlambat sementara, tetap harus di atas jam 07.00)
+    } else { // Hari Jumat
       return { allowed: true, status: "Masuk (Jumat)" };
     }
   } 
   else if (type === 'pulang') {
-    // Blokir jika absen pulang lewat dari 17.30
     if (timeFloat > 17.5) {
       return { allowed: false, msg: "Absen pulang ditolak! Batas maksimal absen pulang adalah 17.30 WIB." };
     }
     
-    // Cek status kepulangan
-    if (timeFloat < 15.5) { // Sebelum 15.30
+    if (timeFloat < 15.5) { 
       return { allowed: true, status: "Pulang Lebih Cepat" };
-    } else { // 15.30 - 17.30
+    } else { 
       return { allowed: true, status: "Tepat Waktu" };
     }
   }
@@ -91,7 +84,6 @@ async function startAbsensi(type) {
     return;
   }
 
-  // Cek validasi jam SEBELUM kamera menyala
   const timeCheck = evaluateTime(type);
   if (!timeCheck.allowed) {
     alert(timeCheck.msg);
@@ -205,7 +197,6 @@ async function submitAbsensi() {
   const employeeName = document.getElementById("employee").value;
   const btnSubmit = document.getElementById("btnSubmit");
   
-  // Cek ulang waktu saat mereka klik kirim (untuk mencegah mereka diam di halaman kamera berjam-jam)
   const timeCheck = evaluateTime(absenType);
   if (!timeCheck.allowed) {
     alert(timeCheck.msg);
@@ -220,7 +211,7 @@ async function submitAbsensi() {
     waktu: new Date().toISOString(),
     nama: employeeName,
     tipe: absenType,
-    status_waktu: timeCheck.status, // Ini akan tersimpan ke GitHub
+    status_waktu: timeCheck.status,
     lat: currentLocation.lat,
     lng: currentLocation.lng,
     lokasi: currentLocation.address,
@@ -270,7 +261,7 @@ async function saveToGitHub(newRecord) {
   const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(existingData, null, 2))));
 
   const body = {
-    message: `Absen ${newRecord.tipe.toUpperCase()} - ${newRecord.nama} (${newRecord.status_waktu})`,
+    message: `Absen ${newRecord.tipe.toUpperCase()} - ${newRecord.nama}`,
     content: updatedContent,
     branch: CONFIG.BRANCH
   };
@@ -281,13 +272,17 @@ async function saveToGitHub(newRecord) {
   if (!putRes.ok) throw new Error("Gagal push ke GitHub");
 }
 
-// === FUNGSI ADMIN ===
+// === FUNGSI ADMIN & DOWNLOAD ===
 async function adminLogin() {
   const pass = document.getElementById("adminPassword").value;
   if(pass === CONFIG.ADMIN_PASSWORD) {
     document.getElementById("adminPassword").value = "Memuat data dari GitHub...";
     await loadAdminData();
-    document.getElementById("adminPassword").value = "";
+    
+    // Tampilkan tombol download dan sembunyikan area login
+    document.getElementById("adminLoginArea").classList.add("hidden");
+    document.getElementById("adminControls").classList.remove("hidden");
+    document.getElementById("adminControls").classList.add("flex");
   } else {
     alert("Password salah!");
   }
@@ -305,7 +300,10 @@ async function loadAdminData() {
     if (!res.ok) throw new Error("Gagal load data");
     const fileData = await res.json();
     const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
-    const data = JSON.parse(decodedContent);
+    
+    // Simpan ke variabel global (dibaca dari bawah/terbaru ke atas)
+    const rawData = JSON.parse(decodedContent);
+    adminDataGlobal = rawData.reverse(); 
     
     const tbody = document.getElementById("adminTableBody");
     tbody.innerHTML = `
@@ -313,17 +311,16 @@ async function loadAdminData() {
         <th class="p-2 border">Waktu</th>
         <th class="p-2 border">Nama</th>
         <th class="p-2 border">Tipe</th>
-        <th class="p-2 border">Status Kehadiran</th>
+        <th class="p-2 border">Status</th>
         <th class="p-2 border">Lokasi</th>
-        <th class="p-2 border">Foto</th>
+        <th class="p-2 border text-center">Foto</th>
       </tr>
     `;
     
-    data.reverse().forEach(d => {
+    adminDataGlobal.forEach(d => {
       const date = new Date(d.waktu).toLocaleString("id-ID");
-      const fotoTag = d.foto ? `<img src="${d.foto}" class="w-10 h-10 object-cover rounded hover:scale-150 transition">` : "-";
+      const fotoTag = d.foto ? `<img src="${d.foto}" class="w-10 h-10 object-cover rounded hover:scale-150 transition mx-auto">` : "-";
       
-      // Warnai teks status agar mudah dilihat admin (Merah kalau telat/cepat pulang, Hijau kalau tepat)
       let statusColor = "text-gray-700";
       if (d.status_waktu === "Tepat Waktu") statusColor = "text-green-600";
       if (d.status_waktu === "Terlambat") statusColor = "text-red-600";
@@ -332,9 +329,9 @@ async function loadAdminData() {
       tbody.innerHTML += `
         <tr class="border-b text-sm hover:bg-gray-50">
           <td class="p-2 border">${date}</td>
-          <td class="p-2 border font-semibold">${d.nama}</td>
+          <td class="p-2 border font-semibold whitespace-nowrap">${d.nama}</td>
           <td class="p-2 border text-center font-bold ${d.tipe === 'masuk' ? 'text-blue-600' : 'text-emerald-600'}">${d.tipe.toUpperCase()}</td>
-          <td class="p-2 border text-center font-bold ${statusColor}">${d.status_waktu || "-"}</td>
+          <td class="p-2 border text-center font-bold ${statusColor} whitespace-nowrap">${d.status_waktu || "-"}</td>
           <td class="p-2 border text-xs text-gray-600">${d.lokasi}</td>
           <td class="p-2 border text-center">${fotoTag}</td>
         </tr>
@@ -344,4 +341,78 @@ async function loadAdminData() {
     console.error(e);
     alert("Belum ada data absensi atau gagal memuat data.");
   }
+}
+
+// Fitur Unduh Excel (Membutuhkan SheetJS)
+function downloadExcel() {
+  if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
+
+  // Mapping data agar lebih rapi di Excel (Tanpa kolom Foto)
+  const excelData = adminDataGlobal.map(d => ({
+    "Waktu Absen": new Date(d.waktu).toLocaleString("id-ID"),
+    "Nama Pegawai": d.nama,
+    "Tipe Absen": d.tipe.toUpperCase(),
+    "Status Kehadiran": d.status_waktu || "-",
+    "Lokasi (GPS)": d.lokasi
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(excelData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Data Absensi");
+
+  // Nama file otomatis sesuai tanggal cetak
+  const fileName = `Rekap_Absensi_BPBD_${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")}.xlsx`;
+  XLSX.writeFile(workbook, fileName);
+}
+
+// Fitur Unduh PDF A4 (Membutuhkan jsPDF + AutoTable)
+function downloadPDF() {
+  if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4'); // 'p' = portrait, 'mm' = milimeter, 'a4' = ukuran kertas
+
+  // Judul PDF
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("REKAP ABSENSI WFA", 105, 15, { align: "center" });
+  
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", 105, 20, { align: "center" });
+  doc.text(`Dicetak pada: ${new Date().toLocaleString("id-ID")}`, 14, 30);
+
+  // Setup Tabel PDF
+  const tableColumn = ["Waktu", "Nama Pegawai", "Tipe", "Status", "Lokasi (GPS)"];
+  const tableRows = [];
+
+  adminDataGlobal.forEach(d => {
+    const rowData = [
+      new Date(d.waktu).toLocaleString("id-ID"),
+      d.nama,
+      d.tipe.toUpperCase(),
+      d.status_waktu || "-",
+      d.lokasi
+    ];
+    tableRows.push(rowData);
+  });
+
+  // Render Tabel
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 35, // Jarak dari atas kertas
+    styles: { fontSize: 8, cellPadding: 2 },
+    headStyles: { fillColor: [30, 58, 138] }, // Warna biru gelap khas BPBD
+    columnStyles: {
+      0: { cellWidth: 25 }, // Lebar kolom Waktu
+      1: { cellWidth: 40 }, // Lebar kolom Nama
+      2: { cellWidth: 15 }, // Lebar kolom Tipe
+      3: { cellWidth: 25 }, // Lebar kolom Status
+      4: { cellWidth: 'auto' } // Lebar kolom Lokasi menyesuaikan sisa kertas
+    }
+  });
+
+  const fileName = `Rekap_Absensi_A4_${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")}.pdf`;
+  doc.save(fileName);
 }
