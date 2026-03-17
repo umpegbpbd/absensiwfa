@@ -3,7 +3,7 @@ let stream = null;
 let photoBase64 = "";
 let absenType = ""; 
 let currentLocation = { lat: null, lng: null, address: "" }; 
-let adminDataGlobal = []; // Menyimpan data untuk diexport
+let adminDataGlobal = []; 
 
 window.onload = () => {
   initClock();
@@ -52,13 +52,13 @@ function evaluateTime(type) {
       return { allowed: false, msg: "Belum waktunya! Absen masuk baru dibuka jam 07.00 WIB." };
     }
 
-    if (day !== 5) { // Selain Jumat
+    if (day !== 5) { 
       if (timeFloat <= 7.5) { 
         return { allowed: true, status: "Tepat Waktu" };
       } else { 
         return { allowed: true, status: "Terlambat" };
       }
-    } else { // Hari Jumat
+    } else { 
       return { allowed: true, status: "Masuk (Jumat)" };
     }
   } 
@@ -279,7 +279,6 @@ async function adminLogin() {
     document.getElementById("adminPassword").value = "Memuat data dari GitHub...";
     await loadAdminData();
     
-    // Tampilkan tombol download dan sembunyikan area login
     document.getElementById("adminLoginArea").classList.add("hidden");
     document.getElementById("adminControls").classList.remove("hidden");
     document.getElementById("adminControls").classList.add("flex");
@@ -301,7 +300,6 @@ async function loadAdminData() {
     const fileData = await res.json();
     const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
     
-    // Simpan ke variabel global (dibaca dari bawah/terbaru ke atas)
     const rawData = JSON.parse(decodedContent);
     adminDataGlobal = rawData.reverse(); 
     
@@ -343,36 +341,83 @@ async function loadAdminData() {
   }
 }
 
-// Fitur Unduh Excel (Membutuhkan SheetJS)
-function downloadExcel() {
+// === EXPORT EXCEL DENGAN FOTO (Memakai ExcelJS) ===
+async function downloadExcel() {
   if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
 
-  // Mapping data agar lebih rapi di Excel (Tanpa kolom Foto)
-  const excelData = adminDataGlobal.map(d => ({
-    "Waktu Absen": new Date(d.waktu).toLocaleString("id-ID"),
-    "Nama Pegawai": d.nama,
-    "Tipe Absen": d.tipe.toUpperCase(),
-    "Status Kehadiran": d.status_waktu || "-",
-    "Lokasi (GPS)": d.lokasi
-  }));
+  // Bikin tombol jadi loading
+  const btn = document.querySelector('button[onclick="downloadExcel()"]');
+  const originalText = btn.innerText;
+  btn.innerText = "⏳ Memproses Excel...";
+  btn.disabled = true;
 
-  const worksheet = XLSX.utils.json_to_sheet(excelData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Data Absensi");
+  try {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Data Absensi");
 
-  // Nama file otomatis sesuai tanggal cetak
-  const fileName = `Rekap_Absensi_BPBD_${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
+    // Setup Header Kolom
+    worksheet.columns = [
+      { header: "Waktu Absen", key: "waktu", width: 22 },
+      { header: "Nama Pegawai", key: "nama", width: 35 },
+      { header: "Tipe Absen", key: "tipe", width: 15 },
+      { header: "Status Kehadiran", key: "status", width: 20 },
+      { header: "Lokasi (GPS)", key: "lokasi", width: 50 },
+      { header: "Foto Wajah", key: "foto", width: 15 }
+    ];
+
+    // Styling Header
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+    // Masukkan Data
+    adminDataGlobal.forEach((d, index) => {
+      const row = worksheet.addRow({
+        waktu: new Date(d.waktu).toLocaleString("id-ID"),
+        nama: d.nama,
+        tipe: d.tipe.toUpperCase(),
+        status: d.status_waktu || "-",
+        lokasi: d.lokasi
+      });
+      
+      // Kasih tinggi baris agak besar buat tempat foto
+      row.height = 65;
+      row.alignment = { vertical: 'middle' };
+
+      // Sisipkan gambar ke sel Excel
+      if (d.foto) {
+        const imageId = workbook.addImage({
+          base64: d.foto,
+          extension: 'jpeg',
+        });
+        
+        worksheet.addImage(imageId, {
+          tl: { col: 5, row: index + 1 }, // Posisi kolom (5 = Kolom F) dan baris
+          ext: { width: 80, height: 60 }  // Ukuran gambar di Excel
+        });
+      }
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const fileName = `Rekap_Absensi_BPBD_${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")}.xlsx`;
+    saveAs(new Blob([buffer]), fileName);
+
+  } catch (error) {
+    console.error("Gagal export Excel:", error);
+    alert("Terjadi kesalahan saat membuat file Excel.");
+  } finally {
+    btn.innerText = originalText;
+    btn.disabled = false;
+  }
 }
 
-// Fitur Unduh PDF A4 (Membutuhkan jsPDF + AutoTable)
+// === EXPORT PDF DENGAN FOTO (Memakai jsPDF) ===
 function downloadPDF() {
   if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4'); // 'p' = portrait, 'mm' = milimeter, 'a4' = ukuran kertas
+  const doc = new jsPDF('p', 'mm', 'a4'); 
 
-  // Judul PDF
+  // Judul
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.text("REKAP ABSENSI WFA", 105, 15, { align: "center" });
@@ -382,34 +427,43 @@ function downloadPDF() {
   doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", 105, 20, { align: "center" });
   doc.text(`Dicetak pada: ${new Date().toLocaleString("id-ID")}`, 14, 30);
 
-  // Setup Tabel PDF
-  const tableColumn = ["Waktu", "Nama Pegawai", "Tipe", "Status", "Lokasi (GPS)"];
+  const tableColumn = ["Waktu", "Nama Pegawai", "Tipe", "Status", "Lokasi", "Foto"];
   const tableRows = [];
 
   adminDataGlobal.forEach(d => {
-    const rowData = [
+    tableRows.push([
       new Date(d.waktu).toLocaleString("id-ID"),
       d.nama,
       d.tipe.toUpperCase(),
       d.status_waktu || "-",
-      d.lokasi
-    ];
-    tableRows.push(rowData);
+      d.lokasi,
+      "" // Kosongkan teksnya, karena kita akan isi pakai gambar di hook didDrawCell
+    ]);
   });
 
-  // Render Tabel
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
-    startY: 35, // Jarak dari atas kertas
-    styles: { fontSize: 8, cellPadding: 2 },
-    headStyles: { fillColor: [30, 58, 138] }, // Warna biru gelap khas BPBD
+    startY: 35,
+    styles: { fontSize: 8, cellPadding: 2, minCellHeight: 18, valign: 'middle' },
+    headStyles: { fillColor: [30, 58, 138] },
     columnStyles: {
-      0: { cellWidth: 25 }, // Lebar kolom Waktu
-      1: { cellWidth: 40 }, // Lebar kolom Nama
-      2: { cellWidth: 15 }, // Lebar kolom Tipe
-      3: { cellWidth: 25 }, // Lebar kolom Status
-      4: { cellWidth: 'auto' } // Lebar kolom Lokasi menyesuaikan sisa kertas
+      0: { cellWidth: 22 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 15 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 65 },
+      5: { cellWidth: 25 } // Lebar kolom foto
+    },
+    // Hook untuk merender gambar di dalam tabel
+    didDrawCell: function(data) {
+      if (data.column.index === 5 && data.cell.section === 'body') {
+        const imgBase64 = adminDataGlobal[data.row.index].foto;
+        if (imgBase64) {
+          // Posisi (X, Y) dan Ukuran (Width, Height) gambar
+          doc.addImage(imgBase64, 'JPEG', data.cell.x + 2, data.cell.y + 2, 20, 15);
+        }
+      }
     }
   });
 
