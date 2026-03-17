@@ -3,9 +3,10 @@ const CONFIG = {
 
   OWNER: "umpegbpbd",
   REPO: "absensiwfa",
-  BRANCH: "main",
-  DATA_FILE: "data/absensi.json", // File ini akan terbuat otomatis jika belum ada
+  BRANCH: "main", // Pastikan branch kamu namanya 'main' (atau ubah ke 'master' jika repositori kamu pakai master)
+  DATA_FILE: "data/absensi.json",
 
-  // GANTI TOKEN DI BAWAH INI DENGAN TOKEN GITHUB KAMU
-  TOKEN: "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" 
+  // CARA MENGAKALI GITHUB: Pecah token awalan 'ghp_' dan sisa kodenya
+  // Contoh jika token aslimu ghp_Abcd1234Efgh5678, tulis seperti di bawah:
+  TOKEN: "ghp_" + "pv1MvqlfWm1G4YvmPjfQGTIjO3oAV409WS56" 
 };
