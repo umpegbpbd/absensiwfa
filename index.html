@@ -1,158 +1,85 @@
 <!doctype html>
-
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Absensi WFA - BPBD Trenggalek</title>
-
-  <!-- Tailwind -->
+  <title>Absensi WFA</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Font -->
-
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Style -->
-
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-
-  <style>
-    .page { display: none; }
-    .page.active { display: block; }
-  </style>
-
 </head>
 
-<body class="text-slate-900">
-  <div class="max-w-3xl mx-auto p-4 min-h-screen">
+<body>
+  <div class="max-w-3xl mx-auto p-4">
 
-```
-<!-- HEADER -->
-<header class="bg-blue-900 text-white rounded-2xl p-5 flex justify-between items-center shadow-lg mb-6">
-  <div>
-    <h1 class="font-bold text-xl">⏱️ Absensi WFA</h1>
-    <p class="text-xs text-blue-200">BPBD KAB. TRENGGALEK</p>
-  </div>
-  <div class="flex gap-2">
-    <button onclick="showPage('dashboard')" class="bg-white/10 px-3 py-2 rounded-lg">🏠</button>
-    <button onclick="showPage('admin')" class="bg-white/10 px-3 py-2 rounded-lg">🔐</button>
-  </div>
-</header>
+    <!-- HEADER -->
+    <header class="bg-blue-900 text-white p-4 rounded-xl flex justify-between">
+      <div>
+        <h1 class="font-bold">⏱️ Absensi WFA</h1>
+        <p class="text-xs">BPBD TRENGGALEK</p>
+      </div>
+      <div>
+        <button onclick="showPage('dashboard')">🏠</button>
+        <button onclick="showPage('admin')">🔐</button>
+      </div>
+    </header>
 
-<!-- DASHBOARD -->
-<main id="page-dashboard" class="page active space-y-4">
+    <!-- DASHBOARD -->
+    <main id="page-dashboard" class="page active mt-4">
 
-  <!-- JAM -->
-  <div class="bg-white rounded-2xl p-8 text-center shadow">
-    <div id="today" class="text-sm text-slate-500 font-semibold">MEMUAT TANGGAL...</div>
-    <div id="clock" class="text-6xl font-bold text-blue-800 mt-2">00:00:00</div>
-  </div>
+      <div class="bg-white p-6 rounded-xl text-center">
+        <div id="today">Memuat...</div>
+        <div id="clock" class="text-4xl font-bold">00:00:00</div>
+      </div>
 
-  <!-- SELECT -->
-  <div class="bg-white rounded-2xl p-6 shadow">
-    <label class="font-bold block mb-2">👤 Pilih Nama Pegawai</label>
-    <select id="employee" class="w-full border-2 p-3 rounded-xl"></select>
-  </div>
+      <div class="bg-white p-4 rounded-xl mt-4">
+        <select id="employee" class="w-full p-3 border rounded-lg"></select>
+      </div>
 
-  <!-- BUTTON -->
-  <div class="grid grid-cols-2 gap-4">
-    <button onclick="startAbsensi('masuk')" class="bg-blue-600 text-white p-6 rounded-xl font-bold">
-      ✓ MASUK
-    </button>
-    <button onclick="startAbsensi('pulang')" class="bg-emerald-600 text-white p-6 rounded-xl font-bold">
-      ✓ PULANG
-    </button>
-  </div>
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        <button onclick="startAbsensi('masuk')" class="bg-blue-600 text-white p-6 rounded-xl">
+          MASUK
+        </button>
+        <button onclick="startAbsensi('pulang')" class="bg-green-600 text-white p-6 rounded-xl">
+          PULANG
+        </button>
+      </div>
+    </main>
 
-</main>
+    <!-- ABSEN -->
+    <main id="page-absen" class="page mt-4">
 
-<!-- ABSEN -->
-<main id="page-absen" class="page space-y-4">
+      <button onclick="cancelAbsensi()">❌ Batal</button>
 
-  <div class="bg-white rounded-2xl p-4 shadow">
+      <video id="camera" class="video" autoplay></video>
+      <canvas id="canvas" class="hidden"></canvas>
+      <img id="photo" class="hidden photo">
 
-    <button onclick="cancelAbsensi()" class="mb-3 text-slate-500">✕ Batalkan</button>
+      <p id="locationText">Mendeteksi lokasi...</p>
 
-    <video id="camera" class="video" autoplay playsinline muted></video>
-    <canvas id="canvas" class="hidden"></canvas>
-    <img id="photo" class="photo hidden">
+      <button id="btnCapture" onclick="capturePhoto()">📸 Foto</button>
 
-    <div class="mt-3 text-sm">
-      📍 <span id="locationText">Mendeteksi lokasi...</span>
-    </div>
+      <div id="postCapture" class="hidden">
+        <button onclick="retakePhoto()">Ulang</button>
+        <button id="btnSubmit" onclick="submitAbsensi()">Kirim</button>
+      </div>
+    </main>
 
-    <button id="btnCapture" onclick="capturePhoto()" class="mt-4 bg-blue-600 text-white w-full p-3 rounded-xl">
-      📸 Ambil Foto
-    </button>
+    <!-- ADMIN -->
+    <main id="page-admin" class="page mt-4">
+      <input id="adminPassword" placeholder="Password">
+      <button onclick="adminLogin()">Login</button>
 
-    <div id="postCapture" class="hidden grid grid-cols-2 gap-2 mt-3">
-      <button onclick="retakePhoto()" class="bg-gray-500 text-white p-3 rounded-xl">
-        Ulang
-      </button>
-      <button id="btnSubmit" onclick="submitAbsensi()" class="bg-blue-700 text-white p-3 rounded-xl">
-        Kirim
-      </button>
-    </div>
+      <table>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </main>
 
   </div>
-
-</main>
-
-<!-- ADMIN -->
-<main id="page-admin" class="page space-y-4">
-
-  <div id="adminLogin" class="bg-white p-6 rounded-2xl text-center shadow">
-    <h2 class="font-bold text-xl mb-3">Admin Panel</h2>
-
-    <input id="adminPassword" type="password" placeholder="Password"
-      class="border p-3 w-full rounded-xl mb-3">
-
-    <button onclick="adminLogin()" class="bg-blue-700 text-white w-full p-3 rounded-xl">
-      Login
-    </button>
-  </div>
-
-  <div id="adminPanel" class="hidden bg-white p-4 rounded-2xl shadow">
-
-    <div class="flex justify-between mb-3">
-      <button onclick="loadAdminTable()" class="bg-blue-100 px-3 py-2 rounded">Refresh</button>
-      <button onclick="exportToCSV()" class="bg-green-600 text-white px-3 py-2 rounded">Export</button>
-    </div>
-
-    <table class="w-full text-sm">
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>Waktu</th>
-          <th>Tipe</th>
-          <th>Status</th>
-          <th>Foto</th>
-        </tr>
-      </thead>
-      <tbody id="adminTableBody"></tbody>
-    </table>
-
-  </div>
-
-</main>
-
-<!-- FOOTER -->
-<footer class="text-center text-xs mt-6 text-gray-400">
-  © BPBD TRENGGALEK
-</footer>
-```
-
-  </div>
-
-  <!-- SCRIPT (WAJIB URUTAN INI) -->
 
   <script src="config.js"></script>
-
   <script src="employees.js"></script>
-
   <script src="app.js"></script>
-
 </body>
 </html>
