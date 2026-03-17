@@ -1,4 +1,3 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/app.js b/app.js
 index ce2882d8e6db0c85e140f882eb4cd6d6aa1df4ac..9aef942d499ef8ef81ea43edc7ef42036effd5f3 100644
 --- a/app.js
@@ -394,6 +393,3 @@ index ce2882d8e6db0c85e140f882eb4cd6d6aa1df4ac..9aef942d499ef8ef81ea43edc7ef4203
 +    stopCamera();
 +    location.reload();
 +}
- 
-EOF
-)
