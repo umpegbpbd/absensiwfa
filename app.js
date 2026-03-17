@@ -1,11 +1,4 @@
-let state = {
-    currentType: "", 
-    stream: null,
-    photo: null,
-    lat: null,
-    lng: null,
-    address: "Mencari lokasi..."
-};
+let state = { currentType: "", stream: null, photo: null, lat: null, lng: null, address: "Mencari lokasi..." };
 
 // ================= INITIALIZATION =================
 window.addEventListener("DOMContentLoaded", () => {
@@ -14,127 +7,83 @@ window.addEventListener("DOMContentLoaded", () => {
     showPage("dashboard");
 });
 
-// ================= JAM REALTIME =================
 function startClock() {
-    const clockEl = document.getElementById("clockDisplay");
-    const dateEl = document.getElementById("currentDate");
-
     setInterval(() => {
         const now = new Date();
-        if (clockEl) clockEl.textContent = now.toLocaleTimeString("id-ID", { hour12: false }).replace(/\./g, ':');
-        if (dateEl) {
-            dateEl.textContent = now.toLocaleDateString("id-ID", {
-                weekday: "long", year: "numeric", month: "long", day: "numeric"
-            });
-        }
+        document.getElementById("clockDisplay").textContent = now.toLocaleTimeString("id-ID", { hour12: false }).replace(/\./g, ':');
+        document.getElementById("currentDate").textContent = now.toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     }, 1000);
 }
 
-// ================= NAVIGATION =================
 function showPage(pageId) {
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    const target = document.getElementById("page-" + pageId);
-    if (target) target.classList.add("active");
+    document.getElementById("page-" + pageId).classList.add("active");
     if (pageId === "dashboard") stopCamera();
 }
 
-// ================= LOAD EMPLOYEES =================
 function loadEmployees() {
     const select = document.getElementById("employeeSelect");
-    const list = (typeof employees !== "undefined") ? employees : ["Andi", "Budi", "Caca"];
-    
+    const list = (typeof employees !== "undefined") ? employees : ["User Test"];
     select.innerHTML = '<option value="" disabled selected>-- Pilih Nama Anda --</option>';
-    list.forEach(nama => {
-        const opt = document.createElement("option");
-        opt.value = nama;
-        opt.textContent = nama;
-        select.appendChild(opt);
-    });
+    list.forEach(n => { const o = document.createElement("option"); o.value = n; o.textContent = n; select.appendChild(o); });
 }
 
-// ================= CAMERA ENGINE =================
+// ================= CAMERA & GPS =================
 async function startCamera() {
     const video = document.getElementById("cameraPreview");
-    try {
-        state.stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: CONFIG.CAMERA_FACING_MODE },
-            audio: false
-        });
-        video.srcObject = state.stream;
-        video.play();
-    } catch (err) {
-        alert("Kamera tidak diizinkan atau tidak ditemukan.");
-    }
+    state.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: CONFIG.CAMERA_FACING_MODE }, audio: false });
+    video.srcObject = state.stream;
+    video.play();
 }
 
-function stopCamera() {
-    if (state.stream) {
-        state.stream.getTracks().forEach(track => track.stop());
-        state.stream = null;
-    }
-}
+function stopCamera() { if (state.stream) state.stream.getTracks().forEach(t => t.stop()); }
 
 function capturePhoto() {
-    const video = document.getElementById("cameraPreview");
-    const canvas = document.getElementById("cameraCanvas");
-    const imgDisplay = document.getElementById("capturedPhoto");
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, 0, 0);
-
-    state.photo = canvas.toDataURL("image/jpeg", CONFIG.IMAGE_QUALITY);
-    imgDisplay.src = state.photo;
-    imgDisplay.style.display = "block";
-    video.style.display = "none";
-    
+    const v = document.getElementById("cameraPreview");
+    const c = document.getElementById("cameraCanvas");
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    const ctx = c.getContext("2d");
+    ctx.translate(c.width, 0); ctx.scale(-1, 1); ctx.drawImage(v, 0, 0);
+    state.photo = c.toDataURL("image/jpeg", CONFIG.IMAGE_QUALITY);
+    document.getElementById("capturedPhoto").src = state.photo;
+    document.getElementById("capturedPhoto").classList.remove("hidden");
+    v.classList.add("hidden");
     document.getElementById("btnCapture").classList.add("hidden");
     document.getElementById("postCaptureButtons").classList.remove("hidden");
 }
 
 function retakePhoto() {
-    state.photo = null;
-    document.getElementById("capturedPhoto").style.display = "none";
-    document.getElementById("cameraPreview").style.display = "block";
+    document.getElementById("capturedPhoto").classList.add("hidden");
+    document.getElementById("cameraPreview").classList.remove("hidden");
     document.getElementById("btnCapture").classList.remove("hidden");
     document.getElementById("postCaptureButtons").classList.add("hidden");
 }
 
-// ================= GPS =================
 function getLocation() {
-    const info = document.getElementById("locationText");
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-        state.lat = pos.coords.latitude;
-        state.lng = pos.coords.longitude;
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${state.lat}&lon=${state.lng}`);
-            const data = await res.json();
-            state.address = data.display_name.split(',').slice(0, 3).join(',');
-            info.innerText = state.address;
-        } catch (e) {
-            info.innerText = `${state.lat}, ${state.lng}`;
-        }
-    }, () => { info.innerText = "GPS Aktifkan!"; }, { enableHighAccuracy: true });
+    navigator.geolocation.getCurrentPosition(async (p) => {
+        state.lat = p.coords.latitude; state.lng = p.coords.longitude;
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${state.lat}&lon=${state.lng}`);
+        const d = await res.json();
+        state.address = d.display_name.split(',').slice(0, 3).join(',');
+        document.getElementById("locationText").innerText = state.address;
+    }, null, { enableHighAccuracy: true });
 }
 
-async function startAbsensi(type) {
+async function startAbsensi(t) {
     if (!document.getElementById("employeeSelect").value) return alert("Pilih Nama!");
-    state.currentType = type;
+    state.currentType = t;
     showPage("absensi");
     await startCamera();
     getLocation();
 }
 
-// ================= SAVE TO GITHUB =================
+// ================= GITHUB ENGINE (ANTI-LAG) =================
 async function submitAbsensi() {
     const btn = document.getElementById("btnSubmitAbsen");
     btn.disabled = true;
-    btn.innerText = "Mengirim...";
+    btn.innerText = "⏳ Sedang Mengirim...";
 
-    const dataAbsen = {
+    const payload = {
         nama: document.getElementById("employeeSelect").value,
         tanggal: new Date().toLocaleDateString("id-ID"),
         jam: new Date().toLocaleTimeString("id-ID"),
@@ -147,40 +96,45 @@ async function submitAbsensi() {
     const url = `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${CONFIG.DATA_FILE}`;
 
     try {
-        const resGet = await fetch(url, { headers: { "Authorization": `token ${CONFIG.TOKEN}` } });
+        // 1. Ambil file SHA terbaru
+        const resGet = await fetch(url, { headers: { "Authorization": `token ${CONFIG.TOKEN}`, "Accept": "application/vnd.github.v3+json" } });
+        
         let sha = "";
         let currentData = [];
 
         if (resGet.ok) {
             const file = await resGet.json();
             sha = file.sha;
-            currentData = JSON.parse(atob(file.content));
+            currentData = JSON.parse(decodeURIComponent(escape(atob(file.content))));
         }
 
-        currentData.push(dataAbsen);
+        // 2. Tambah Data Baru
+        currentData.push(payload);
 
+        // 3. Kirim Balik
         const resPut = await fetch(url, {
             method: "PUT",
             headers: { "Authorization": `token ${CONFIG.TOKEN}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-                message: `Absen ${dataAbsen.nama}`,
+                message: `Absen: ${payload.nama}`,
                 content: btoa(unescape(encodeURIComponent(JSON.stringify(currentData, null, 2)))),
                 sha: sha
             })
         });
 
         if (resPut.ok) {
-            alert("✅ Absensi Berhasil Terkirim ke GitHub!");
+            alert("✅ Absensi Berhasil Disimpan!");
             location.reload();
+        } else {
+            const err = await resPut.json();
+            throw new Error(err.message);
         }
     } catch (e) {
-        alert("Gagal kirim. Cek koneksi/token.");
+        console.error(e);
+        alert("❌ Error: " + e.message + "\n\nPastikan Token GitHub benar & Repositori Private.");
         btn.disabled = false;
+        btn.innerText = "Coba Kirim Lagi";
     }
 }
 
-function cancelAbsensi() {
-    stopCamera();
-    showPage("dashboard");
-    retakePhoto();
-}
+function cancelAbsensi() { stopCamera(); location.reload(); }
