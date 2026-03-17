@@ -2,7 +2,7 @@ let gpsLoaded = false;
 let stream = null;
 let photoBase64 = "";
 let absenType = ""; 
-let currentLocation = { lat: null, lng: null, address: "" }; 
+let currentLocation = { lat: null, lng: null, address: "", accuracy: 0, fake_status: "Aman" }; 
 let adminDataGlobal = []; 
 
 window.onload = () => {
@@ -109,13 +109,27 @@ async function startCamera() {
 function detectLocation() {
   if (gpsLoaded) return;
   const locText = document.getElementById("locationText");
-  locText.innerHTML = "Mendeteksi koordinat dan alamat...";
+  locText.innerHTML = "Menghubungkan ke Satelit GPS (Menghindari Fake GPS)...";
   
+  const geoOptions = {
+    enableHighAccuracy: true, 
+    maximumAge: 0,            
+    timeout: 15000            
+  };
+
   navigator.geolocation.getCurrentPosition(
     async pos => {
       gpsLoaded = true;
       currentLocation.lat = pos.coords.latitude;
       currentLocation.lng = pos.coords.longitude;
+      currentLocation.accuracy = pos.coords.accuracy;
+
+      // JEBAKAN FAKE GPS SEDERHANA
+      if (pos.coords.altitude === null && pos.coords.accuracy < 5) {
+        currentLocation.fake_status = "⚠️ Terindikasi Fake GPS";
+      } else {
+        currentLocation.fake_status = "Aman";
+      }
       
       try {
         const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLocation.lat}&lon=${currentLocation.lng}&zoom=18&addressdetails=1`);
@@ -138,15 +152,21 @@ function detectLocation() {
         currentLocation.address = "Gagal memuat alamat dari server";
       }
 
+      let statusHtml = currentLocation.fake_status === "Aman" 
+          ? `<span class="text-green-600 font-bold">✓ GPS Asli (Akurasi: ${Math.round(currentLocation.accuracy)}m)</span>`
+          : `<span class="text-red-600 font-bold bg-red-100 p-1 rounded block mt-1">${currentLocation.fake_status} - Absen Ditangguhkan</span>`;
+
       locText.innerHTML = `
         <span class="font-bold text-blue-900">Lat: ${currentLocation.lat.toFixed(5)}, Lng: ${currentLocation.lng.toFixed(5)}</span><br>
         <span class="text-xs text-gray-600 mt-1 block">${currentLocation.address}</span>
+        <div class="mt-2 text-xs">${statusHtml}</div>
       `;
     },
     err => {
-      locText.textContent = "Gagal mendapatkan lokasi. Izinkan akses GPS.";
+      locText.innerHTML = `<span class="text-red-600 font-bold">Gagal mendapatkan lokasi. Pastikan GPS HP menyala (High Accuracy) dan izinkan akses di Browser.</span>`;
       console.error(err);
-    }
+    },
+    geoOptions 
   );
 }
 
@@ -203,6 +223,17 @@ async function submitAbsensi() {
     return;
   }
 
+  if (!currentLocation.lat) {
+    alert("Titik GPS belum ditemukan! Tunggu sebentar atau pastikan GPS HP menyala.");
+    return;
+  }
+
+  // === FITUR BLOKIR FAKE GPS ===
+  if (currentLocation.fake_status !== "Aman") {
+    alert("🚫 AKSES DITOLAK!\n\nSistem mendeteksi penggunaan Fake GPS / Mock Location.\nSilakan matikan aplikasi pemalsu lokasi, muat ulang halaman ini, dan gunakan GPS asli perangkat Anda untuk melakukan absensi.");
+    return; // Langsung hentikan proses di sini
+  }
+
   btnSubmit.innerText = "⏳ Sedang Menyimpan...";
   btnSubmit.disabled = true;
 
@@ -215,12 +246,13 @@ async function submitAbsensi() {
     lat: currentLocation.lat,
     lng: currentLocation.lng,
     lokasi: currentLocation.address,
+    gps_status: currentLocation.fake_status, 
     foto: photoBase64 
   };
 
   try {
     await saveToGitHub(newRecord);
-    alert(`Berhasil! Absen ${absenType.toUpperCase()} atas nama ${employeeName} tersimpan.\nStatus: ${timeCheck.status}`);
+    alert(`Berhasil! Absen ${absenType.toUpperCase()} atas nama ${employeeName} tersimpan.`);
     cancelAbsensi(); 
   } catch (error) {
     console.error(error);
@@ -309,7 +341,8 @@ async function loadAdminData() {
         <th class="p-2 border">Waktu</th>
         <th class="p-2 border">Nama</th>
         <th class="p-2 border">Tipe</th>
-        <th class="p-2 border">Status</th>
+        <th class="p-2 border">Status Kehadiran</th>
+        <th class="p-2 border">Validasi GPS</th>
         <th class="p-2 border">Lokasi</th>
         <th class="p-2 border text-center">Foto</th>
       </tr>
@@ -323,6 +356,8 @@ async function loadAdminData() {
       if (d.status_waktu === "Tepat Waktu") statusColor = "text-green-600";
       if (d.status_waktu === "Terlambat") statusColor = "text-red-600";
       if (d.status_waktu === "Pulang Lebih Cepat") statusColor = "text-orange-500";
+
+      let gpsColor = d.gps_status === "Aman" ? "text-green-600" : "text-red-600 font-bold bg-red-100 p-1 rounded";
       
       tbody.innerHTML += `
         <tr class="border-b text-sm hover:bg-gray-50">
@@ -330,6 +365,7 @@ async function loadAdminData() {
           <td class="p-2 border font-semibold whitespace-nowrap">${d.nama}</td>
           <td class="p-2 border text-center font-bold ${d.tipe === 'masuk' ? 'text-blue-600' : 'text-emerald-600'}">${d.tipe.toUpperCase()}</td>
           <td class="p-2 border text-center font-bold ${statusColor} whitespace-nowrap">${d.status_waktu || "-"}</td>
+          <td class="p-2 border text-xs text-center ${gpsColor}">${d.gps_status || "Aman"}</td>
           <td class="p-2 border text-xs text-gray-600">${d.lokasi}</td>
           <td class="p-2 border text-center">${fotoTag}</td>
         </tr>
@@ -341,11 +377,10 @@ async function loadAdminData() {
   }
 }
 
-// === EXPORT EXCEL DENGAN FOTO (Memakai ExcelJS) ===
+// === EXPORT EXCEL DENGAN FOTO ===
 async function downloadExcel() {
   if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
 
-  // Bikin tombol jadi loading
   const btn = document.querySelector('button[onclick="downloadExcel()"]');
   const originalText = btn.innerText;
   btn.innerText = "⏳ Memproses Excel...";
@@ -355,44 +390,46 @@ async function downloadExcel() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Data Absensi");
 
-    // Setup Header Kolom
     worksheet.columns = [
       { header: "Waktu Absen", key: "waktu", width: 22 },
       { header: "Nama Pegawai", key: "nama", width: 35 },
       { header: "Tipe Absen", key: "tipe", width: 15 },
       { header: "Status Kehadiran", key: "status", width: 20 },
+      { header: "Validasi GPS", key: "gps", width: 25 },
       { header: "Lokasi (GPS)", key: "lokasi", width: 50 },
       { header: "Foto Wajah", key: "foto", width: 15 }
     ];
 
-    // Styling Header
     worksheet.getRow(1).font = { bold: true };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
 
-    // Masukkan Data
     adminDataGlobal.forEach((d, index) => {
       const row = worksheet.addRow({
         waktu: new Date(d.waktu).toLocaleString("id-ID"),
         nama: d.nama,
         tipe: d.tipe.toUpperCase(),
         status: d.status_waktu || "-",
+        gps: d.gps_status || "Aman",
         lokasi: d.lokasi
       });
       
-      // Kasih tinggi baris agak besar buat tempat foto
       row.height = 65;
       row.alignment = { vertical: 'middle' };
 
-      // Sisipkan gambar ke sel Excel
+      if (d.gps_status && d.gps_status !== "Aman") {
+         row.getCell('gps').fill = {
+           type: 'pattern',
+           pattern: 'solid',
+           fgColor: { argb: 'FFFFCCCC' } 
+         };
+         row.getCell('gps').font = { color: { argb: 'FFFF0000' }, bold: true };
+      }
+
       if (d.foto) {
-        const imageId = workbook.addImage({
-          base64: d.foto,
-          extension: 'jpeg',
-        });
-        
+        const imageId = workbook.addImage({ base64: d.foto, extension: 'jpeg' });
         worksheet.addImage(imageId, {
-          tl: { col: 5, row: index + 1 }, // Posisi kolom (5 = Kolom F) dan baris
-          ext: { width: 80, height: 60 }  // Ukuran gambar di Excel
+          tl: { col: 6, row: index + 1 }, 
+          ext: { width: 80, height: 60 }
         });
       }
     });
@@ -410,24 +447,23 @@ async function downloadExcel() {
   }
 }
 
-// === EXPORT PDF DENGAN FOTO (Memakai jsPDF) ===
+// === EXPORT PDF DENGAN FOTO ===
 function downloadPDF() {
   if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4'); 
+  const doc = new jsPDF('l', 'mm', 'a4'); 
 
-  // Judul
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("REKAP ABSENSI WFA", 105, 15, { align: "center" });
+  doc.text("REKAP ABSENSI WFA", 148, 15, { align: "center" });
   
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", 105, 20, { align: "center" });
+  doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", 148, 20, { align: "center" });
   doc.text(`Dicetak pada: ${new Date().toLocaleString("id-ID")}`, 14, 30);
 
-  const tableColumn = ["Waktu", "Nama Pegawai", "Tipe", "Status", "Lokasi", "Foto"];
+  const tableColumn = ["Waktu", "Nama Pegawai", "Tipe", "Kehadiran", "GPS", "Lokasi", "Foto"];
   const tableRows = [];
 
   adminDataGlobal.forEach(d => {
@@ -436,8 +472,9 @@ function downloadPDF() {
       d.nama,
       d.tipe.toUpperCase(),
       d.status_waktu || "-",
+      d.gps_status || "Aman",
       d.lokasi,
-      "" // Kosongkan teksnya, karena kita akan isi pakai gambar di hook didDrawCell
+      "" 
     ]);
   });
 
@@ -448,19 +485,18 @@ function downloadPDF() {
     styles: { fontSize: 8, cellPadding: 2, minCellHeight: 18, valign: 'middle' },
     headStyles: { fillColor: [30, 58, 138] },
     columnStyles: {
-      0: { cellWidth: 22 },
-      1: { cellWidth: 35 },
+      0: { cellWidth: 25 },
+      1: { cellWidth: 40 },
       2: { cellWidth: 15 },
-      3: { cellWidth: 20 },
-      4: { cellWidth: 65 },
-      5: { cellWidth: 25 } // Lebar kolom foto
+      3: { cellWidth: 22 },
+      4: { cellWidth: 25 }, 
+      5: { cellWidth: 90 }, 
+      6: { cellWidth: 25 }  
     },
-    // Hook untuk merender gambar di dalam tabel
     didDrawCell: function(data) {
-      if (data.column.index === 5 && data.cell.section === 'body') {
+      if (data.column.index === 6 && data.cell.section === 'body') {
         const imgBase64 = adminDataGlobal[data.row.index].foto;
         if (imgBase64) {
-          // Posisi (X, Y) dan Ukuran (Width, Height) gambar
           doc.addImage(imgBase64, 'JPEG', data.cell.x + 2, data.cell.y + 2, 20, 15);
         }
       }
