@@ -38,11 +38,63 @@ function showPage(p) {
   document.getElementById("page-" + p).classList.add("active");
 }
 
+// === FUNGSI EVALUASI WAKTU ===
+function evaluateTime(type) {
+  const now = new Date();
+  const day = now.getDay(); // 0: Minggu, 1: Senin, 2: Selasa, ..., 5: Jumat, 6: Sabtu
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  
+  // Mengubah waktu jadi format desimal untuk mempermudah perbandingan 
+  // Contoh: 07:30 menjadi 7.5 | 15:30 menjadi 15.5
+  const timeFloat = hours + (minutes / 60);
+
+  if (type === 'masuk') {
+    // Blokir jika absen masuk sebelum jam 07.00
+    if (timeFloat < 7.0) {
+      return { allowed: false, msg: "Belum waktunya! Absen masuk baru dibuka jam 07.00 WIB." };
+    }
+
+    // Aturan Selain Jumat
+    if (day !== 5) {
+      if (timeFloat <= 7.5) { // 07.00 - 07.30
+        return { allowed: true, status: "Tepat Waktu" };
+      } else { // Lebih dari 07.30
+        return { allowed: true, status: "Terlambat" };
+      }
+    } else {
+      // Aturan Khusus Jumat (Bebas terlambat sementara, tetap harus di atas jam 07.00)
+      return { allowed: true, status: "Masuk (Jumat)" };
+    }
+  } 
+  else if (type === 'pulang') {
+    // Blokir jika absen pulang lewat dari 17.30
+    if (timeFloat > 17.5) {
+      return { allowed: false, msg: "Absen pulang ditolak! Batas maksimal absen pulang adalah 17.30 WIB." };
+    }
+    
+    // Cek status kepulangan
+    if (timeFloat < 15.5) { // Sebelum 15.30
+      return { allowed: true, status: "Pulang Lebih Cepat" };
+    } else { // 15.30 - 17.30
+      return { allowed: true, status: "Tepat Waktu" };
+    }
+  }
+  return { allowed: true, status: "-" };
+}
+
 async function startAbsensi(type) {
   const selectedEmployee = document.getElementById("employee").value;
   
   if (!selectedEmployee) {
     alert("Silakan pilih nama terlebih dahulu!");
+    return;
+  }
+
+  // Cek validasi jam SEBELUM kamera menyala
+  const timeCheck = evaluateTime(type);
+  if (!timeCheck.allowed) {
+    alert(timeCheck.msg);
     return;
   }
 
@@ -110,14 +162,12 @@ function capturePhoto() {
   const video = document.getElementById("camera");
   const canvas = document.getElementById("canvas");
 
-  // Perkecil resolusi foto agar ukuran JSON tidak cepat penuh
   canvas.width = 320; 
   canvas.height = 240;
 
   const ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  // Kompres kualitas JPEG ke 0.6 (60%)
   photoBase64 = canvas.toDataURL("image/jpeg", 0.6);
 
   document.getElementById("photo").src = photoBase64;
@@ -151,11 +201,17 @@ function cancelAbsensi() {
   showPage("dashboard");
 }
 
-// === FUNGSI MENGIRIM KE GITHUB ===
 async function submitAbsensi() {
   const employeeName = document.getElementById("employee").value;
   const btnSubmit = document.getElementById("btnSubmit");
   
+  // Cek ulang waktu saat mereka klik kirim (untuk mencegah mereka diam di halaman kamera berjam-jam)
+  const timeCheck = evaluateTime(absenType);
+  if (!timeCheck.allowed) {
+    alert(timeCheck.msg);
+    return;
+  }
+
   btnSubmit.innerText = "⏳ Sedang Menyimpan...";
   btnSubmit.disabled = true;
 
@@ -164,6 +220,7 @@ async function submitAbsensi() {
     waktu: new Date().toISOString(),
     nama: employeeName,
     tipe: absenType,
+    status_waktu: timeCheck.status, // Ini akan tersimpan ke GitHub
     lat: currentLocation.lat,
     lng: currentLocation.lng,
     lokasi: currentLocation.address,
@@ -172,11 +229,11 @@ async function submitAbsensi() {
 
   try {
     await saveToGitHub(newRecord);
-    alert(`Sukses! Absen ${absenType.toUpperCase()} atas nama ${employeeName} berhasil disimpan.`);
+    alert(`Berhasil! Absen ${absenType.toUpperCase()} atas nama ${employeeName} tersimpan.\nStatus: ${timeCheck.status}`);
     cancelAbsensi(); 
   } catch (error) {
     console.error(error);
-    alert("Gagal menyimpan data! Pastikan Token GitHub di config.js sudah benar.");
+    alert("Gagal menyimpan data! Pastikan Token GitHub di config.js sudah benar dan aktif.");
   } finally {
     btnSubmit.innerText = "✈️ Kirim Absen";
     btnSubmit.disabled = false;
@@ -196,7 +253,6 @@ async function saveToGitHub(newRecord) {
   let sha = "";
   let existingData = [];
 
-  // 1. Ambil data absensi.json yang lama (jika ada)
   try {
     const getRes = await fetch(url, { method: "GET", headers });
     if (getRes.ok) {
@@ -209,15 +265,12 @@ async function saveToGitHub(newRecord) {
     console.log("Membuat file baru karena file belum ada.");
   }
 
-  // 2. Tambahkan data absen baru ke tumpukan data lama
   existingData.push(newRecord);
 
-  // 3. Ubah kembali ke format Base64 untuk dikirim ke GitHub
   const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(existingData, null, 2))));
 
-  // 4. Kirim / Update file di GitHub
   const body = {
-    message: `Absen ${newRecord.tipe.toUpperCase()} - ${newRecord.nama}`,
+    message: `Absen ${newRecord.tipe.toUpperCase()} - ${newRecord.nama} (${newRecord.status_waktu})`,
     content: updatedContent,
     branch: CONFIG.BRANCH
   };
@@ -260,21 +313,28 @@ async function loadAdminData() {
         <th class="p-2 border">Waktu</th>
         <th class="p-2 border">Nama</th>
         <th class="p-2 border">Tipe</th>
+        <th class="p-2 border">Status Kehadiran</th>
         <th class="p-2 border">Lokasi</th>
         <th class="p-2 border">Foto</th>
       </tr>
     `;
     
-    // Reverse agar data terbaru ada di atas
     data.reverse().forEach(d => {
       const date = new Date(d.waktu).toLocaleString("id-ID");
-      const fotoTag = d.foto ? `<img src="${d.foto}" class="w-10 h-10 object-cover rounded">` : "-";
+      const fotoTag = d.foto ? `<img src="${d.foto}" class="w-10 h-10 object-cover rounded hover:scale-150 transition">` : "-";
+      
+      // Warnai teks status agar mudah dilihat admin (Merah kalau telat/cepat pulang, Hijau kalau tepat)
+      let statusColor = "text-gray-700";
+      if (d.status_waktu === "Tepat Waktu") statusColor = "text-green-600";
+      if (d.status_waktu === "Terlambat") statusColor = "text-red-600";
+      if (d.status_waktu === "Pulang Lebih Cepat") statusColor = "text-orange-500";
       
       tbody.innerHTML += `
         <tr class="border-b text-sm hover:bg-gray-50">
           <td class="p-2 border">${date}</td>
           <td class="p-2 border font-semibold">${d.nama}</td>
-          <td class="p-2 border text-center font-bold ${d.tipe === 'masuk' ? 'text-blue-600' : 'text-green-600'}">${d.tipe.toUpperCase()}</td>
+          <td class="p-2 border text-center font-bold ${d.tipe === 'masuk' ? 'text-blue-600' : 'text-emerald-600'}">${d.tipe.toUpperCase()}</td>
+          <td class="p-2 border text-center font-bold ${statusColor}">${d.status_waktu || "-"}</td>
           <td class="p-2 border text-xs text-gray-600">${d.lokasi}</td>
           <td class="p-2 border text-center">${fotoTag}</td>
         </tr>
