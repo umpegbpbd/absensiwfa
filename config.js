@@ -2,13 +2,16 @@ const CONFIG = {
     APP_NAME: "Absensi WFA",
     ORGANISASI: "BPBD KAB. TRENGGALEK",
     ADMIN_PASSWORD: "admin123",
-    
+
     // GITHUB STORAGE
     OWNER: "umpegbpbd",
     REPO: "absensiwfa",
     BRANCH: "main",
     DATA_FILE: "data/absensi.json",
-    TOKEN: "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",
+
+    // Kosongkan token default demi keamanan.
+    // Token akan dibaca dari localStorage (lihat app.js) atau bisa diisi manual di sini.
+    TOKEN: "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",
 
     // ATURAN ABSENSI
     JAM_MASUK_END: "07:30",
