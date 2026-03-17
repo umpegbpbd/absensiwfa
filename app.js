@@ -4,6 +4,8 @@ stream: null,
 photo: "",
 };
 
+let gpsLoaded = false;
+
 window.addEventListener("DOMContentLoaded", () => {
 initClock();
 initEmployees();
@@ -14,12 +16,12 @@ showPage("dashboard");
 function initClock() {
 setInterval(() => {
 const now = new Date();
-document.getElementById("clock").textContent =
-now.toLocaleTimeString("id-ID");
+const clock = document.getElementById("clock");
+const today = document.getElementById("today");
 
 ```
-document.getElementById("today").textContent =
-  now.toLocaleDateString("id-ID");
+if (clock) clock.textContent = now.toLocaleTimeString("id-ID");
+if (today) today.textContent = now.toLocaleDateString("id-ID");
 ```
 
 }, 1000);
@@ -28,30 +30,30 @@ document.getElementById("today").textContent =
 /* ================= EMPLOYEE ================= */
 function initEmployees() {
 const select = document.getElementById("employee");
-
 if (!select) return;
 
 select.innerHTML = '<option value="">-- Pilih Nama --</option>';
 
 if (typeof EMPLOYEES !== "undefined") {
-EMPLOYEES.forEach(n => {
+EMPLOYEES.forEach(name => {
 const opt = document.createElement("option");
-opt.value = n;
-opt.textContent = n;
+opt.value = name;
+opt.textContent = name;
 select.appendChild(opt);
 });
 }
 }
 
 /* ================= PAGE ================= */
-function showPage(id) {
+function showPage(page) {
 document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-document.getElementById("page-" + id).classList.add("active");
+const el = document.getElementById("page-" + page);
+if (el) el.classList.add("active");
 }
 
-/* ================= ABSENSI ================= */
+/* ================= START ABSEN ================= */
 function startAbsensi(type) {
-const name = document.getElementById("employee").value;
+const name = document.getElementById("employee")?.value;
 
 if (!name) {
 alert("Pilih nama dulu");
@@ -62,7 +64,7 @@ state.type = type;
 showPage("absen");
 
 startCamera();
-detectLocation(); // ✅ FIX GPS
+detectLocation();
 }
 
 /* ================= CAMERA ================= */
@@ -70,8 +72,15 @@ async function startCamera() {
 try {
 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 const video = document.getElementById("camera");
-video.srcObject = stream;
+
+```
+if (video) {
+  video.srcObject = stream;
+}
+
 state.stream = stream;
+```
+
 } catch {
 alert("Kamera tidak diizinkan");
 }
@@ -80,12 +89,15 @@ alert("Kamera tidak diizinkan");
 function stopCamera() {
 if (state.stream) {
 state.stream.getTracks().forEach(t => t.stop());
+state.stream = null;
 }
 }
 
 function capturePhoto() {
 const video = document.getElementById("camera");
 const canvas = document.getElementById("canvas");
+
+if (!video || !canvas) return;
 
 canvas.width = video.videoWidth;
 canvas.height = video.videoHeight;
@@ -108,8 +120,11 @@ document.getElementById("camera").classList.remove("hidden");
 document.getElementById("postCapture").classList.add("hidden");
 }
 
-/* ================= GPS FIX TOTAL ================= */
+/* ================= GPS FIX ================= */
 function detectLocation() {
+if (gpsLoaded) return;
+gpsLoaded = true;
+
 const label = document.getElementById("locationText");
 
 if (!navigator.geolocation) {
@@ -125,10 +140,8 @@ const lat = pos.coords.latitude;
 const lng = pos.coords.longitude;
 
 ```
-  // tampilkan koordinat dulu
   label.textContent = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
 
-  // ambil alamat (optional)
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
@@ -168,30 +181,36 @@ alert("Ambil foto dulu");
 return;
 }
 
-alert("✅ Absensi berhasil (mode aman)");
+alert("✅ Absensi berhasil (mode stabil)");
 cancelAbsensi();
 }
 
 /* ================= CANCEL ================= */
 function cancelAbsensi() {
 stopCamera();
+
+gpsLoaded = false;
+
+const label = document.getElementById("locationText");
+if (label) label.textContent = "Mendeteksi lokasi...";
+
 showPage("dashboard");
 }
 
 /* ================= ADMIN ================= */
 function adminLogin() {
-const pass = document.getElementById("adminPassword").value;
+const pass = document.getElementById("adminPassword")?.value;
 
 if (pass !== CONFIG.ADMIN_PASSWORD) {
 alert("Password salah");
 return;
 }
 
-document.getElementById("adminPanel").classList.remove("hidden");
+document.getElementById("adminPanel")?.classList.remove("hidden");
 }
 
 function loadAdminTable() {
-alert("Belum aktif");
+alert("Belum aktif (mode aman)");
 }
 
 function exportToCSV() {
