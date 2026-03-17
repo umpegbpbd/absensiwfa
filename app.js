@@ -11,7 +11,7 @@ let state = {
 };
 
 const DEFAULT_SUBMIT_LABEL = "✓ Kirim Data";
-const TOKEN_STORAGE_KEY = "ABSENSI_GITHUB_TOKEN";
+const TOKEN_STORAGE_KEY = "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";
 
 window.addEventListener("DOMContentLoaded", () => {
     startClock();
