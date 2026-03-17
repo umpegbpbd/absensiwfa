@@ -1,692 +1,358 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/index.html b/index.html
-index 6cd52ff376847192aa0c7382da6ddec8fa46cbf3..03b1e44025b3ade57f8b0e0ae027acfe30427956 100644
+index 6cd52ff376847192aa0c7382da6ddec8fa46cbf3..6fca942049e7a1dc9b994a593a09d9f2eb75bd7d 100644
 --- a/index.html
 +++ b/index.html
-@@ -179,58 +179,663 @@
-                     <div class="overflow-x-auto rounded-xl border border-slate-100">
-                         <table class="w-full text-left border-collapse">
-                             <thead class="bg-slate-50 border-b border-slate-200">
-                                 <tr>
-                                     <th class="p-4 font-bold text-slate-600 text-xs uppercase">Nama</th>
-                                     <th class="p-4 font-bold text-slate-600 text-xs uppercase">Waktu</th>
-                                     <th class="p-4 font-bold text-slate-600 text-xs uppercase">Tipe</th>
-                                     <th class="p-4 font-bold text-slate-600 text-xs uppercase">Status</th>
-                                     <th class="p-4 font-bold text-slate-600 text-xs uppercase text-center">Foto</th>
-                                 </tr>
-                             </thead>
-                             <tbody id="adminTableBody" class="divide-y divide-slate-100 text-sm">
-                                 </tbody>
-                         </table>
-                     </div>
-                 </div>
-             </div>
-         </main>
- 
-         <footer class="mt-8 text-center text-slate-400 text-xs">
-             &copy; 2026 BPBD KAB. TRENGGALEK - <span class="font-bold text-blue-400">PUSDALOPS</span>
-         </footer>
- 
-     </div>
- 
+@@ -1,236 +1,121 @@
+ <!doctype html>
+ <html lang="id">
+ <head>
+-    <meta charset="UTF-8">
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-    <title>Absensi WFA - BPBD Trenggalek</title>
+-
+-    <script src="https://cdn.tailwindcss.com"></script>
+-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+-
+-    <style>
+-        body {
+-            font-family: 'Plus Jakarta Sans', sans-serif;
+-            background: #f0f5ff;
+-        }
+-
+-        /* Navigasi Page System */
+-        .page {
+-            display: none;
+-        }
+-        .page.active {
+-            display: block;
+-        }
+-
+-        /* Camera Styling */
+-        #cameraPreview {
+-            transform: scaleX(-1); /* Mirroring */
+-            border-radius: 12px;
+-            object-fit: cover;
+-            width: 100%;
+-            height: 300px;
+-            background: #000;
+-        }
+-
+-        #capturedPhoto {
+-            width: 100%;
+-            height: 300px;
+-            object-fit: cover;
+-            border-radius: 12px;
+-            border: 4px solid #3b82f6;
+-        }
+-
+-        .photo-thumb {
+-            width: 50px;
+-            height: 50px;
+-            border-radius: 8px;
+-            object-fit: cover;
+-            cursor: pointer;
+-            transition: transform 0.2s;
+-        }
+-        .photo-thumb:hover {
+-            transform: scale(1.1);
+-        }
+-
+-        /* Loading Spinner */
+-        .loader {
+-            border: 3px solid #f3f3f3;
+-            border-top: 3px solid #3498db;
+-            border-radius: 50%;
+-            width: 20px;
+-            height: 20px;
+-            animation: spin 1s linear infinite;
+-            display: inline-block;
+-        }
+-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+-    </style>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>Absensi WFA - BPBD Trenggalek</title>
++  <script src="https://cdn.tailwindcss.com"></script>
++  <link rel="preconnect" href="https://fonts.googleapis.com">
++  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
++  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
++  <link rel="stylesheet" href="style.css">
+ </head>
+-
+-<body class="bg-slate-50 text-slate-900">
+-
+-    <div class="max-w-2xl mx-auto p-4 min-h-screen">
+-
+-        <header class="bg-blue-900 text-white rounded-2xl p-5 flex justify-between items-center shadow-lg mb-6">
+-            <div>
+-                <h1 class="font-bold text-xl tracking-tight">⏱️ Absensi WFA</h1>
+-                <p class="text-xs text-blue-200">BPBD KAB. TRENGGALEK</p>
+-            </div>
+-            <div class="flex gap-2">
+-                <button onclick="showPage('dashboard')" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition" title="Dashboard">
+-                    🏠
+-                </button>
+-                <button onclick="showPage('admin')" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition" title="Admin">
+-                    🔐
+-                </button>
+-            </div>
+-        </header>
+-
+-        <main id="page-dashboard" class="page active space-y-4">
+-            <div class="bg-white rounded-2xl p-8 text-center shadow-sm border border-blue-100">
+-                <div id="currentDate" class="text-sm text-slate-500 font-semibold uppercase tracking-wider">Memuat tanggal...</div>
+-                <div id="clockDisplay" class="text-6xl font-extrabold text-blue-800 mt-2 font-mono tracking-tighter">00:00:00</div>
+-            </div>
+-
+-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-blue-100">
+-                <label for="employeeSelect" class="font-bold text-slate-700 block mb-3 flex items-center gap-2">
+-                    👤 Pilih Nama Pegawai
+-                </label>
+-                <select id="employeeSelect" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-4 text-lg font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none transition-all appearance-none cursor-pointer">
+-                    <option value="" disabled selected>-- Pilih Nama Anda --</option>
+-                </select>
+-            </div>
+-
+-            <div class="grid grid-cols-2 gap-4">
+-                <button onclick="startAbsensi('masuk')" class="group relative overflow-hidden bg-blue-600 hover:bg-blue-700 text-white font-bold p-8 rounded-2xl transition shadow-blue-200 shadow-xl active:scale-95">
+-                    <span class="relative z-10 text-xl block">✓ MASUK</span>
+-                    <span class="text-xs font-normal opacity-80">Presensi Datang</span>
+-                </button>
+-                <button onclick="startAbsensi('pulang')" class="group relative overflow-hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-8 rounded-2xl transition shadow-emerald-200 shadow-xl active:scale-95">
+-                    <span class="relative z-10 text-xl block">✓ PULANG</span>
+-                    <span class="text-xs font-normal opacity-80">Presensi Selesai</span>
+-                </button>
+-            </div>
+-        </main>
+-
+-        <main id="page-absensi" class="page space-y-4">
+-            <div class="bg-white rounded-2xl p-4 shadow-sm">
+-                <button onclick="cancelAbsensi()" class="mb-4 flex items-center gap-2 text-slate-500 hover:text-slate-800 font-bold transition">
+-                    ✕ Batalkan Presensi
+-                </button>
+-
+-                <div class="relative overflow-hidden rounded-xl bg-slate-900">
+-                    <video id="cameraPreview" autoplay playsinline muted></video>
+-                    <canvas id="cameraCanvas" class="hidden"></canvas>
+-                    <img id="capturedPhoto" class="hidden">
+-                </div>
+-
+-                <div id="locationInfo" class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100 flex items-start gap-3">
+-                    <span class="text-xl">📍</span>
+-                    <div class="text-sm">
+-                        <p class="font-bold text-blue-900">Lokasi Anda:</p>
+-                        <p id="locationText" class="text-blue-700 italic">Mendeteksi koordinat...</p>
+-                    </div>
+-                </div>
+-
+-                <div class="grid grid-cols-1 gap-3 mt-5">
+-                    <button id="btnCapture" onclick="capturePhoto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
+-                        📸 Ambil Foto Presensi
+-                    </button>
+-                    
+-                    <div id="postCaptureButtons" class="hidden grid grid-cols-2 gap-3 w-full">
+-                        <button id="btnRetake" onclick="retakePhoto()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold p-4 rounded-xl transition">
+-                            🔄 Ulang Foto
+-                        </button>
+-                        <button id="btnSubmitAbsen" onclick="submitAbsensi()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold p-4 rounded-xl shadow-lg transition">
+-                            ✓ Kirim Data
+-                        </button>
+-                    </div>
+-                </div>
+-            </div>
+-        </main>
+-
+-        <main id="page-admin" class="page space-y-4">
+-            <div id="adminLoginForm" class="bg-white rounded-2xl p-8 shadow-sm text-center border border-slate-200">
+-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🔐</div>
+-                <h2 class="text-2xl font-bold text-slate-800 mb-2">Admin Panel</h2>
+-                <p class="text-slate-500 text-sm mb-6">Masukkan password untuk melihat rekap data.</p>
+-                
+-                <input id="adminPass" type="password" placeholder="Password Admin" class="border-2 border-slate-200 p-4 w-full rounded-xl focus:border-blue-500 outline-none mb-4 text-center tracking-widest font-bold">
+-                
+-                <button onclick="adminLogin()" class="bg-blue-700 hover:bg-blue-800 text-white w-full p-4 rounded-xl font-bold shadow-lg transition">
+-                    Masuk Sekarang
+-                </button>
+-            </div>
+-
+-            <div id="adminPanel" class="hidden space-y-4">
+-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+-                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+-                        <h3 class="text-xl font-bold text-slate-800 tracking-tight">📊 Rekap Presensi GitHub</h3>
+-                        <div class="flex gap-2">
+-                            <button onclick="loadAdminTable()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-200 transition">
+-                                🔄 Refresh
+-                            </button>
+-                            <button onclick="exportToCSV()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-700 transition">
+-                                📥 Export CSV
+-                            </button>
+-                        </div>
+-                    </div>
+-
+-                    <div class="overflow-x-auto rounded-xl border border-slate-100">
+-                        <table class="w-full text-left border-collapse">
+-                            <thead class="bg-slate-50 border-b border-slate-200">
+-                                <tr>
+-                                    <th class="p-4 font-bold text-slate-600 text-xs uppercase">Nama</th>
+-                                    <th class="p-4 font-bold text-slate-600 text-xs uppercase">Waktu</th>
+-                                    <th class="p-4 font-bold text-slate-600 text-xs uppercase">Tipe</th>
+-                                    <th class="p-4 font-bold text-slate-600 text-xs uppercase">Status</th>
+-                                    <th class="p-4 font-bold text-slate-600 text-xs uppercase text-center">Foto</th>
+-                                </tr>
+-                            </thead>
+-                            <tbody id="adminTableBody" class="divide-y divide-slate-100 text-sm">
+-                                </tbody>
+-                        </table>
+-                    </div>
+-                </div>
+-            </div>
+-        </main>
+-
+-        <footer class="mt-8 text-center text-slate-400 text-xs">
+-            &copy; 2026 BPBD KAB. TRENGGALEK - <span class="font-bold text-blue-400">PUSDALOPS</span>
+-        </footer>
+-
+-    </div>
+-
 -    <script src="config.js"></script>
 -    <script src="employees.js"></script>
 -    <script src="app.js"></script>
-+    <script>
-+const CONFIG = {
-+    APP_NAME: "Absensi WFA",
-+    ORGANISASI: "BPBD KAB. TRENGGALEK",
-+    ADMIN_PASSWORD: "admin123",
-+
-+    // GITHUB STORAGE
-+    OWNER: "umpegbpbd",
-+    REPO: "absensiwfa",
-+    BRANCH: "main",
-+    DATA_FILE: "data/absensi.json",
-+
-+    // DEMI KEAMANAN JANGAN SIMPAN TOKEN ASLI DI REPO.
-+    // Isi manual saat deploy lokal (opsional) atau biarkan kosong.
-+    TOKEN: "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",
-+
-+    // ATURAN ABSENSI
-+    JAM_MASUK_END: "07:30",
-+    JAM_PULANG_START: "15:30",
-+
-+    // VALIDASI
-+    GPS_REQUIRED: true,
-+    MAX_GPS_ACCURACY: 100,
-+    IMAGE_QUALITY: 0.4,
-+    CAMERA_FACING_MODE: "user"
-+};
-+    </script>
-+    <script>
-+const EMPLOYEES = [
-+
-+"Drs. STEFANUS TRIADI ATMONO, M.Si.",
-+"Drs. AGUNG WIDODO",
-+"DWIANA HANDAYANI, SE",
-+"EDY PURWANTO, SE",
-+"Bakti Dwi Prasetyo, S.T., M.T.",
-+"SUDARSONO",
-+"ANIKMATUL KHOIRIYAH, S.M.",
-+"RENY YANTI, S.Pd",
-+"RIZAL RIZKIANTO, A.Md",
-+"SUJANTORO",
-+"WAWAN PURWANTO",
-+"Abdurrohman Malik Ibrahim, S.Psi.",
-+"Khoirul Anam, A.Md",
-+"PRABOWO",
-+"TONI MURTONO, A.Md",
-+"HARI MUSTAPA",
-+"MUHAMAD CHOLIK",
-+"Imam Basori, SE",
-+"DEDY KURNIAWAN, S.T.",
-+"TRI EFENDI",
-+"SUGENG HARYADI, S.T.",
-+"MISRALI, S.E.",
-+"LUHUR NAWANG SUKMA KUSUMA, S.E.",
-+"DEDY PEBRI YUSTISIANTO PRATAMA, S.Stat",
-+"DWI BAROROH BARIDAH, S.Psi",
-+"DIAN LUPI YUSTIKASARI, A.Md.",
-+"ARDEA WIDIANTO ARI HIDAYAT, S.Psi.",
-+"HADI PURWANTO",
-+"ARDY DESTA EKA PUTRA",
-+"AGUS SUGHULIN",
-+"ADI MUJIPRASETYO",
-+"SARI MUMANTI",
-+"IDA APRILIYA",
-+"ALVIN WAHYU DWISAPUTRA",
-+"AFRISKA PRASETYA",
-+"GIGIH HIRTAGARA",
-+"IMAM MURODI",
-+"GUSTA MULTI PRATAMA",
-+"YONA PRAMISTA MAHARDIKA",
-+"KURNIA RIAN RACHMASARI",
-+"YOHANTAR LUTFI ARISANDHI",
-+"YENI DWI LESTARI",
-+"AYU FERISTARINI",
-+"SITI ROBIAH",
-+"DWI MARTASARININGSIH",
-+"ANDRIK PRAYUGO",
-+"NIKO KURNIAWAN",
-+"PRENDICHANATA",
-+"HINN BONKE SAMALIWU"
- 
-+];
-+    </script>
-     <script>
+-
+-    <script>
 -        // Tambahan helper UI agar selaras dengan app.js
 -        function capturePhotoUI() {
 -            document.getElementById("btnCapture").classList.add("hidden");
 -            document.getElementById("postCaptureButtons").classList.remove("hidden");
 -            document.getElementById("capturedPhoto").classList.remove("hidden");
 -            document.getElementById("cameraPreview").classList.add("hidden");
-+let state = {
-+    currentType: "",
-+    stream: null,
-+    photo: null,
-+    lat: null,
-+    lng: null,
-+    accuracy: null,
-+    address: "Mencari lokasi...",
-+    isSubmitting: false,
-+    tokenValidated: false,
-+    runtimeToken: "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",
-+    adminRows: []
-+};
-+
-+const DEFAULT_SUBMIT_LABEL = "✓ Kirim Data";
-+const TOKEN_STORAGE_KEY = "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";
-+
-+window.addEventListener("DOMContentLoaded", () => {
-+    startClock();
-+    loadEmployees();
-+    loadRuntimeToken();
-+    showPage("dashboard");
-+});
-+
-+function startClock() {
-+    const tick = () => {
-+        const now = new Date();
-+        document.getElementById("clockDisplay").textContent = now.toLocaleTimeString("id-ID", { hour12: false }).replace(/\./g, ":");
-+        document.getElementById("currentDate").textContent = now.toLocaleDateString("id-ID", {
-+            weekday: "long",
-+            year: "numeric",
-+            month: "long",
-+            day: "numeric"
-+        });
-+    };
-+
-+    tick();
-+    setInterval(tick, 1000);
-+}
-+
-+function showPage(pageId) {
-+    document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
-+    document.getElementById(`page-${pageId}`).classList.add("active");
-+
-+    if (pageId === "dashboard") {
-+        stopCamera();
-+    }
-+}
-+
-+function loadEmployees() {
-+    const select = document.getElementById("employeeSelect");
-+    const list = (typeof EMPLOYEES !== "undefined" && Array.isArray(EMPLOYEES) && EMPLOYEES.length > 0)
-+        ? EMPLOYEES
-+        : ["User Test"];
-+
-+    select.innerHTML = '<option value="" disabled selected>-- Pilih Nama Anda --</option>';
-+
-+    list.forEach((n) => {
-+        const o = document.createElement("option");
-+        o.value = n;
-+        o.textContent = n;
-+        select.appendChild(o);
-+    });
-+}
-+
-+function loadRuntimeToken() {
-+    const fromStorage = localStorage.getItem(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) || "";
-+    const fromConfig = (CONFIG?.TOKEN || "").trim();
-+    state.runtimeToken = fromStorage || fromConfig;
-+}
-+
-+function getRuntimeToken() {
-+    return (state.runtimeToken || "").trim();
-+}
-+
-+function setRuntimeToken(token) {
-+    state.runtimeToken = (token || "").trim();
-+    state.tokenValidated = false;
-+
-+    if (state.runtimeToken) {
-+        localStorage.setItem(TOKEN_STORAGE_KEY, state.runtimeToken);
-+    }
-+}
-+
-+function clearRuntimeToken() {
-+    state.runtimeToken = "";
-+    state.tokenValidated = false;
-+    localStorage.removeItem(TOKEN_STORAGE_KEY);
-+}
-+
-+async function startCamera() {
-+    const video = document.getElementById("cameraPreview");
-+
-+    state.stream = await navigator.mediaDevices.getUserMedia({
-+        video: { facingMode: CONFIG.CAMERA_FACING_MODE },
-+        audio: false
-+    });
-+
-+    video.srcObject = state.stream;
-+    await video.play();
-+}
-+
-+function stopCamera() {
-+    if (state.stream) {
-+        state.stream.getTracks().forEach((t) => t.stop());
-+        state.stream = null;
-+    }
-+}
-+
-+function capturePhoto() {
-+    const v = document.getElementById("cameraPreview");
-+    const c = document.getElementById("cameraCanvas");
-+
-+    c.width = v.videoWidth;
-+    c.height = v.videoHeight;
-+
-+    const ctx = c.getContext("2d");
-+    ctx.translate(c.width, 0);
-+    ctx.scale(-1, 1);
-+    ctx.drawImage(v, 0, 0);
-+
-+    state.photo = c.toDataURL("image/jpeg", CONFIG.IMAGE_QUALITY);
-+    document.getElementById("capturedPhoto").src = state.photo;
-+    document.getElementById("capturedPhoto").classList.remove("hidden");
-+    v.classList.add("hidden");
-+    document.getElementById("btnCapture").classList.add("hidden");
-+    document.getElementById("postCaptureButtons").classList.remove("hidden");
-+}
-+
-+function retakePhoto() {
-+    state.photo = null;
-+    document.getElementById("capturedPhoto").classList.add("hidden");
-+    document.getElementById("cameraPreview").classList.remove("hidden");
-+    document.getElementById("btnCapture").classList.remove("hidden");
-+    document.getElementById("postCaptureButtons").classList.add("hidden");
-+}
-+
-+function getLocation() {
-+    navigator.geolocation.getCurrentPosition(async (p) => {
-+        state.lat = p.coords.latitude;
-+        state.lng = p.coords.longitude;
-+        state.accuracy = p.coords.accuracy;
-+
-+        try {
-+            const res = await fetchWithTimeout(
-+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${state.lat}&lon=${state.lng}`,
-+                {},
-+                10000
-+            );
-+            const d = await res.json();
-+            state.address = d.display_name
-+                ? d.display_name.split(",").slice(0, 4).join(",")
-+                : `${state.lat}, ${state.lng}`;
-+        } catch {
-+            state.address = `${state.lat}, ${state.lng}`;
-+        }
-+
-+        document.getElementById("locationText").innerText = `${state.address} (±${Math.round(state.accuracy)}m)`;
-+    }, () => {
-+        state.address = "Lokasi tidak tersedia";
-+        state.accuracy = null;
-+        document.getElementById("locationText").innerText = state.address;
-+    }, { enableHighAccuracy: true });
-+}
-+
-+async function startAbsensi(t) {
-+    if (!document.getElementById("employeeSelect").value) {
-+        alert("Pilih nama terlebih dahulu.");
-+        return;
-+    }
-+
-+    state.currentType = t;
-+    showPage("absensi");
-+
-+    try {
-+        await startCamera();
-+        getLocation();
-+    } catch (error) {
-+        alert(`Gagal membuka kamera: ${error.message}`);
-+        showPage("dashboard");
-+    }
-+}
-+
-+async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
-+    const controller = new AbortController();
-+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-+
-+    try {
-+        return await fetch(url, { ...options, signal: controller.signal });
-+    } catch (error) {
-+        if (error.name === "AbortError") throw new Error("Koneksi timeout. Cek internet lalu coba lagi.");
-+        throw error;
-+    } finally {
-+        clearTimeout(timeout);
-+    }
-+}
-+
-+function getGitHubHeaders(withJson = false) {
-+    const token = getRuntimeToken();
-+    const headers = {
-+        Accept: "application/vnd.github+json",
-+        "X-GitHub-Api-Version": "2022-11-28",
-+        Authorization: `Bearer ${token}`
-+    };
-+
-+    if (withJson) headers["Content-Type"] = "application/json";
-+    return headers;
-+}
-+
-+function parseGitHubError(status, message = "") {
-+    if (status === 401) return "Token GitHub tidak valid / expired (Bad credentials).";
-+    if (status === 403) return "Token tidak punya izin menulis. Scope minimal: repo (classic) atau Contents: Read & Write (fine-grained).";
-+    if (status === 404) return "Repo/path tidak ditemukan atau token tidak punya akses repo.";
-+    if (status === 409) return "Terjadi konflik update data. Silakan ulangi.";
-+    return message || `Gagal akses GitHub (HTTP ${status}).`;
-+}
-+
-+function decodeBase64Unicode(content) {
-+    return decodeURIComponent(escape(atob(content)));
-+}
-+
-+function encodeBase64Unicode(content) {
-+    return btoa(unescape(encodeURIComponent(content)));
-+}
-+
-+function slugifyName(name) {
-+    return name
-+        .toLowerCase()
-+        .normalize("NFD")
-+        .replace(/[\u0300-\u036f]/g, "")
-+        .replace(/[^a-z0-9]+/g, "-")
-+        .replace(/^-+|-+$/g, "") || "pegawai";
-+}
-+
-+function buildPayload() {
-+    const now = new Date();
-+    const hour = now.getHours();
-+
-+    return {
-+        nama: document.getElementById("employeeSelect").value,
-+        tanggal: now.toLocaleDateString("id-ID"),
-+        jam: now.toLocaleTimeString("id-ID"),
-+        tipe: state.currentType.toUpperCase(),
-+        status: state.currentType === "masuk"
-+            ? (hour < 8 ? "Hadir" : "Terlambat")
-+            : "Pulang",
-+        lokasi: state.address,
-+        latitude: state.lat,
-+        longitude: state.lng,
-+        akurasi: state.accuracy,
-+        foto: state.photo,
-+        createdAt: now.toISOString()
-+    };
-+}
-+
-+function getAggregateUrl() {
-+    return `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${CONFIG.DATA_FILE}`;
-+}
-+
-+function getRecordUrl(payload) {
-+    const now = new Date();
-+    const y = now.getFullYear();
-+    const m = String(now.getMonth() + 1).padStart(2, "0");
-+    const d = String(now.getDate()).padStart(2, "0");
-+    const ms = String(now.getTime());
-+    const rand = Math.random().toString(36).slice(2, 8);
-+    const safeName = slugifyName(payload.nama);
-+    const path = `data/records/${y}/${m}/${d}/${ms}-${safeName}-${rand}.json`;
-+
-+    return `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${path}`;
-+}
-+
-+async function validateGithubToken() {
-+    if (state.tokenValidated) return;
-+
-+    const res = await fetchWithTimeout("https://api.github.com/user", {
-+        headers: getGitHubHeaders(false)
-+    }, 15000);
-+
-+    if (!res.ok) {
-+        const err = await res.json().catch(() => ({}));
-+        throw new Error(parseGitHubError(res.status, err.message));
-+    }
-+
-+    state.tokenValidated = true;
-+}
-+
-+function askTokenIfNeeded(errorMessage) {
-+    if (!errorMessage.includes("Bad credentials") && !errorMessage.includes("tidak valid") && !errorMessage.includes("expired")) {
-+        return false;
-+    }
-+
-+    const token = prompt("Token GitHub invalid/expired. Paste token baru (scope: repo / Contents RW):");
-+    if (!token || !token.trim()) return false;
-+
-+    setRuntimeToken(token.trim());
-+    return true;
-+}
-+
-+async function saveRecordFile(payload) {
-+    const recordUrl = getRecordUrl(payload);
-+
-+    const response = await fetchWithTimeout(recordUrl, {
-+        method: "PUT",
-+        headers: getGitHubHeaders(true),
-+        body: JSON.stringify({
-+            message: `Absensi record: ${payload.nama}`,
-+            content: encodeBase64Unicode(JSON.stringify(payload, null, 2)),
-+            branch: CONFIG.BRANCH
-+        })
-+    }, 20000);
-+
-+    if (!response.ok) {
-+        const err = await response.json().catch(() => ({}));
-+        throw new Error(parseGitHubError(response.status, err.message));
-+    }
-+}
-+
-+async function getAggregateData(url) {
-+    const resGet = await fetchWithTimeout(url, {
-+        headers: getGitHubHeaders(false)
-+    }, 15000);
-+
-+    if (resGet.ok) {
-+        const file = await resGet.json();
-+        return {
-+            sha: file.sha,
-+            rows: JSON.parse(decodeBase64Unicode(file.content))
-+        };
-+    }
-+
-+    if (resGet.status === 404) return { sha: "", rows: [] };
-+
-+    const err = await resGet.json().catch(() => ({}));
-+    throw new Error(parseGitHubError(resGet.status, err.message));
-+}
-+
-+async function putAggregateData(url, rows, sha, payloadName) {
-+    const resPut = await fetchWithTimeout(url, {
-+        method: "PUT",
-+        headers: getGitHubHeaders(true),
-+        body: JSON.stringify({
-+            message: `Absen: ${payloadName}`,
-+            content: encodeBase64Unicode(JSON.stringify(rows, null, 2)),
-+            ...(sha ? { sha } : {}),
-+            branch: CONFIG.BRANCH
-+        })
-+    }, 20000);
-+
-+    if (!resPut.ok) {
-+        const err = await resPut.json().catch(() => ({}));
-+        throw new Error(parseGitHubError(resPut.status, err.message));
-+    }
-+}
-+
-+async function saveAggregateWithRetry(payload, retries = 3) {
-+    const url = getAggregateUrl();
-+
-+    for (let attempt = 0; attempt <= retries; attempt += 1) {
-+        try {
-+            const { sha, rows } = await getAggregateData(url);
-+            rows.push(payload);
-+            await putAggregateData(url, rows, sha, payload.nama);
-+            return;
-+        } catch (err) {
-+            const msg = String(err.message || "").toLowerCase();
-+            const isConflict = msg.includes("konflik") || msg.includes("409");
-+
-+            if (isConflict && attempt < retries) {
-+                await new Promise((resolve) => setTimeout(resolve, 700 + (attempt * 500)));
-+                continue;
-+            }
-+
-+            throw err;
-         }
-+    }
-+}
-+
-+async function saveAbsensi(payload) {
-+    await validateGithubToken();
-+    await saveRecordFile(payload);
-+    await saveAggregateWithRetry(payload, 3);
-+}
-+
-+async function submitAbsensi() {
-+    const btn = document.getElementById("btnSubmitAbsen");
-+
-+    if (state.isSubmitting) return;
-+    if (!state.photo) {
-+        alert("Ambil foto dulu sebelum kirim.");
-+        return;
-+    }
-+
-+    if (!getRuntimeToken() || getRuntimeToken().includes("GITHUB_TOKEN")) {
-+        alert("Token GitHub belum terpasang. Isi di config.js atau input saat diminta.");
-+        return;
-+    }
-+
-+    state.isSubmitting = true;
-+    btn.disabled = true;
-+    btn.innerText = "⏳ Sedang Mengirim...";
- 
+-        }
+-
 -        function retakePhotoUI() {
 -            document.getElementById("btnCapture").classList.remove("hidden");
 -            document.getElementById("postCaptureButtons").classList.add("hidden");
 -            document.getElementById("capturedPhoto").classList.add("hidden");
 -            document.getElementById("cameraPreview").classList.remove("hidden");
-+    const payload = buildPayload();
-+
-+    try {
-+        await saveAbsensi(payload);
-+        alert("✅ Absensi berhasil disimpan ke GitHub.");
-+        location.reload();
-+    } catch (e) {
-+        const canRetryWithNewToken = askTokenIfNeeded(String(e.message || ""));
-+
-+        if (canRetryWithNewToken) {
-+            try {
-+                await saveAbsensi(payload);
-+                alert("✅ Absensi berhasil disimpan ke GitHub.");
-+                location.reload();
-+                return;
-+            } catch (retryError) {
-+                if (String(retryError.message || "").includes("tidak valid")) clearRuntimeToken();
-+                alert(`❌ Error: ${retryError.message}`);
-+            }
-+        } else {
-+            if (String(e.message || "").includes("tidak valid")) clearRuntimeToken();
-+            alert(`❌ Error: ${e.message}`);
-         }
-+    } finally {
-+        state.isSubmitting = false;
-+        btn.disabled = false;
-+        btn.innerText = DEFAULT_SUBMIT_LABEL;
-+    }
-+}
-+
-+function cancelAbsensi() {
-+    stopCamera();
-+    location.reload();
-+}
-+
-+function adminLogin() {
-+    const pass = document.getElementById("adminPass").value;
-+
-+    if (pass !== CONFIG.ADMIN_PASSWORD) {
-+        alert("Password admin salah.");
-+        return;
-+    }
-+
-+    document.getElementById("adminLoginForm").classList.add("hidden");
-+    document.getElementById("adminPanel").classList.remove("hidden");
-+    loadAdminTable();
-+}
-+
-+function escapeHtml(raw = "") {
-+    return String(raw)
-+        .replaceAll("&", "&amp;")
-+        .replaceAll("<", "&lt;")
-+        .replaceAll(">", "&gt;")
-+        .replaceAll('"', "&quot;")
-+        .replaceAll("'", "&#39;");
-+}
-+
-+function renderAdminTable(rows) {
-+    const body = document.getElementById("adminTableBody");
-+
-+    if (!rows.length) {
-+        body.innerHTML = `
-+            <tr>
-+                <td colspan="5" class="p-6 text-center text-slate-400">Belum ada data absensi.</td>
-+            </tr>`;
-+        return;
-+    }
-+
-+    body.innerHTML = rows.map((row) => {
-+        const hasPhoto = Boolean(row.foto);
-+        const photoHtml = hasPhoto
-+            ? `<img src="${row.foto}" alt="Foto ${escapeHtml(row.nama)}" class="photo-thumb mx-auto" onclick="window.open('${row.foto}', '_blank')">`
-+            : "-";
-+
-+        return `
-+            <tr>
-+                <td class="p-4 font-semibold text-slate-700">${escapeHtml(row.nama || "-")}</td>
-+                <td class="p-4 text-slate-600">${escapeHtml(`${row.tanggal || "-"} ${row.jam || ""}`)}</td>
-+                <td class="p-4 text-slate-600">${escapeHtml(row.tipe || "-")}</td>
-+                <td class="p-4 text-slate-600">${escapeHtml(row.status || "-")}</td>
-+                <td class="p-4 text-center">${photoHtml}</td>
-+            </tr>`;
-+    }).join("");
-+}
-+
-+async function loadAdminTable() {
-+    const body = document.getElementById("adminTableBody");
-+    body.innerHTML = `
-+        <tr>
-+            <td colspan="5" class="p-6 text-center text-slate-400">Memuat data...</td>
-+        </tr>`;
-+
-+    if (!getRuntimeToken() || getRuntimeToken().includes("GITHUB_TOKEN")) {
-+        body.innerHTML = `
-+            <tr>
-+                <td colspan="5" class="p-6 text-center text-amber-600">Token GitHub belum diatur.</td>
-+            </tr>`;
-+        return;
-+    }
-+
-+    try {
-+        await validateGithubToken();
-+        const { rows } = await getAggregateData(getAggregateUrl());
-+        const sorted = rows.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-+        state.adminRows = sorted;
-+        renderAdminTable(sorted);
-+    } catch (error) {
-+        body.innerHTML = `
-+            <tr>
-+                <td colspan="5" class="p-6 text-center text-red-600">${escapeHtml(error.message)}</td>
-+            </tr>`;
-+    }
-+}
-+
-+function exportToCSV() {
-+    if (!state.adminRows.length) {
-+        alert("Data kosong, tidak ada yang bisa diexport.");
-+        return;
-+    }
-+
-+    const headers = ["Nama", "Tanggal", "Jam", "Tipe", "Status", "Lokasi", "Latitude", "Longitude", "Akurasi", "CreatedAt"];
-+    const rows = state.adminRows.map((r) => [
-+        r.nama || "",
-+        r.tanggal || "",
-+        r.jam || "",
-+        r.tipe || "",
-+        r.status || "",
-+        r.lokasi || "",
-+        r.latitude ?? "",
-+        r.longitude ?? "",
-+        r.akurasi ?? "",
-+        r.createdAt || ""
-+    ]);
-+
-+    const csv = [headers, ...rows]
-+        .map((line) => line.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(","))
-+        .join("\n");
- 
+-        }
+-
 -        // Modifikasi fungsi capture di app.js nantinya panggil ini
 -        const originalCapture = capturePhoto;
 -        capturePhoto = () => { originalCapture(); capturePhotoUI(); };
-+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-+    const url = URL.createObjectURL(blob);
-+    const a = document.createElement("a");
- 
+-
 -        const originalRetake = retakePhoto;
 -        retakePhoto = () => { originalRetake(); retakePhotoUI(); };
 -        
 -        const originalCancel = cancelAbsensi;
 -        cancelAbsensi = () => { originalCancel(); retakePhotoUI(); };
-+    a.href = url;
-+    a.download = `rekap-absensi-${new Date().toISOString().slice(0, 10)}.csv`;
-+    document.body.appendChild(a);
-+    a.click();
-+    document.body.removeChild(a);
-+    URL.revokeObjectURL(url);
-+}
-     </script>
- 
+-    </script>
+-
++<body class="text-slate-900">
++  <div class="max-w-3xl mx-auto p-4 min-h-screen">
++    <header class="bg-blue-900 text-white rounded-2xl p-5 flex justify-between items-center shadow-lg mb-6">
++      <div>
++        <h1 class="font-bold text-xl tracking-tight">⏱️ Absensi WFA</h1>
++        <p class="text-xs text-blue-200">BPBD KAB. TRENGGALEK</p>
++      </div>
++      <div class="flex gap-2">
++        <button onclick="showPage('dashboard')" class="bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg">🏠</button>
++        <button onclick="showPage('admin')" class="bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg">🔐</button>
++      </div>
++    </header>
++
++    <main id="page-dashboard" class="page active space-y-4">
++      <section class="bg-white rounded-2xl p-8 text-center shadow-sm border border-blue-100">
++        <div id="today" class="text-sm text-slate-500 font-semibold uppercase tracking-wider">Memuat tanggal...</div>
++        <div id="clock" class="text-6xl font-extrabold text-blue-800 mt-2 font-mono tracking-tighter">00:00:00</div>
++      </section>
++
++      <section class="bg-white rounded-2xl p-6 shadow-sm border border-blue-100">
++        <label for="employee" class="font-bold text-slate-700 block mb-3">👤 Pilih Nama Pegawai</label>
++        <select id="employee" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-4 text-lg font-medium focus:border-blue-500 focus:ring-4 focus:ring-blue-100 outline-none">
++          <option value="" disabled selected>-- Pilih Nama Anda --</option>
++        </select>
++      </section>
++
++      <section class="grid grid-cols-2 gap-4">
++        <button onclick="startAbsensi('masuk')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-8 rounded-2xl transition shadow-blue-200 shadow-xl">
++          <span class="text-xl block">✓ MASUK</span>
++          <span class="text-xs font-normal opacity-80">Presensi Datang</span>
++        </button>
++        <button onclick="startAbsensi('pulang')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-8 rounded-2xl transition shadow-emerald-200 shadow-xl">
++          <span class="text-xl block">✓ PULANG</span>
++          <span class="text-xs font-normal opacity-80">Presensi Selesai</span>
++        </button>
++      </section>
++    </main>
++
++    <main id="page-absen" class="page space-y-4">
++      <div class="bg-white rounded-2xl p-4 shadow-sm">
++        <button onclick="cancelAbsensi()" class="mb-4 text-slate-500 hover:text-slate-800 font-bold">✕ Batalkan Presensi</button>
++
++        <div class="rounded-xl overflow-hidden bg-black">
++          <video id="camera" class="video" autoplay playsinline muted></video>
++          <canvas id="canvas" class="hidden"></canvas>
++          <img id="photo" class="photo hidden" alt="Foto Presensi">
++        </div>
++
++        <div class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
++          <p class="font-bold text-blue-900 text-sm">📍 Lokasi Anda</p>
++          <p id="locationText" class="text-blue-700 text-sm italic">Mendeteksi lokasi...</p>
++        </div>
++
++        <div class="grid grid-cols-1 gap-3 mt-5">
++          <button id="btnCapture" onclick="capturePhoto()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-xl">📸 Ambil Foto Presensi</button>
++          <div id="postCapture" class="hidden grid grid-cols-2 gap-3">
++            <button onclick="retakePhoto()" class="bg-slate-500 hover:bg-slate-600 text-white font-bold p-4 rounded-xl">🔄 Ulang Foto</button>
++            <button id="btnSubmit" onclick="submitAbsensi()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold p-4 rounded-xl">✓ Kirim Data</button>
++          </div>
++        </div>
++      </div>
++    </main>
++
++    <main id="page-admin" class="page space-y-4">
++      <div id="adminLogin" class="bg-white rounded-2xl p-8 shadow-sm text-center border border-slate-200">
++        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🔐</div>
++        <h2 class="text-2xl font-bold text-slate-800 mb-2">Admin Panel</h2>
++        <p class="text-slate-500 text-sm mb-6">Masukkan password untuk melihat rekap data.</p>
++
++        <input id="adminPassword" type="password" placeholder="Password Admin" class="border-2 border-slate-200 p-4 w-full rounded-xl focus:border-blue-500 outline-none mb-4 text-center tracking-widest font-bold">
++        <button onclick="adminLogin()" class="bg-blue-700 hover:bg-blue-800 text-white w-full p-4 rounded-xl font-bold">Masuk Sekarang</button>
++      </div>
++
++      <div id="adminPanel" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
++        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
++          <h3 class="text-xl font-bold text-slate-800">📊 Rekap Presensi GitHub</h3>
++          <div class="flex gap-2">
++            <button onclick="loadAdminTable()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-bold">🔄 Refresh</button>
++            <button onclick="exportToCSV()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-bold">📥 Export CSV</button>
++          </div>
++        </div>
++
++        <div class="overflow-x-auto rounded-xl border border-slate-100">
++          <table class="w-full text-left border-collapse text-sm">
++            <thead class="bg-slate-50 border-b border-slate-200">
++              <tr>
++                <th class="p-4 font-bold text-slate-600 text-xs uppercase">Nama</th>
++                <th class="p-4 font-bold text-slate-600 text-xs uppercase">Waktu</th>
++                <th class="p-4 font-bold text-slate-600 text-xs uppercase">Tipe</th>
++                <th class="p-4 font-bold text-slate-600 text-xs uppercase">Status</th>
++                <th class="p-4 font-bold text-slate-600 text-xs uppercase text-center">Foto</th>
++              </tr>
++            </thead>
++            <tbody id="adminTableBody"></tbody>
++          </table>
++        </div>
++      </div>
++    </main>
++
++    <footer class="mt-8 text-center text-slate-400 text-xs">
++      &copy; 2026 BPBD KAB. TRENGGALEK - <span class="font-bold text-blue-400">PUSDALOPS</span>
++    </footer>
++  </div>
++
++  <script src="config.js"></script>
++  <script src="employees.js"></script>
++  <script src="app.js"></script>
  </body>
  </html>
  
