@@ -380,7 +380,7 @@ function resetFilter() {
   renderAdminTable();
 }
 
-// === FUNGSI RENDER TABEL (Terpisah agar gampang dipanggil saat filter) ===
+// === FUNGSI RENDER TABEL ===
 function renderAdminTable() {
   const tbody = document.getElementById("adminTableBody");
   tbody.innerHTML = `
@@ -502,7 +502,7 @@ async function downloadExcel() {
   }
 }
 
-// === EXPORT PDF DENGAN FOTO ===
+// === EXPORT PDF DENGAN FOTO (VERSI BARU - SUDAH DIPERBAIKI) ===
 function downloadPDF() {
   if (adminDataGlobal.length === 0) return alert("Tidak ada data untuk diunduh!");
 
@@ -526,15 +526,20 @@ function downloadPDF() {
   const tableRows = [];
 
   adminDataGlobal.forEach(d => {
-    tableRows.push([
+    // Menyusun baris tabel dan menitipkan data foto
+    let rowData = [
       new Date(d.waktu).toLocaleString("id-ID"),
       d.nama,
       d.tipe.toUpperCase(),
       d.status_waktu || "-",
       d.gps_status || "Aman",
       d.lokasi,
-      "" 
-    ]);
+      "" // Sel ini dibiarkan kosong untuk tempat gambar nanti
+    ];
+    
+    // Titipkan base64 foto ke objek array ini (tidak akan ikut tercetak sebagai teks)
+    rowData.fotoBase64 = d.foto; 
+    tableRows.push(rowData);
   });
 
   doc.autoTable({
@@ -553,10 +558,17 @@ function downloadPDF() {
       6: { cellWidth: 25 }  
     },
     didDrawCell: function(data) {
+      // Mengambil foto dari "titipan" di data.row.raw
       if (data.column.index === 6 && data.cell.section === 'body') {
-        const imgBase64 = adminDataGlobal[data.row.index].foto;
+        const imgBase64 = data.row.raw.fotoBase64; 
+        
         if (imgBase64) {
-          doc.addImage(imgBase64, 'JPEG', data.cell.x + 2, data.cell.y + 2, 20, 15);
+          try {
+            // Pasang gambar ke dalam sel
+            doc.addImage(imgBase64, 'JPEG', data.cell.x + 2, data.cell.y + 2, 20, 15);
+          } catch (e) {
+            console.error("Gagal melampirkan foto pada nama: " + data.row.raw[1], e);
+          }
         }
       }
     }
