@@ -3,7 +3,9 @@ let stream = null;
 let photoBase64 = "";
 let absenType = ""; 
 let currentLocation = { lat: null, lng: null, address: "", accuracy: 0, fake_status: "Aman" }; 
-let adminDataGlobal = []; 
+
+let rawAdminData = []; // Menyimpan semua data asli dari GitHub
+let adminDataGlobal = []; // Menyimpan data yang sudah di-filter untuk didownload
 
 window.onload = () => {
   initClock();
@@ -124,7 +126,6 @@ function detectLocation() {
       currentLocation.lng = pos.coords.longitude;
       currentLocation.accuracy = pos.coords.accuracy;
 
-      // JEBAKAN FAKE GPS SEDERHANA
       if (pos.coords.altitude === null && pos.coords.accuracy < 5) {
         currentLocation.fake_status = "⚠️ Terindikasi Fake GPS";
       } else {
@@ -228,10 +229,9 @@ async function submitAbsensi() {
     return;
   }
 
-  // === FITUR BLOKIR FAKE GPS ===
   if (currentLocation.fake_status !== "Aman") {
     alert("🚫 AKSES DITOLAK!\n\nSistem mendeteksi penggunaan Fake GPS / Mock Location.\nSilakan matikan aplikasi pemalsu lokasi, muat ulang halaman ini, dan gunakan GPS asli perangkat Anda untuk melakukan absensi.");
-    return; // Langsung hentikan proses di sini
+    return; 
   }
 
   btnSubmit.innerText = "⏳ Sedang Menyimpan...";
@@ -304,7 +304,7 @@ async function saveToGitHub(newRecord) {
   if (!putRes.ok) throw new Error("Gagal push ke GitHub");
 }
 
-// === FUNGSI ADMIN & DOWNLOAD ===
+// === FUNGSI ADMIN ===
 async function adminLogin() {
   const pass = document.getElementById("adminPassword").value;
   if(pass === CONFIG.ADMIN_PASSWORD) {
@@ -332,54 +332,102 @@ async function loadAdminData() {
     const fileData = await res.json();
     const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
     
-    const rawData = JSON.parse(decodedContent);
-    adminDataGlobal = rawData.reverse(); 
+    const parsedData = JSON.parse(decodedContent);
+    // Simpan data asli ke rawAdminData
+    rawAdminData = parsedData.reverse(); 
+    // Duplikat ke adminDataGlobal untuk dirender
+    adminDataGlobal = [...rawAdminData]; 
     
-    const tbody = document.getElementById("adminTableBody");
-    tbody.innerHTML = `
-      <tr class="bg-blue-100 text-sm">
-        <th class="p-2 border">Waktu</th>
-        <th class="p-2 border">Nama</th>
-        <th class="p-2 border">Tipe</th>
-        <th class="p-2 border">Status Kehadiran</th>
-        <th class="p-2 border">Validasi GPS</th>
-        <th class="p-2 border">Lokasi</th>
-        <th class="p-2 border text-center">Foto</th>
-      </tr>
-    `;
-    
-    adminDataGlobal.forEach(d => {
-      const date = new Date(d.waktu).toLocaleString("id-ID");
-      const fotoTag = d.foto ? `<img src="${d.foto}" class="w-10 h-10 object-cover rounded hover:scale-150 transition mx-auto">` : "-";
-      
-      let statusColor = "text-gray-700";
-      if (d.status_waktu === "Tepat Waktu") statusColor = "text-green-600";
-      if (d.status_waktu === "Terlambat") statusColor = "text-red-600";
-      if (d.status_waktu === "Pulang Lebih Cepat") statusColor = "text-orange-500";
-
-      let gpsColor = d.gps_status === "Aman" ? "text-green-600" : "text-red-600 font-bold bg-red-100 p-1 rounded";
-      
-      tbody.innerHTML += `
-        <tr class="border-b text-sm hover:bg-gray-50">
-          <td class="p-2 border">${date}</td>
-          <td class="p-2 border font-semibold whitespace-nowrap">${d.nama}</td>
-          <td class="p-2 border text-center font-bold ${d.tipe === 'masuk' ? 'text-blue-600' : 'text-emerald-600'}">${d.tipe.toUpperCase()}</td>
-          <td class="p-2 border text-center font-bold ${statusColor} whitespace-nowrap">${d.status_waktu || "-"}</td>
-          <td class="p-2 border text-xs text-center ${gpsColor}">${d.gps_status || "Aman"}</td>
-          <td class="p-2 border text-xs text-gray-600">${d.lokasi}</td>
-          <td class="p-2 border text-center">${fotoTag}</td>
-        </tr>
-      `;
-    });
+    renderAdminTable();
   } catch (e) {
     console.error(e);
     alert("Belum ada data absensi atau gagal memuat data.");
   }
 }
 
+// === FUNGSI FILTER TANGGAL ===
+function applyFilter() {
+  const startDate = document.getElementById("filterStart").value;
+  const endDate = document.getElementById("filterEnd").value;
+
+  if (!startDate && !endDate) {
+    alert("Silakan pilih minimal satu tanggal untuk melakukan filter!");
+    return;
+  }
+
+  adminDataGlobal = rawAdminData.filter(d => {
+    // d.waktu formatnya "2026-03-17T08:00:00.000Z"
+    // Kita ambil cuma tanggalnya aja (YYYY-MM-DD)
+    const dateStr = d.waktu.split('T')[0]; 
+    
+    if (startDate && endDate) {
+      return dateStr >= startDate && dateStr <= endDate;
+    } else if (startDate) {
+      return dateStr >= startDate;
+    } else if (endDate) {
+      return dateStr <= endDate;
+    }
+    return true;
+  });
+
+  renderAdminTable();
+}
+
+function resetFilter() {
+  document.getElementById("filterStart").value = "";
+  document.getElementById("filterEnd").value = "";
+  adminDataGlobal = [...rawAdminData]; // Kembalikan ke data asli
+  renderAdminTable();
+}
+
+// === FUNGSI RENDER TABEL (Terpisah agar gampang dipanggil saat filter) ===
+function renderAdminTable() {
+  const tbody = document.getElementById("adminTableBody");
+  tbody.innerHTML = `
+    <tr class="bg-blue-100 text-sm">
+      <th class="p-2 border">Waktu</th>
+      <th class="p-2 border">Nama</th>
+      <th class="p-2 border">Tipe</th>
+      <th class="p-2 border">Status Kehadiran</th>
+      <th class="p-2 border">Validasi GPS</th>
+      <th class="p-2 border">Lokasi</th>
+      <th class="p-2 border text-center">Foto</th>
+    </tr>
+  `;
+  
+  if (adminDataGlobal.length === 0) {
+    tbody.innerHTML += `<tr><td colspan="7" class="text-center p-4 text-gray-500 font-bold">Tidak ada data absensi pada rentang tanggal tersebut.</td></tr>`;
+    return;
+  }
+
+  adminDataGlobal.forEach(d => {
+    const date = new Date(d.waktu).toLocaleString("id-ID");
+    const fotoTag = d.foto ? `<img src="${d.foto}" class="w-10 h-10 object-cover rounded hover:scale-150 transition mx-auto cursor-pointer">` : "-";
+    
+    let statusColor = "text-gray-700";
+    if (d.status_waktu === "Tepat Waktu") statusColor = "text-green-600";
+    if (d.status_waktu === "Terlambat") statusColor = "text-red-600";
+    if (d.status_waktu === "Pulang Lebih Cepat") statusColor = "text-orange-500";
+
+    let gpsColor = d.gps_status === "Aman" ? "text-green-600" : "text-red-600 font-bold bg-red-100 p-1 rounded";
+    
+    tbody.innerHTML += `
+      <tr class="border-b text-sm hover:bg-gray-50">
+        <td class="p-2 border whitespace-nowrap">${date}</td>
+        <td class="p-2 border font-semibold whitespace-nowrap">${d.nama}</td>
+        <td class="p-2 border text-center font-bold ${d.tipe === 'masuk' ? 'text-blue-600' : 'text-emerald-600'}">${d.tipe.toUpperCase()}</td>
+        <td class="p-2 border text-center font-bold ${statusColor} whitespace-nowrap">${d.status_waktu || "-"}</td>
+        <td class="p-2 border text-xs text-center ${gpsColor} whitespace-nowrap">${d.gps_status || "Aman"}</td>
+        <td class="p-2 border text-xs text-gray-600 min-w-[200px]">${d.lokasi}</td>
+        <td class="p-2 border text-center">${fotoTag}</td>
+      </tr>
+    `;
+  });
+}
+
 // === EXPORT EXCEL DENGAN FOTO ===
 async function downloadExcel() {
-  if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
+  if (adminDataGlobal.length === 0) return alert("Tidak ada data untuk diunduh!");
 
   const btn = document.querySelector('button[onclick="downloadExcel()"]');
   const originalText = btn.innerText;
@@ -435,7 +483,14 @@ async function downloadExcel() {
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const fileName = `Rekap_Absensi_BPBD_${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")}.xlsx`;
+    
+    // Penamaan file dinamis berdasarkan filter
+    const startStr = document.getElementById("filterStart").value;
+    const endStr = document.getElementById("filterEnd").value;
+    let fileSuffix = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
+    if(startStr) fileSuffix = `${startStr}_sd_${endStr || startStr}`;
+
+    const fileName = `Rekap_Absensi_BPBD_${fileSuffix}.xlsx`;
     saveAs(new Blob([buffer]), fileName);
 
   } catch (error) {
@@ -449,7 +504,7 @@ async function downloadExcel() {
 
 // === EXPORT PDF DENGAN FOTO ===
 function downloadPDF() {
-  if (adminDataGlobal.length === 0) return alert("Belum ada data absensi untuk diunduh!");
+  if (adminDataGlobal.length === 0) return alert("Tidak ada data untuk diunduh!");
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('l', 'mm', 'a4'); 
@@ -461,7 +516,11 @@ function downloadPDF() {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", 148, 20, { align: "center" });
-  doc.text(`Dicetak pada: ${new Date().toLocaleString("id-ID")}`, 14, 30);
+
+  const startStr = document.getElementById("filterStart").value;
+  const endStr = document.getElementById("filterEnd").value;
+  let periodeTxt = startStr ? `Periode: ${startStr} s.d. ${endStr || startStr}` : "Periode: Semua Waktu";
+  doc.text(periodeTxt, 14, 30);
 
   const tableColumn = ["Waktu", "Nama Pegawai", "Tipe", "Kehadiran", "GPS", "Lokasi", "Foto"];
   const tableRows = [];
@@ -503,6 +562,8 @@ function downloadPDF() {
     }
   });
 
-  const fileName = `Rekap_Absensi_A4_${new Date().toLocaleDateString("id-ID").replace(/\//g, "-")}.pdf`;
+  let fileSuffix = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
+  if(startStr) fileSuffix = `${startStr}_sd_${endStr || startStr}`;
+  const fileName = `Rekap_Absensi_BPBD_${fileSuffix}.pdf`;
   doc.save(fileName);
 }
