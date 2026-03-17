@@ -1,172 +1,148 @@
 let gpsLoaded = false;
 let stream = null;
 let photoBase64 = "";
-let currentType = "";
+let absenType = ""; // Menyimpan status masuk atau pulang
+let currentLocation = { lat: null, lng: null }; // Menyimpan koordinat
 
-window.addEventListener("DOMContentLoaded", () => {
-initClock();
-initEmployees();
-});
+window.onload = () => {
+  initClock();
+  initEmployees();
+};
 
-/* ================= CLOCK ================= */
 function initClock() {
-const clock = document.getElementById("clock");
-const today = document.getElementById("today");
-
-if (!clock || !today) return;
-
-setInterval(() => {
-const now = new Date();
-clock.textContent = now.toLocaleTimeString("id-ID");
-today.textContent = now.toLocaleDateString("id-ID");
-}, 1000);
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById("clock").textContent = now.toLocaleTimeString("id-ID");
+    
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById("today").textContent = now.toLocaleDateString("id-ID", options);
+  }, 1000);
 }
 
-/* ================= EMPLOYEE ================= */
 function initEmployees() {
-const select = document.getElementById("employee");
-if (!select) return;
+  const select = document.getElementById("employee");
+  select.innerHTML = '<option value="">-- Pilih Nama --</option>';
 
-select.innerHTML = '<option value="">-- Pilih Nama --</option>';
+  if (typeof EMPLOYEES === "undefined") return;
 
-if (typeof EMPLOYEES === "undefined") {
-console.error("EMPLOYEES tidak ditemukan");
-return;
+  EMPLOYEES.forEach(n => {
+    const o = document.createElement("option");
+    o.value = n;
+    o.textContent = n;
+    select.appendChild(o);
+  });
 }
 
-EMPLOYEES.forEach(n => {
-const o = document.createElement("option");
-o.value = n;
-o.textContent = n;
-select.appendChild(o);
-});
-}
-
-/* ================= PAGE ================= */
 function showPage(p) {
-document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
-const page = document.getElementById("page-" + p);
-if (page) page.classList.add("active");
+  document.querySelectorAll(".page").forEach(el => el.classList.remove("active"));
+  document.getElementById("page-" + p).classList.add("active");
 }
 
-/* ================= START ABSEN ================= */
-function startAbsensi(type) {
-const name = document.getElementById("employee")?.value;
+async function startAbsensi(type) {
+  const selectedEmployee = document.getElementById("employee").value;
+  
+  if (!selectedEmployee) {
+    alert("Silakan pilih nama terlebih dahulu!");
+    return;
+  }
 
-if (!name) {
-alert("Pilih nama dulu");
-return;
+  absenType = type; // 'masuk' atau 'pulang'
+  showPage("absen");
+  startCamera();
+  detectLocation();
 }
 
-currentType = type;
-showPage("absen");
-
-startCamera();
-detectLocation();
-}
-
-/* ================= CAMERA ================= */
 async function startCamera() {
-try {
-stream = await navigator.mediaDevices.getUserMedia({ video: true });
-const video = document.getElementById("camera");
-
-```
-if (video) video.srcObject = stream;
-```
-
-} catch {
-alert("Kamera tidak diizinkan");
-}
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    document.getElementById("camera").srcObject = stream;
+  } catch (err) {
+    alert("Kamera tidak dapat diakses. Pastikan izin kamera sudah diberikan.");
+    console.error(err);
+  }
 }
 
-/* ================= GPS ================= */
 function detectLocation() {
-if (gpsLoaded) return;
-gpsLoaded = true;
-
-const label = document.getElementById("locationText");
-if (!label) return;
-
-if (!navigator.geolocation) {
-label.textContent = "GPS tidak didukung";
-return;
+  if (gpsLoaded) return;
+  document.getElementById("locationText").textContent = "Mendeteksi lokasi...";
+  
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      gpsLoaded = true;
+      currentLocation.lat = pos.coords.latitude;
+      currentLocation.lng = pos.coords.longitude;
+      document.getElementById("locationText").textContent = `Lokasi: Lat ${currentLocation.lat.toFixed(5)}, Lng ${currentLocation.lng.toFixed(5)}`;
+    },
+    err => {
+      document.getElementById("locationText").textContent = "Gagal mendapatkan lokasi. Izinkan akses GPS.";
+      console.error(err);
+    }
+  );
 }
 
-label.textContent = "Mendeteksi lokasi...";
-
-navigator.geolocation.getCurrentPosition(
-(pos) => {
-const lat = pos.coords.latitude;
-const lng = pos.coords.longitude;
-
-```
-  label.textContent = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-},
-() => {
-  label.textContent = "GPS error / tidak diizinkan";
-}
-```
-
-);
-}
-
-/* ================= FOTO ================= */
 function capturePhoto() {
-const video = document.getElementById("camera");
-const canvas = document.getElementById("canvas");
+  const video = document.getElementById("camera");
+  const canvas = document.getElementById("canvas");
 
-if (!video || !canvas) return;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
-canvas.width = video.videoWidth;
-canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-const ctx = canvas.getContext("2d");
-ctx.drawImage(video, 0, 0);
+  photoBase64 = canvas.toDataURL("image/jpeg");
 
-photoBase64 = canvas.toDataURL("image/jpeg");
+  // Tampilkan foto, sembunyikan video
+  document.getElementById("photo").src = photoBase64;
+  document.getElementById("photo").classList.remove("hidden");
+  document.getElementById("camera").classList.add("hidden");
 
-document.getElementById("photo").src = photoBase64;
-document.getElementById("photo").classList.remove("hidden");
-
-document.getElementById("btnCapture").classList.add("hidden");
-document.getElementById("postCapture").classList.remove("hidden");
+  // Atur visibilitas tombol
+  document.getElementById("btnCapture").classList.add("hidden");
+  document.getElementById("postCapture").classList.remove("hidden");
 }
 
 function retakePhoto() {
-document.getElementById("photo").classList.add("hidden");
-document.getElementById("btnCapture").classList.remove("hidden");
-document.getElementById("postCapture").classList.add("hidden");
+  // Sembunyikan foto, tampilkan video lagi
+  document.getElementById("photo").classList.add("hidden");
+  document.getElementById("camera").classList.remove("hidden");
+  
+  // Atur visibilitas tombol
+  document.getElementById("btnCapture").classList.remove("hidden");
+  document.getElementById("postCapture").classList.add("hidden");
 }
 
-/* ================= CANCEL ================= */
 function cancelAbsensi() {
-if (stream) stream.getTracks().forEach(t => t.stop());
-
-gpsLoaded = false;
-
-showPage("dashboard");
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+  }
+  
+  // Reset tampilan UI ke mode awal ambil foto
+  document.getElementById("photo").classList.add("hidden");
+  document.getElementById("camera").classList.remove("hidden");
+  document.getElementById("btnCapture").classList.remove("hidden");
+  document.getElementById("postCapture").classList.add("hidden");
+  document.getElementById("locationText").textContent = "Mendeteksi lokasi...";
+  
+  gpsLoaded = false;
+  showPage("dashboard");
 }
 
-/* ================= SUBMIT ================= */
 function submitAbsensi() {
-if (!photoBase64) {
-alert("Ambil foto dulu");
-return;
+  const employeeName = document.getElementById("employee").value;
+  alert(`Absen ${absenType.toUpperCase()} berhasil untuk ${employeeName}! (Dummy)`);
+  
+  // Balik ke dashboard setelah sukses
+  cancelAbsensi(); 
 }
 
-alert("✅ Absensi berhasil (FIXED)");
-cancelAbsensi();
-}
-
-/* ================= ADMIN ================= */
+// Dummy fungsi admin agar tidak error saat tombol login ditekan
 function adminLogin() {
-const pass = document.getElementById("adminPassword")?.value;
-
-if (pass !== CONFIG.ADMIN_PASSWORD) {
-alert("Password salah");
-return;
-}
-
-alert("Login berhasil");
+  const pass = document.getElementById("adminPassword").value;
+  if(pass === CONFIG.ADMIN_PASSWORD) {
+    alert("Login Admin Berhasil (Dummy)");
+    // Disini logika ambil data absensi nanti dimasukkan
+  } else {
+    alert("Password salah!");
+  }
 }
