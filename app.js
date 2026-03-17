@@ -1,8 +1,8 @@
 let gpsLoaded = false;
 let stream = null;
 let photoBase64 = "";
-let absenType = ""; // Menyimpan status masuk atau pulang
-let currentLocation = { lat: null, lng: null }; // Menyimpan koordinat
+let absenType = ""; 
+let currentLocation = { lat: null, lng: null, address: "" }; 
 
 window.onload = () => {
   initClock();
@@ -46,7 +46,7 @@ async function startAbsensi(type) {
     return;
   }
 
-  absenType = type; // 'masuk' atau 'pulang'
+  absenType = type; 
   showPage("absen");
   startCamera();
   detectLocation();
@@ -64,17 +64,47 @@ async function startCamera() {
 
 function detectLocation() {
   if (gpsLoaded) return;
-  document.getElementById("locationText").textContent = "Mendeteksi lokasi...";
+  const locText = document.getElementById("locationText");
+  locText.innerHTML = "Mendeteksi koordinat dan alamat...";
   
   navigator.geolocation.getCurrentPosition(
-    pos => {
+    async pos => {
       gpsLoaded = true;
       currentLocation.lat = pos.coords.latitude;
       currentLocation.lng = pos.coords.longitude;
-      document.getElementById("locationText").textContent = `Lokasi: Lat ${currentLocation.lat.toFixed(5)}, Lng ${currentLocation.lng.toFixed(5)}`;
+      
+      // Mengambil alamat dari OpenStreetMap API (Nominatim)
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLocation.lat}&lon=${currentLocation.lng}&zoom=18&addressdetails=1`);
+        const data = await response.json();
+        
+        if (data && data.address) {
+          const addr = data.address;
+          // Menyusun alamat berdasarkan ketersediaan data dari OSM
+          const dusun = addr.hamlet || addr.neighbourhood || "";
+          const desa = addr.village || addr.suburb || addr.residential || "";
+          const kecamatan = addr.town || addr.city_district || "";
+          const kota = addr.city || addr.county || addr.state_district || "";
+          
+          // Gabungkan yang tidak kosong
+          const addressParts = [dusun, desa, kecamatan, kota].filter(part => part !== "");
+          currentLocation.address = addressParts.join(", ");
+        } else {
+          currentLocation.address = "Alamat detail tidak ditemukan";
+        }
+      } catch (error) {
+        console.error("Gagal mengambil alamat:", error);
+        currentLocation.address = "Gagal memuat alamat dari server";
+      }
+
+      // Tampilkan ke layar (Koordinat + Alamat Detail)
+      locText.innerHTML = `
+        <span class="font-bold text-blue-900">Lat: ${currentLocation.lat.toFixed(5)}, Lng: ${currentLocation.lng.toFixed(5)}</span><br>
+        <span class="text-xs text-gray-600 mt-1 block">${currentLocation.address}</span>
+      `;
     },
     err => {
-      document.getElementById("locationText").textContent = "Gagal mendapatkan lokasi. Izinkan akses GPS.";
+      locText.textContent = "Gagal mendapatkan lokasi. Izinkan akses GPS.";
       console.error(err);
     }
   );
@@ -92,22 +122,18 @@ function capturePhoto() {
 
   photoBase64 = canvas.toDataURL("image/jpeg");
 
-  // Tampilkan foto, sembunyikan video
   document.getElementById("photo").src = photoBase64;
   document.getElementById("photo").classList.remove("hidden");
   document.getElementById("camera").classList.add("hidden");
 
-  // Atur visibilitas tombol
   document.getElementById("btnCapture").classList.add("hidden");
   document.getElementById("postCapture").classList.remove("hidden");
 }
 
 function retakePhoto() {
-  // Sembunyikan foto, tampilkan video lagi
   document.getElementById("photo").classList.add("hidden");
   document.getElementById("camera").classList.remove("hidden");
   
-  // Atur visibilitas tombol
   document.getElementById("btnCapture").classList.remove("hidden");
   document.getElementById("postCapture").classList.add("hidden");
 }
@@ -117,12 +143,11 @@ function cancelAbsensi() {
     stream.getTracks().forEach(t => t.stop());
   }
   
-  // Reset tampilan UI ke mode awal ambil foto
   document.getElementById("photo").classList.add("hidden");
   document.getElementById("camera").classList.remove("hidden");
   document.getElementById("btnCapture").classList.remove("hidden");
   document.getElementById("postCapture").classList.add("hidden");
-  document.getElementById("locationText").textContent = "Mendeteksi lokasi...";
+  document.getElementById("locationText").innerHTML = "Mendeteksi lokasi...";
   
   gpsLoaded = false;
   showPage("dashboard");
@@ -130,18 +155,15 @@ function cancelAbsensi() {
 
 function submitAbsensi() {
   const employeeName = document.getElementById("employee").value;
-  alert(`Absen ${absenType.toUpperCase()} berhasil untuk ${employeeName}! (Dummy)`);
+  alert(`Absen ${absenType.toUpperCase()} berhasil untuk ${employeeName}!\nLokasi: ${currentLocation.address}`);
   
-  // Balik ke dashboard setelah sukses
   cancelAbsensi(); 
 }
 
-// Dummy fungsi admin agar tidak error saat tombol login ditekan
 function adminLogin() {
   const pass = document.getElementById("adminPassword").value;
   if(pass === CONFIG.ADMIN_PASSWORD) {
     alert("Login Admin Berhasil (Dummy)");
-    // Disini logika ambil data absensi nanti dimasukkan
   } else {
     alert("Password salah!");
   }
