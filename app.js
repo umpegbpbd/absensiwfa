@@ -60,7 +60,9 @@ return;
 
 state.type = type;
 showPage("absen");
+
 startCamera();
+detectLocation(); // ✅ FIX GPS
 }
 
 /* ================= CAMERA ================= */
@@ -106,9 +108,67 @@ document.getElementById("camera").classList.remove("hidden");
 document.getElementById("postCapture").classList.add("hidden");
 }
 
+/* ================= GPS FIX TOTAL ================= */
+function detectLocation() {
+const label = document.getElementById("locationText");
+
+if (!navigator.geolocation) {
+label.textContent = "GPS tidak didukung";
+return;
+}
+
+label.textContent = "Mendeteksi lokasi...";
+
+navigator.geolocation.getCurrentPosition(
+async (pos) => {
+const lat = pos.coords.latitude;
+const lng = pos.coords.longitude;
+
+```
+  // tampilkan koordinat dulu
+  label.textContent = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+
+  // ambil alamat (optional)
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    );
+    const data = await res.json();
+
+    if (data.display_name) {
+      label.textContent = data.display_name;
+    }
+  } catch {
+    // fallback tetap koordinat
+  }
+},
+(err) => {
+  if (err.code === 1) {
+    label.textContent = "Izin lokasi ditolak";
+  } else if (err.code === 2) {
+    label.textContent = "Lokasi tidak tersedia";
+  } else {
+    label.textContent = "GPS error";
+  }
+},
+{
+  enableHighAccuracy: true,
+  timeout: 10000,
+  maximumAge: 0
+}
+```
+
+);
+}
+
 /* ================= SUBMIT ================= */
 function submitAbsensi() {
-alert("Absensi berhasil (mode offline dulu)");
+if (!state.photo) {
+alert("Ambil foto dulu");
+return;
+}
+
+alert("✅ Absensi berhasil (mode aman)");
 cancelAbsensi();
 }
 
@@ -131,9 +191,9 @@ document.getElementById("adminPanel").classList.remove("hidden");
 }
 
 function loadAdminTable() {
-alert("Data belum aktif (mode offline)");
+alert("Belum aktif");
 }
 
 function exportToCSV() {
-alert("Export belum aktif");
+alert("Belum aktif");
 }
