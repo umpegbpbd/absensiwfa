@@ -364,7 +364,6 @@ async function saveFullAdminDataToGitHub(updatedNewestFirstData, commitMessage =
   const fileData = await getRes.json();
   sha = fileData.sha;
 
-  // Disimpan kembali dalam urutan lama -> baru
   const dataToSave = [...updatedNewestFirstData].reverse();
   const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2))));
 
@@ -763,10 +762,6 @@ function downloadPDF() {
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const marginLeft = 10;
-  const marginRight = 10;
-  const topMargin = 30;
-  const bottomMargin = 12;
 
   const startStr = document.getElementById("filterStart").value;
   const endStr = document.getElementById("filterEnd").value;
@@ -775,7 +770,7 @@ function downloadPDF() {
   const tableColumn = [
     "Waktu Absen",
     "Nama Pegawai",
-    "Tipe Absen",
+    "Tipe\nAbsen",
     "Status\nKehadiran",
     "Validasi\nGPS",
     "Lokasi (GPS)",
@@ -796,24 +791,27 @@ function downloadPDF() {
     return row;
   });
 
-  const drawHeader = () => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text("REKAP ABSENSI WFA", pageWidth / 2, 12, { align: "center" });
+  // Total lebar tabel dibuat proporsional lalu dipusatkan
+  const colWidths = [24, 35, 15, 20, 14, 60, 20];
+  const totalTableWidth = colWidths.reduce((a, b) => a + b, 0);
+  const leftMargin = (pageWidth - totalTableWidth) / 2;
+  const rightMargin = leftMargin;
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", pageWidth / 2, 18, { align: "center" });
-    doc.text(periodeTxt, marginLeft, 26);
-  };
+  // Header hanya di halaman pertama
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("REKAP ABSENSI WFA", pageWidth / 2, 12, { align: "center" });
 
-  drawHeader();
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", pageWidth / 2, 18, { align: "center" });
+  doc.text(periodeTxt, leftMargin, 26);
 
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
-    startY: topMargin,
-    margin: { left: marginLeft, right: marginRight, bottom: bottomMargin },
+    startY: 30,
+    margin: { left: leftMargin, right: rightMargin, bottom: 14 },
     theme: "grid",
     pageBreak: "auto",
     rowPageBreak: "avoid",
@@ -840,17 +838,15 @@ function downloadPDF() {
       halign: "center",
       valign: "middle"
     },
+    showHead: "everyPage",
     columnStyles: {
-      0: { cellWidth: 24 },
-      1: { cellWidth: 35 },
-      2: { cellWidth: 15 },
-      3: { cellWidth: 20 },
-      4: { cellWidth: 14 },
-      5: { cellWidth: 72, halign: "left" },
-      6: { cellWidth: 20 }
-    },
-    didDrawPage: function () {
-      drawHeader();
+      0: { cellWidth: colWidths[0] },
+      1: { cellWidth: colWidths[1] },
+      2: { cellWidth: colWidths[2] },
+      3: { cellWidth: colWidths[3] },
+      4: { cellWidth: colWidths[4] },
+      5: { cellWidth: colWidths[5], halign: "left" },
+      6: { cellWidth: colWidths[6] }
     },
     didParseCell: function (data) {
       if (data.section === "body") {
@@ -901,29 +897,32 @@ function downloadPDF() {
     }
   });
 
-  let finalY = doc.lastAutoTable.finalY + 4;
+  let finalY = doc.lastAutoTable.finalY + 8;
 
-  if (finalY + 24 > pageHeight) {
+  if (finalY + 34 > pageHeight) {
     doc.addPage();
-    drawHeader();
-    finalY = 34;
+    finalY = 24;
   }
 
-  const signX = 214;
+  // Blok tanda tangan jangan terlalu kanan
+  const signX = pageWidth - 78;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text("Trenggalek, ........", signX, finalY);
-  doc.text("Kepala Pelaksana", signX, finalY + 4);
-  doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 8);
-  doc.text("Kabupaten Trenggalek", signX, finalY + 12);
+  doc.text("Kepala Pelaksana", signX, finalY + 5);
+  doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 10);
+  doc.text("Kabupaten Trenggalek", signX, finalY + 15);
 
-  doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si", signX, finalY + 16);
-  const nameWidth = doc.getTextWidth("Drs. STEFANUS TRIADI ATMONO, M.Si");
-  doc.line(signX, finalY + 16.5, signX + nameWidth, finalY + 16.5);
+  // Spasi tanda tangan
+  doc.setFont("helvetica", "bold");
+  doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si.", signX, finalY + 29);
+  const nameWidth = doc.getTextWidth("Drs. STEFANUS TRIADI ATMONO, M.Si.");
+  doc.line(signX, finalY + 29.7, signX + nameWidth, finalY + 29.7);
 
-  doc.text("Pembina Utama Muda", signX, finalY + 20);
-  doc.text("NIP. 19700907 199003 1 006", signX, finalY + 24);
+  doc.setFont("helvetica", "normal");
+  doc.text("Pembina Utama Muda", signX, finalY + 34);
+  doc.text("NIP. 19700907 199003 1 006", signX, finalY + 39);
 
   const fileSuffix = getExportFileSuffix();
   const fileName = `Rekap_Absensi_BPBD_${fileSuffix}.pdf`;
