@@ -791,13 +791,11 @@ function downloadPDF() {
     return row;
   });
 
-  // Total lebar tabel dibuat proporsional lalu dipusatkan
   const colWidths = [24, 35, 15, 20, 14, 60, 20];
   const totalTableWidth = colWidths.reduce((a, b) => a + b, 0);
   const leftMargin = (pageWidth - totalTableWidth) / 2;
   const rightMargin = leftMargin;
 
-  // Header hanya di halaman pertama
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.text("REKAP ABSENSI WFA", pageWidth / 2, 12, { align: "center" });
@@ -899,13 +897,13 @@ function downloadPDF() {
 
   let finalY = doc.lastAutoTable.finalY + 8;
 
-  if (finalY + 34 > pageHeight) {
+  if (finalY + 42 > pageHeight) {
     doc.addPage();
     finalY = 24;
   }
 
-  // Blok tanda tangan jangan terlalu kanan
-  const signX = pageWidth - 78;
+  // Digeser ke kiri agar tidak melewati batas kanan tabel
+  const signX = pageWidth - 95;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -914,15 +912,15 @@ function downloadPDF() {
   doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 10);
   doc.text("Kabupaten Trenggalek", signX, finalY + 15);
 
-  // Spasi tanda tangan
+  // Ditambah kira-kira 2 enter ke bawah dari baris Kabupaten Trenggalek
   doc.setFont("helvetica", "bold");
-  doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si.", signX, finalY + 29);
+  doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si.", signX, finalY + 35);
   const nameWidth = doc.getTextWidth("Drs. STEFANUS TRIADI ATMONO, M.Si.");
-  doc.line(signX, finalY + 29.7, signX + nameWidth, finalY + 29.7);
+  doc.line(signX, finalY + 35.7, signX + nameWidth, finalY + 35.7);
 
   doc.setFont("helvetica", "normal");
-  doc.text("Pembina Utama Muda", signX, finalY + 34);
-  doc.text("NIP. 19700907 199003 1 006", signX, finalY + 39);
+  doc.text("Pembina Utama Muda", signX, finalY + 40);
+  doc.text("NIP. 19700907 199003 1 006", signX, finalY + 45);
 
   const fileSuffix = getExportFileSuffix();
   const fileName = `Rekap_Absensi_BPBD_${fileSuffix}.pdf`;
