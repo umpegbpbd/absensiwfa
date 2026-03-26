@@ -550,26 +550,26 @@ async function downloadExcel() {
       fitToWidth: 1,
       fitToHeight: 0,
       margins: {
-        left: 0.3,
-        right: 0.3,
-        top: 0.5,
-        bottom: 0.5,
-        header: 0.2,
-        footer: 0.2
+        left: 0.25,
+        right: 0.25,
+        top: 0.35,
+        bottom: 0.35,
+        header: 0.15,
+        footer: 0.15
       }
     };
 
-    worksheet.properties.defaultRowHeight = 20;
+    worksheet.properties.defaultRowHeight = 18;
     worksheet.views = [{ showGridLines: true }];
 
     worksheet.columns = [
-      { key: "waktu", width: 22 },
-      { key: "nama", width: 34 },
-      { key: "tipe", width: 14 },
-      { key: "status", width: 20 },
-      { key: "gps", width: 16 },
-      { key: "lokasi", width: 42 },
-      { key: "foto", width: 16 }
+      { key: "waktu", width: 18 },
+      { key: "nama", width: 28 },
+      { key: "tipe", width: 12 },
+      { key: "status", width: 16 },
+      { key: "gps", width: 12 },
+      { key: "lokasi", width: 28 },
+      { key: "foto", width: 14 }
     ];
 
     worksheet.mergeCells("A1:G1");
@@ -637,7 +637,7 @@ async function downloadExcel() {
       row.getCell(6).value = d.lokasi || "";
       row.getCell(7).value = "";
 
-      row.height = 52;
+      row.height = 46;
 
       for (let col = 1; col <= 7; col++) {
         const cell = row.getCell(col);
@@ -682,8 +682,8 @@ async function downloadExcel() {
           });
 
           worksheet.addImage(imageId, {
-            tl: { col: 6.15, row: currentRow - 0.85 },
-            ext: { width: 55, height: 40 }
+            tl: { col: 6.18, row: currentRow - 0.82 },
+            ext: { width: 52, height: 34 }
           });
         } catch (err) {
           console.error("Gagal menambahkan foto di Excel:", err);
@@ -693,7 +693,7 @@ async function downloadExcel() {
       currentRow++;
     });
 
-    const signStartRow = currentRow + 2;
+    const signStartRow = currentRow + 1;
 
     worksheet.mergeCells(`E${signStartRow}:G${signStartRow}`);
     worksheet.getCell(`E${signStartRow}`).value = "Trenggalek, ........";
@@ -715,10 +715,10 @@ async function downloadExcel() {
     worksheet.getCell(`E${signStartRow + 3}`).font = { name: "Arial", size: 11 };
     worksheet.getCell(`E${signStartRow + 3}`).alignment = { horizontal: "center", vertical: "middle" };
 
-    worksheet.getRow(signStartRow + 4).height = 18;
-    worksheet.getRow(signStartRow + 5).height = 18;
-    worksheet.getRow(signStartRow + 6).height = 18;
-    worksheet.getRow(signStartRow + 7).height = 18;
+    worksheet.getRow(signStartRow + 4).height = 6;
+    worksheet.getRow(signStartRow + 5).height = 6;
+    worksheet.getRow(signStartRow + 6).height = 6;
+    worksheet.getRow(signStartRow + 7).height = 6;
 
     worksheet.mergeCells(`E${signStartRow + 8}:G${signStartRow + 8}`);
     worksheet.getCell(`E${signStartRow + 8}`).value = "Drs. STEFANUS TRIADI ATMONO, M.Si";
@@ -765,28 +765,19 @@ function downloadPDF() {
   const pageHeight = doc.internal.pageSize.getHeight();
   const marginLeft = 10;
   const marginRight = 10;
+  const topMargin = 30;
+  const bottomMargin = 12;
 
   const startStr = document.getElementById("filterStart").value;
   const endStr = document.getElementById("filterEnd").value;
   const periodeTxt = formatPeriodeText(startStr, endStr);
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("REKAP ABSENSI WFA", pageWidth / 2, 12, { align: "center" });
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", pageWidth / 2, 18, { align: "center" });
-
-  doc.setFontSize(10);
-  doc.text(periodeTxt, marginLeft, 26);
-
   const tableColumn = [
     "Waktu Absen",
     "Nama Pegawai",
     "Tipe Absen",
-    "Status Kehadiran",
-    "Validasi GPS",
+    "Status\nKehadiran",
+    "Validasi\nGPS",
     "Lokasi (GPS)",
     "Foto Wajah"
   ];
@@ -805,16 +796,31 @@ function downloadPDF() {
     return row;
   });
 
+  const drawHeader = () => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("REKAP ABSENSI WFA", pageWidth / 2, 12, { align: "center" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", pageWidth / 2, 18, { align: "center" });
+    doc.text(periodeTxt, marginLeft, 26);
+  };
+
+  drawHeader();
+
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
-    startY: 30,
-    margin: { left: marginLeft, right: marginRight },
+    startY: topMargin,
+    margin: { left: marginLeft, right: marginRight, bottom: bottomMargin },
     theme: "grid",
+    pageBreak: "auto",
+    rowPageBreak: "avoid",
     styles: {
       font: "helvetica",
       fontSize: 8,
-      cellPadding: 1.5,
+      cellPadding: 1.2,
       lineColor: [0, 0, 0],
       lineWidth: 0.2,
       valign: "middle",
@@ -835,17 +841,20 @@ function downloadPDF() {
       valign: "middle"
     },
     columnStyles: {
-      0: { cellWidth: 27 },
-      1: { cellWidth: 42 },
-      2: { cellWidth: 18 },
-      3: { cellWidth: 23 },
-      4: { cellWidth: 18 },
-      5: { cellWidth: 86, halign: "left" },
-      6: { cellWidth: 22 }
+      0: { cellWidth: 24 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 15 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 14 },
+      5: { cellWidth: 72, halign: "left" },
+      6: { cellWidth: 20 }
+    },
+    didDrawPage: function () {
+      drawHeader();
     },
     didParseCell: function (data) {
       if (data.section === "body") {
-        data.row.height = 18;
+        data.row.height = 17;
 
         if (data.column.index === 3) {
           const value = String(data.cell.raw || "");
@@ -879,10 +888,10 @@ function downloadPDF() {
             doc.addImage(
               imgBase64,
               "JPEG",
-              data.cell.x + 1.5,
-              data.cell.y + 1.5,
-              18,
-              14
+              data.cell.x + 1,
+              data.cell.y + 1,
+              17,
+              13
             );
           } catch (e) {
             console.error("Gagal menambahkan foto PDF:", e);
@@ -892,28 +901,29 @@ function downloadPDF() {
     }
   });
 
-  let finalY = doc.lastAutoTable.finalY + 12;
+  let finalY = doc.lastAutoTable.finalY + 4;
 
-  if (finalY + 40 > pageHeight) {
+  if (finalY + 24 > pageHeight) {
     doc.addPage();
-    finalY = 20;
+    drawHeader();
+    finalY = 34;
   }
 
-  const signX = 220;
+  const signX = 214;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text("Trenggalek,            ", signX, finalY);
-  doc.text("Kepala Pelaksana", signX, finalY + 6);
-  doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 12);
-  doc.text("Kabupaten Trenggalek", signX, finalY + 18);
+  doc.text("Trenggalek, ........", signX, finalY);
+  doc.text("Kepala Pelaksana", signX, finalY + 4);
+  doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 8);
+  doc.text("Kabupaten Trenggalek", signX, finalY + 12);
 
-  doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si", signX, finalY + 42);
+  doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si", signX, finalY + 16);
   const nameWidth = doc.getTextWidth("Drs. STEFANUS TRIADI ATMONO, M.Si");
-  doc.line(signX, finalY + 43, signX + nameWidth, finalY + 43);
+  doc.line(signX, finalY + 16.5, signX + nameWidth, finalY + 16.5);
 
-  doc.text("Pembina Utama Muda", signX, finalY + 48);
-  doc.text("NIP. 19700907 199003 1 006", signX, finalY + 54);
+  doc.text("Pembina Utama Muda", signX, finalY + 20);
+  doc.text("NIP. 19700907 199003 1 006", signX, finalY + 24);
 
   const fileSuffix = getExportFileSuffix();
   const fileName = `Rekap_Absensi_BPBD_${fileSuffix}.pdf`;
