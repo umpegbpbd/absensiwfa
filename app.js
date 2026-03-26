@@ -4,8 +4,8 @@ let photoBase64 = "";
 let absenType = ""; 
 let currentLocation = { lat: null, lng: null, address: "", accuracy: 0, fake_status: "Aman" }; 
 
-let rawAdminData = []; // Menyimpan semua data asli dari GitHub
-let adminDataGlobal = []; // Menyimpan data yang sudah di-filter untuk didownload
+let rawAdminData = []; // Menyimpan semua data asli dari GitHub (urutan terbaru di atas)
+let adminDataGlobal = []; // Menyimpan data yang sudah di-filter untuk ditampilkan / didownload
 
 window.onload = () => {
   initClock();
@@ -333,13 +333,88 @@ async function loadAdminData() {
     const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
     
     const parsedData = JSON.parse(decodedContent);
-    rawAdminData = parsedData.reverse(); 
+    rawAdminData = [...parsedData].reverse(); 
     adminDataGlobal = [...rawAdminData]; 
     
     renderAdminTable();
+    document.getElementById("adminPassword").value = "";
   } catch (e) {
     console.error(e);
     alert("Belum ada data absensi atau gagal memuat data.");
+    document.getElementById("adminPassword").value = "";
+  }
+}
+
+// === SIMPAN DATA ADMIN SETELAH HAPUS ===
+async function saveFullAdminDataToGitHub(updatedNewestFirstData, commitMessage = "Update data absensi") {
+  if (!CONFIG.TOKEN) throw new Error("Token belum diisi!");
+
+  const url = `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${CONFIG.DATA_FILE}`;
+  const headers = {
+    "Authorization": `token ${CONFIG.TOKEN}`,
+    "Accept": "application/vnd.github.v3+json",
+    "Content-Type": "application/json"
+  };
+
+  let sha = "";
+
+  const getRes = await fetch(url, { method: "GET", headers });
+  if (!getRes.ok) throw new Error("Gagal mengambil file data terbaru dari GitHub");
+
+  const fileData = await getRes.json();
+  sha = fileData.sha;
+
+  // Disimpan kembali dalam urutan lama -> baru
+  const dataToSave = [...updatedNewestFirstData].reverse();
+  const updatedContent = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2))));
+
+  const body = {
+    message: commitMessage,
+    content: updatedContent,
+    branch: CONFIG.BRANCH,
+    sha
+  };
+
+  const putRes = await fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(body)
+  });
+
+  if (!putRes.ok) {
+    const errorText = await putRes.text();
+    console.error(errorText);
+    throw new Error("Gagal memperbarui data di GitHub");
+  }
+}
+
+// === HAPUS ABSENSI PER BARIS ===
+async function deleteAbsensi(absensiId) {
+  const data = rawAdminData.find(d => d.id === absensiId);
+  if (!data) {
+    alert("Data tidak ditemukan.");
+    return;
+  }
+
+  const confirmText = `Yakin ingin menghapus data absensi ini?\n\nNama: ${data.nama}\nTipe: ${String(data.tipe || "").toUpperCase()}\nWaktu: ${new Date(data.waktu).toLocaleString("id-ID")}`;
+  if (!confirm(confirmText)) return;
+
+  try {
+    const updatedRawData = rawAdminData.filter(d => d.id !== absensiId);
+
+    await saveFullAdminDataToGitHub(
+      updatedRawData,
+      `Hapus absensi - ${data.nama} - ${String(data.tipe || "").toUpperCase()}`
+    );
+
+    rawAdminData = updatedRawData;
+    adminDataGlobal = adminDataGlobal.filter(d => d.id !== absensiId);
+
+    renderAdminTable();
+    alert("Data absensi berhasil dihapus.");
+  } catch (error) {
+    console.error(error);
+    alert("Gagal menghapus data absensi.");
   }
 }
 
@@ -388,11 +463,12 @@ function renderAdminTable() {
       <th class="p-2 border">Validasi GPS</th>
       <th class="p-2 border">Lokasi</th>
       <th class="p-2 border text-center">Foto</th>
+      <th class="p-2 border text-center">Aksi</th>
     </tr>
   `;
   
   if (adminDataGlobal.length === 0) {
-    tbody.innerHTML += `<tr><td colspan="7" class="text-center p-4 text-gray-500 font-bold">Tidak ada data absensi pada rentang tanggal tersebut.</td></tr>`;
+    tbody.innerHTML += `<tr><td colspan="8" class="text-center p-4 text-gray-500 font-bold">Tidak ada data absensi pada rentang tanggal tersebut.</td></tr>`;
     return;
   }
 
@@ -416,6 +492,11 @@ function renderAdminTable() {
         <td class="p-2 border text-xs text-center ${gpsColor} whitespace-nowrap">${d.gps_status || "Aman"}</td>
         <td class="p-2 border text-xs text-gray-600 min-w-[200px]">${d.lokasi}</td>
         <td class="p-2 border text-center">${fotoTag}</td>
+        <td class="p-2 border text-center whitespace-nowrap">
+          <button onclick="deleteAbsensi(${d.id})" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
+            🗑 Hapus
+          </button>
+        </td>
       </tr>
     `;
   });
@@ -822,7 +903,7 @@ function downloadPDF() {
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text("Trenggalek, ........", signX, finalY);
+  doc.text("Trenggalek,            ", signX, finalY);
   doc.text("Kepala Pelaksana", signX, finalY + 6);
   doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 12);
   doc.text("Kabupaten Trenggalek", signX, finalY + 18);
