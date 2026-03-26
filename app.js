@@ -333,9 +333,7 @@ async function loadAdminData() {
     const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
     
     const parsedData = JSON.parse(decodedContent);
-    // Simpan data asli ke rawAdminData
     rawAdminData = parsedData.reverse(); 
-    // Duplikat ke adminDataGlobal untuk dirender
     adminDataGlobal = [...rawAdminData]; 
     
     renderAdminTable();
@@ -356,8 +354,6 @@ function applyFilter() {
   }
 
   adminDataGlobal = rawAdminData.filter(d => {
-    // d.waktu formatnya "2026-03-17T08:00:00.000Z"
-    // Kita ambil cuma tanggalnya aja (YYYY-MM-DD)
     const dateStr = d.waktu.split('T')[0]; 
     
     if (startDate && endDate) {
@@ -376,7 +372,7 @@ function applyFilter() {
 function resetFilter() {
   document.getElementById("filterStart").value = "";
   document.getElementById("filterEnd").value = "";
-  adminDataGlobal = [...rawAdminData]; // Kembalikan ke data asli
+  adminDataGlobal = [...rawAdminData];
   renderAdminTable();
 }
 
@@ -425,7 +421,35 @@ function renderAdminTable() {
   });
 }
 
-// === EXPORT EXCEL DENGAN FOTO ===
+// === HELPER EXPORT ===
+function formatDateTimeIndonesia(dateString) {
+  const d = new Date(dateString);
+  return d.toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).replace(/\./g, ":");
+}
+
+function formatPeriodeText(startStr, endStr) {
+  if (startStr && endStr) return `Periode: ${startStr} s.d. ${endStr}`;
+  if (startStr) return `Periode: ${startStr} s.d. ${startStr}`;
+  return "Periode: Semua Waktu";
+}
+
+function getExportFileSuffix() {
+  const startStr = document.getElementById("filterStart").value;
+  const endStr = document.getElementById("filterEnd").value;
+
+  let fileSuffix = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
+  if (startStr) fileSuffix = `${startStr}_sd_${endStr || startStr}`;
+  return fileSuffix;
+}
+
+// === EXPORT EXCEL DENGAN FOTO (FORMAT BARU A4) ===
 async function downloadExcel() {
   if (adminDataGlobal.length === 0) return alert("Tidak ada data untuk diunduh!");
 
@@ -436,61 +460,204 @@ async function downloadExcel() {
 
   try {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Data Absensi");
+    const worksheet = workbook.addWorksheet("Rekap Absensi WFA");
+
+    worksheet.pageSetup = {
+      paperSize: 9,
+      orientation: "landscape",
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      margins: {
+        left: 0.3,
+        right: 0.3,
+        top: 0.5,
+        bottom: 0.5,
+        header: 0.2,
+        footer: 0.2
+      }
+    };
+
+    worksheet.properties.defaultRowHeight = 20;
+    worksheet.views = [{ showGridLines: true }];
 
     worksheet.columns = [
-      { header: "Waktu Absen", key: "waktu", width: 22 },
-      { header: "Nama Pegawai", key: "nama", width: 35 },
-      { header: "Tipe Absen", key: "tipe", width: 15 },
-      { header: "Status Kehadiran", key: "status", width: 20 },
-      { header: "Validasi GPS", key: "gps", width: 25 },
-      { header: "Lokasi (GPS)", key: "lokasi", width: 50 },
-      { header: "Foto Wajah", key: "foto", width: 15 }
+      { key: "waktu", width: 22 },
+      { key: "nama", width: 34 },
+      { key: "tipe", width: 14 },
+      { key: "status", width: 20 },
+      { key: "gps", width: 16 },
+      { key: "lokasi", width: 42 },
+      { key: "foto", width: 16 }
     ];
 
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    worksheet.mergeCells("A1:G1");
+    worksheet.getCell("A1").value = "REKAP ABSENSI WFA";
+    worksheet.getCell("A1").font = { name: "Arial", size: 14, bold: true };
+    worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
 
-    adminDataGlobal.forEach((d, index) => {
-      const row = worksheet.addRow({
-        waktu: new Date(d.waktu).toLocaleString("id-ID"),
-        nama: d.nama,
-        tipe: d.tipe.toUpperCase(),
-        status: d.status_waktu || "-",
-        gps: d.gps_status || "Aman",
-        lokasi: d.lokasi
-      });
-      
-      row.height = 65;
-      row.alignment = { vertical: 'middle' };
+    worksheet.mergeCells("A2:G2");
+    worksheet.getCell("A2").value = "Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek";
+    worksheet.getCell("A2").font = { name: "Arial", size: 11 };
+    worksheet.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
 
-      if (d.gps_status && d.gps_status !== "Aman") {
-         row.getCell('gps').fill = {
-           type: 'pattern',
-           pattern: 'solid',
-           fgColor: { argb: 'FFFFCCCC' } 
-         };
-         row.getCell('gps').font = { color: { argb: 'FFFF0000' }, bold: true };
+    const startStr = document.getElementById("filterStart").value;
+    const endStr = document.getElementById("filterEnd").value;
+
+    worksheet.mergeCells("A3:G3");
+    worksheet.getCell("A3").value = formatPeriodeText(startStr, endStr);
+    worksheet.getCell("A3").font = { name: "Arial", size: 10 };
+    worksheet.getCell("A3").alignment = { horizontal: "left", vertical: "middle" };
+
+    const headerRowNumber = 5;
+    const headers = [
+      "Waktu Absen",
+      "Nama Pegawai",
+      "Tipe Absen",
+      "Status Kehadiran",
+      "Validasi GPS",
+      "Lokasi (GPS)",
+      "Foto Wajah"
+    ];
+
+    const headerRow = worksheet.getRow(headerRowNumber);
+    headers.forEach((h, i) => {
+      headerRow.getCell(i + 1).value = h;
+    });
+    headerRow.height = 24;
+
+    for (let col = 1; col <= 7; col++) {
+      const cell = headerRow.getCell(col);
+      cell.font = { name: "Arial", size: 10, bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "D9EAF7" }
+      };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" }
+      };
+    }
+
+    let currentRow = headerRowNumber + 1;
+
+    adminDataGlobal.forEach((d) => {
+      const row = worksheet.getRow(currentRow);
+
+      row.getCell(1).value = formatDateTimeIndonesia(d.waktu);
+      row.getCell(2).value = d.nama || "";
+      row.getCell(3).value = (d.tipe || "").toUpperCase();
+      row.getCell(4).value = d.status_waktu || "-";
+      row.getCell(5).value = d.gps_status || "Aman";
+      row.getCell(6).value = d.lokasi || "";
+      row.getCell(7).value = "";
+
+      row.height = 52;
+
+      for (let col = 1; col <= 7; col++) {
+        const cell = row.getCell(col);
+        cell.font = { name: "Arial", size: 10 };
+        cell.alignment = {
+          horizontal: col === 6 ? "left" : "center",
+          vertical: "middle",
+          wrapText: true
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" }
+        };
+      }
+
+      if (d.status_waktu === "Tepat Waktu") {
+        row.getCell(4).font = { name: "Arial", size: 10, bold: true, color: { argb: "008000" } };
+      } else if (d.status_waktu === "Terlambat") {
+        row.getCell(4).font = { name: "Arial", size: 10, bold: true, color: { argb: "FF0000" } };
+      } else if (d.status_waktu === "Pulang Lebih Cepat") {
+        row.getCell(4).font = { name: "Arial", size: 10, bold: true, color: { argb: "E67E22" } };
+      } else {
+        row.getCell(4).font = { name: "Arial", size: 10, bold: true };
+      }
+
+      if ((d.gps_status || "Aman") !== "Aman") {
+        row.getCell(5).font = { name: "Arial", size: 10, bold: true, color: { argb: "FF0000" } };
+        row.getCell(5).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE5E5" }
+        };
       }
 
       if (d.foto) {
-        const imageId = workbook.addImage({ base64: d.foto, extension: 'jpeg' });
-        worksheet.addImage(imageId, {
-          tl: { col: 6, row: index + 1 }, 
-          ext: { width: 80, height: 60 }
-        });
+        try {
+          const imageId = workbook.addImage({
+            base64: d.foto,
+            extension: "jpeg"
+          });
+
+          worksheet.addImage(imageId, {
+            tl: { col: 6.15, row: currentRow - 0.85 },
+            ext: { width: 55, height: 40 }
+          });
+        } catch (err) {
+          console.error("Gagal menambahkan foto di Excel:", err);
+        }
       }
+
+      currentRow++;
     });
 
-    const buffer = await workbook.xlsx.writeBuffer();
-    
-    // Penamaan file dinamis berdasarkan filter
-    const startStr = document.getElementById("filterStart").value;
-    const endStr = document.getElementById("filterEnd").value;
-    let fileSuffix = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
-    if(startStr) fileSuffix = `${startStr}_sd_${endStr || startStr}`;
+    const signStartRow = currentRow + 2;
 
+    worksheet.mergeCells(`E${signStartRow}:G${signStartRow}`);
+    worksheet.getCell(`E${signStartRow}`).value = "Trenggalek, ........";
+    worksheet.getCell(`E${signStartRow}`).font = { name: "Arial", size: 11 };
+    worksheet.getCell(`E${signStartRow}`).alignment = { horizontal: "center", vertical: "middle" };
+
+    worksheet.mergeCells(`E${signStartRow + 1}:G${signStartRow + 1}`);
+    worksheet.getCell(`E${signStartRow + 1}`).value = "Kepala Pelaksana";
+    worksheet.getCell(`E${signStartRow + 1}`).font = { name: "Arial", size: 11 };
+    worksheet.getCell(`E${signStartRow + 1}`).alignment = { horizontal: "center", vertical: "middle" };
+
+    worksheet.mergeCells(`E${signStartRow + 2}:G${signStartRow + 2}`);
+    worksheet.getCell(`E${signStartRow + 2}`).value = "Badan Penanggulangan Bencana Daerah";
+    worksheet.getCell(`E${signStartRow + 2}`).font = { name: "Arial", size: 11 };
+    worksheet.getCell(`E${signStartRow + 2}`).alignment = { horizontal: "center", vertical: "middle" };
+
+    worksheet.mergeCells(`E${signStartRow + 3}:G${signStartRow + 3}`);
+    worksheet.getCell(`E${signStartRow + 3}`).value = "Kabupaten Trenggalek";
+    worksheet.getCell(`E${signStartRow + 3}`).font = { name: "Arial", size: 11 };
+    worksheet.getCell(`E${signStartRow + 3}`).alignment = { horizontal: "center", vertical: "middle" };
+
+    worksheet.getRow(signStartRow + 4).height = 18;
+    worksheet.getRow(signStartRow + 5).height = 18;
+    worksheet.getRow(signStartRow + 6).height = 18;
+    worksheet.getRow(signStartRow + 7).height = 18;
+
+    worksheet.mergeCells(`E${signStartRow + 8}:G${signStartRow + 8}`);
+    worksheet.getCell(`E${signStartRow + 8}`).value = "Drs. STEFANUS TRIADI ATMONO, M.Si";
+    worksheet.getCell(`E${signStartRow + 8}`).font = { name: "Arial", size: 11, bold: true, underline: true };
+    worksheet.getCell(`E${signStartRow + 8}`).alignment = { horizontal: "center", vertical: "middle" };
+
+    worksheet.mergeCells(`E${signStartRow + 9}:G${signStartRow + 9}`);
+    worksheet.getCell(`E${signStartRow + 9}`).value = "Pembina Utama Muda";
+    worksheet.getCell(`E${signStartRow + 9}`).font = { name: "Arial", size: 11 };
+    worksheet.getCell(`E${signStartRow + 9}`).alignment = { horizontal: "center", vertical: "middle" };
+
+    worksheet.mergeCells(`E${signStartRow + 10}:G${signStartRow + 10}`);
+    worksheet.getCell(`E${signStartRow + 10}`).value = "NIP. 19700907 199003 1 006";
+    worksheet.getCell(`E${signStartRow + 10}`).font = { name: "Arial", size: 11 };
+    worksheet.getCell(`E${signStartRow + 10}`).alignment = { horizontal: "center", vertical: "middle" };
+
+    const fileSuffix = getExportFileSuffix();
     const fileName = `Rekap_Absensi_BPBD_${fileSuffix}.xlsx`;
+
+    const buffer = await workbook.xlsx.writeBuffer();
     saveAs(new Blob([buffer]), fileName);
 
   } catch (error) {
@@ -502,80 +669,172 @@ async function downloadExcel() {
   }
 }
 
-// === EXPORT PDF DENGAN FOTO (VERSI BARU - SUDAH DIPERBAIKI) ===
+// === EXPORT PDF DENGAN FOTO (FORMAT BARU A4) ===
 function downloadPDF() {
   if (adminDataGlobal.length === 0) return alert("Tidak ada data untuk diunduh!");
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('l', 'mm', 'a4'); 
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4"
+  });
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("REKAP ABSENSI WFA", 148, 15, { align: "center" });
-  
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", 148, 20, { align: "center" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginLeft = 10;
+  const marginRight = 10;
 
   const startStr = document.getElementById("filterStart").value;
   const endStr = document.getElementById("filterEnd").value;
-  let periodeTxt = startStr ? `Periode: ${startStr} s.d. ${endStr || startStr}` : "Periode: Semua Waktu";
-  doc.text(periodeTxt, 14, 30);
+  const periodeTxt = formatPeriodeText(startStr, endStr);
 
-  const tableColumn = ["Waktu", "Nama Pegawai", "Tipe", "Kehadiran", "GPS", "Lokasi", "Foto"];
-  const tableRows = [];
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("REKAP ABSENSI WFA", pageWidth / 2, 12, { align: "center" });
 
-  adminDataGlobal.forEach(d => {
-    // Menyusun baris tabel dan menitipkan data foto
-    let rowData = [
-      new Date(d.waktu).toLocaleString("id-ID"),
-      d.nama,
-      d.tipe.toUpperCase(),
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text("Badan Penanggulangan Bencana Daerah (BPBD) Trenggalek", pageWidth / 2, 18, { align: "center" });
+
+  doc.setFontSize(10);
+  doc.text(periodeTxt, marginLeft, 26);
+
+  const tableColumn = [
+    "Waktu Absen",
+    "Nama Pegawai",
+    "Tipe Absen",
+    "Status Kehadiran",
+    "Validasi GPS",
+    "Lokasi (GPS)",
+    "Foto Wajah"
+  ];
+
+  const tableRows = adminDataGlobal.map(d => {
+    const row = [
+      formatDateTimeIndonesia(d.waktu),
+      d.nama || "",
+      (d.tipe || "").toUpperCase(),
       d.status_waktu || "-",
       d.gps_status || "Aman",
-      d.lokasi,
-      "" // Sel ini dibiarkan kosong untuk tempat gambar nanti
+      d.lokasi || "",
+      ""
     ];
-    
-    // Titipkan base64 foto ke objek array ini (tidak akan ikut tercetak sebagai teks)
-    rowData.fotoBase64 = d.foto; 
-    tableRows.push(rowData);
+    row.fotoBase64 = d.foto || "";
+    return row;
   });
 
   doc.autoTable({
     head: [tableColumn],
     body: tableRows,
-    startY: 35,
-    styles: { fontSize: 8, cellPadding: 2, minCellHeight: 18, valign: 'middle' },
-    headStyles: { fillColor: [30, 58, 138] },
-    columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 15 },
-      3: { cellWidth: 22 },
-      4: { cellWidth: 25 }, 
-      5: { cellWidth: 90 }, 
-      6: { cellWidth: 25 }  
+    startY: 30,
+    margin: { left: marginLeft, right: marginRight },
+    theme: "grid",
+    styles: {
+      font: "helvetica",
+      fontSize: 8,
+      cellPadding: 1.5,
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2,
+      valign: "middle",
+      textColor: [0, 0, 0],
+      overflow: "linebreak"
     },
-    didDrawCell: function(data) {
-      // Mengambil foto dari "titipan" di data.row.raw
-      if (data.column.index === 6 && data.cell.section === 'body') {
-        const imgBase64 = data.row.raw.fotoBase64; 
-        
+    headStyles: {
+      fillColor: [217, 234, 247],
+      textColor: [0, 0, 0],
+      fontStyle: "bold",
+      halign: "center",
+      valign: "middle",
+      lineColor: [0, 0, 0],
+      lineWidth: 0.2
+    },
+    bodyStyles: {
+      halign: "center",
+      valign: "middle"
+    },
+    columnStyles: {
+      0: { cellWidth: 27 },
+      1: { cellWidth: 42 },
+      2: { cellWidth: 18 },
+      3: { cellWidth: 23 },
+      4: { cellWidth: 18 },
+      5: { cellWidth: 86, halign: "left" },
+      6: { cellWidth: 22 }
+    },
+    didParseCell: function (data) {
+      if (data.section === "body") {
+        data.row.height = 18;
+
+        if (data.column.index === 3) {
+          const value = String(data.cell.raw || "");
+          if (value === "Tepat Waktu") {
+            data.cell.styles.textColor = [0, 128, 0];
+            data.cell.styles.fontStyle = "bold";
+          } else if (value === "Terlambat") {
+            data.cell.styles.textColor = [255, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+          } else if (value === "Pulang Lebih Cepat") {
+            data.cell.styles.textColor = [230, 126, 34];
+            data.cell.styles.fontStyle = "bold";
+          }
+        }
+
+        if (data.column.index === 4) {
+          const value = String(data.cell.raw || "");
+          if (value !== "Aman") {
+            data.cell.styles.textColor = [255, 0, 0];
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.fillColor = [255, 230, 230];
+          }
+        }
+      }
+    },
+    didDrawCell: function (data) {
+      if (data.section === "body" && data.column.index === 6) {
+        const imgBase64 = data.row.raw.fotoBase64;
         if (imgBase64) {
           try {
-            // Pasang gambar ke dalam sel
-            doc.addImage(imgBase64, 'JPEG', data.cell.x + 2, data.cell.y + 2, 20, 15);
+            doc.addImage(
+              imgBase64,
+              "JPEG",
+              data.cell.x + 1.5,
+              data.cell.y + 1.5,
+              18,
+              14
+            );
           } catch (e) {
-            console.error("Gagal melampirkan foto pada nama: " + data.row.raw[1], e);
+            console.error("Gagal menambahkan foto PDF:", e);
           }
         }
       }
     }
   });
 
-  let fileSuffix = new Date().toLocaleDateString("id-ID").replace(/\//g, "-");
-  if(startStr) fileSuffix = `${startStr}_sd_${endStr || startStr}`;
+  let finalY = doc.lastAutoTable.finalY + 12;
+
+  if (finalY + 40 > pageHeight) {
+    doc.addPage();
+    finalY = 20;
+  }
+
+  const signX = 220;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text("Trenggalek, ........", signX, finalY);
+  doc.text("Kepala Pelaksana", signX, finalY + 6);
+  doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 12);
+  doc.text("Kabupaten Trenggalek", signX, finalY + 18);
+
+  doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si", signX, finalY + 42);
+  const nameWidth = doc.getTextWidth("Drs. STEFANUS TRIADI ATMONO, M.Si");
+  doc.line(signX, finalY + 43, signX + nameWidth, finalY + 43);
+
+  doc.text("Pembina Utama Muda", signX, finalY + 48);
+  doc.text("NIP. 19700907 199003 1 006", signX, finalY + 54);
+
+  const fileSuffix = getExportFileSuffix();
   const fileName = `Rekap_Absensi_BPBD_${fileSuffix}.pdf`;
   doc.save(fileName);
 }
