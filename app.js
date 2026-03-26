@@ -41,14 +41,57 @@ function showPage(p) {
   document.getElementById("page-" + p).classList.add("active");
 }
 
+// === PEGAWAI DENGAN JAM KHUSUS ===
+const SPECIAL_SCHEDULE_EMPLOYEES = [
+  "SARI MUMANTI",
+  "IDA APRILIYA",
+  "KURNIA RIAN RACHMASARI",
+  "YENI DWI LESTARI"
+];
+
+function isSpecialScheduleEmployee(name) {
+  return SPECIAL_SCHEDULE_EMPLOYEES.includes((name || "").trim());
+}
+
 function evaluateTime(type) {
   const now = new Date();
   const day = now.getDay(); 
   const hours = now.getHours();
   const minutes = now.getMinutes();
-  
   const timeFloat = hours + (minutes / 60);
 
+  const selectedEmployee = document.getElementById("employee")?.value || "";
+  const isSpecialEmployee = isSpecialScheduleEmployee(selectedEmployee);
+
+  // === ATURAN KHUSUS UNTUK NAMA TERTENTU ===
+  if (isSpecialEmployee) {
+    if (type === 'masuk') {
+      if (timeFloat < 7.0) {
+        return { allowed: false, msg: "Belum waktunya! Absen masuk baru dibuka jam 07.00 WIB." };
+      }
+
+      if (timeFloat <= 7.5) {
+        return { allowed: true, status: "Tepat Waktu" };
+      } else {
+        return { allowed: true, status: "Terlambat" };
+      }
+    } 
+    else if (type === 'pulang') {
+      if (timeFloat > 20.0) {
+        return { allowed: false, msg: "Absen pulang ditolak! Batas maksimal absen pulang adalah 20.00 WIB." };
+      }
+
+      if (timeFloat < 19.0) {
+        return { allowed: true, status: "Pulang Lebih Cepat" };
+      } else {
+        return { allowed: true, status: "Tepat Waktu" };
+      }
+    }
+
+    return { allowed: true, status: "-" };
+  }
+
+  // === ATURAN LAMA UNTUK PEGAWAI LAIN ===
   if (type === 'masuk') {
     if (timeFloat < 7.0) {
       return { allowed: false, msg: "Belum waktunya! Absen masuk baru dibuka jam 07.00 WIB." };
@@ -902,7 +945,6 @@ function downloadPDF() {
     finalY = 24;
   }
 
-  // Digeser ke kiri agar tidak melewati batas kanan tabel
   const signX = pageWidth - 95;
 
   doc.setFont("helvetica", "normal");
@@ -912,7 +954,6 @@ function downloadPDF() {
   doc.text("Badan Penanggulangan Bencana Daerah", signX, finalY + 10);
   doc.text("Kabupaten Trenggalek", signX, finalY + 15);
 
-  // Ditambah kira-kira 2 enter ke bawah dari baris Kabupaten Trenggalek
   doc.setFont("helvetica", "bold");
   doc.text("Drs. STEFANUS TRIADI ATMONO, M.Si.", signX, finalY + 35);
   const nameWidth = doc.getTextWidth("Drs. STEFANUS TRIADI ATMONO, M.Si.");
