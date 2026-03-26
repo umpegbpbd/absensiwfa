@@ -91,20 +91,30 @@ function evaluateTime(type) {
     return { allowed: true, status: "-" };
   }
 
-  // === ATURAN LAMA UNTUK PEGAWAI LAIN ===
+  // === ATURAN LAMA UNTUK PEGAWAI LAIN + ATURAN KHUSUS JUMAT ===
   if (type === 'masuk') {
+    // Jumat untuk pegawai biasa: mulai 06.30, tepat waktu s.d 07.00
+    if (day === 5) {
+      if (timeFloat < 6.5) {
+        return { allowed: false, msg: "Belum waktunya! Absen masuk hari Jumat baru dibuka jam 06.30 WIB." };
+      }
+
+      if (timeFloat <= 7.0) {
+        return { allowed: true, status: "Tepat Waktu" };
+      } else {
+        return { allowed: true, status: "Terlambat" };
+      }
+    }
+
+    // Hari selain Jumat untuk pegawai biasa
     if (timeFloat < 7.0) {
       return { allowed: false, msg: "Belum waktunya! Absen masuk baru dibuka jam 07.00 WIB." };
     }
 
-    if (day !== 5) { 
-      if (timeFloat <= 7.5) { 
-        return { allowed: true, status: "Tepat Waktu" };
-      } else { 
-        return { allowed: true, status: "Terlambat" };
-      }
+    if (timeFloat <= 7.5) { 
+      return { allowed: true, status: "Tepat Waktu" };
     } else { 
-      return { allowed: true, status: "Masuk (Jumat)" };
+      return { allowed: true, status: "Terlambat" };
     }
   } 
   else if (type === 'pulang') {
