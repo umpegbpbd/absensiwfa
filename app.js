@@ -470,6 +470,23 @@ async function deleteAbsensi(absensiId) {
   }
 }
 
+// === HELPER FILTER WIB 00:00 - 23:59 ===
+function getWibDateString(dateInput) {
+  const d = new Date(dateInput);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(d);
+
+  const year = parts.find(p => p.type === "year")?.value;
+  const month = parts.find(p => p.type === "month")?.value;
+  const day = parts.find(p => p.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
 // === FUNGSI FILTER TANGGAL ===
 function applyFilter() {
   const startDate = document.getElementById("filterStart").value;
@@ -481,14 +498,15 @@ function applyFilter() {
   }
 
   adminDataGlobal = rawAdminData.filter(d => {
-    const dateStr = d.waktu.split('T')[0]; 
-    
+    // Ambil tanggal lokal WIB dari record agar filter benar 00:00 - 23:59 WIB
+    const wibDateStr = getWibDateString(d.waktu);
+
     if (startDate && endDate) {
-      return dateStr >= startDate && dateStr <= endDate;
+      return wibDateStr >= startDate && wibDateStr <= endDate;
     } else if (startDate) {
-      return dateStr >= startDate;
+      return wibDateStr >= startDate;
     } else if (endDate) {
-      return dateStr <= endDate;
+      return wibDateStr <= endDate;
     }
     return true;
   });
